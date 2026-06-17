@@ -6,7 +6,6 @@ import { DayList } from './DayList';
 import { DailyEntriesDrawer, DailyEntriesState } from './DailyEntriesDrawer';
 import { DashboardSummary } from './DashboardSummary';
 import { AddEntryDrawer } from './AddEntryDrawer';
-import { ForecastDrawer } from './ForecastDrawer';
 import { useCashFlow } from '@/hooks/useCashFlow';
 import { EntryFormValues } from './EntryForm';
 import { Filter, Loader2, Plus } from 'lucide-react';
@@ -26,7 +25,7 @@ export function PainelView({
   onUpdateEntry,
   onDeleteEntry,
 }: PainelViewProps) {
-  const { periods, currentBalance, balanceSettings, saldoInicial, allEntries, isLoading, isError, refetchAll, forecasts, setForecast, clearForecast } = useCashFlow();
+  const { periods, currentBalance, balanceSettings, saldoInicial, allEntries, isLoading, isError, refetchAll } = useCashFlow();
 
   const [periodIdx, setPeriodIdx] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -35,8 +34,6 @@ export function PainelView({
   const [isAddingInHeader, setIsAddingInHeader] = useState(false);
   const [showFab, setShowFab] = useState(false);
   const [showPendingOnly, setShowPendingOnly] = useState(false);
-  const [forecastDrawerOpen, setForecastDrawerOpen] = useState(false);
-  const [forecastInitialDate, setForecastInitialDate] = useState<string | undefined>();
   const userNavigatedRef = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -103,11 +100,6 @@ export function PainelView({
   const displayedDays = showPendingOnly
     ? period.days.filter((d) => d.hasPendingRecurring)
     : period.days;
-
-  const handleOpenForecast = (date: string) => {
-    setForecastInitialDate(date);
-    setForecastDrawerOpen(true);
-  };
 
   const handleHeaderAddSave = (values: EntryFormValues) => {
     onAddEntry({
@@ -214,7 +206,6 @@ export function PainelView({
           today={today}
           onOpenSheet={setSheet}
           onAddEntry={onAddEntry}
-          onOpenForecast={handleOpenForecast}
         />
       )}
 
@@ -247,15 +238,6 @@ export function PainelView({
         invoiceId={selectedInvoiceId}
         open={!!selectedInvoiceId}
         onClose={() => setSelectedInvoiceId(null)}
-      />
-
-      <ForecastDrawer
-        open={forecastDrawerOpen}
-        onClose={() => setForecastDrawerOpen(false)}
-        date={forecastInitialDate}
-        currentForecast={forecastInitialDate ? (forecasts[forecastInitialDate] ?? 0) : 0}
-        onSave={(amount) => { if (forecastInitialDate) setForecast([forecastInitialDate], amount); }}
-        onDelete={() => { if (forecastInitialDate) clearForecast(forecastInitialDate); }}
       />
 
       {/* Floating quick-add button (desktop only), appears once the user scrolls down */}

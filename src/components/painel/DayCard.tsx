@@ -1,6 +1,6 @@
 import { DayData } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
-import { Eye, RotateCw, TrendingDown } from 'lucide-react';
+import { Eye, RotateCw } from 'lucide-react';
 import { MONTH_SHORT } from './config';
 import { BalanceSettings } from '@/hooks/useCashFlow';
 
@@ -12,7 +12,6 @@ interface DayCardProps {
   balanceSettings: BalanceSettings;
   onOpenSheet?: (date: string, filter: any) => void;
   onAddEntry?: (entry: any) => void;
-  onOpenForecast?: () => void;
 }
 
 const WEEK_DAYS = [
@@ -43,15 +42,12 @@ export function DayCard({
   onToggle,
   onOpenSheet,
   balanceSettings,
-  onOpenForecast,
 }: DayCardProps) {
   const d = new Date(day.date + 'T00:00:00');
-  const isNegative = day.saldoAcumuladoReal < 0;
+  const isNegative = day.saldoAcumulado < 0;
   const isDisabled = day.isBeforeStartDate;
-  const forecast = day.forecast ?? 0;
 
-  const realStatus = isDisabled ? 'ok' : getSaldoStatus(day.saldoAcumuladoReal, balanceSettings);
-  const prevStatus = isDisabled ? 'ok' : getSaldoStatus(day.saldoAcumulado, balanceSettings);
+  const saldoStatus = isDisabled ? 'ok' : getSaldoStatus(day.saldoAcumulado, balanceSettings);
 
   const statusLine = isToday
     ? 'Hoje'
@@ -109,59 +105,32 @@ export function DayCard({
           )}
         </div>
 
-        {/* Saldo row: Previsto (esq) + Real (dir) */}
+        {/* Saldo row */}
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
-          {/* Esquerda: label + valor previsto + botão forecast */}
-          <div className="flex items-center gap-2">
-            <div className={cn("flex items-baseline gap-1.5", saldoBorderClass(prevStatus))}>
-              <span className="text-[8px] font-black uppercase tracking-wide text-white">Previsto</span>
-              {isDisabled ? (
-                <span className="text-sm font-black font-display text-white/30">—</span>
-              ) : (
-                <span className={cn("text-sm font-black font-display", saldoValueClass(prevStatus))}>
-                  <span className="text-[9px] opacity-60 mr-0.5">R$</span>
-                  {day.saldoAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-              )}
-            </div>
-            {!isDisabled && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onOpenForecast?.(); }}
-                title="Previsão de gasto"
-                className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all shrink-0 bg-white/[0.03] text-muted-foreground/30 hover:bg-white/[0.06] hover:text-muted-foreground/60"
-              >
-                <TrendingDown className="w-3.5 h-3.5" />
-              </button>
+          <div className={cn("flex items-baseline gap-1.5", saldoBorderClass(saldoStatus))}>
+            <span className="text-[8px] font-black uppercase tracking-wide text-white">Saldo</span>
+            {isDisabled ? (
+              <span className="text-sm font-black font-display text-white/30">—</span>
+            ) : (
+              <span className={cn("text-sm font-black font-display", saldoValueClass(saldoStatus))}>
+                <span className="text-[9px] opacity-60 mr-0.5">R$</span>
+                {day.saldoAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
             )}
           </div>
-
-          {/* Direita: label + valor real + botão visualizar */}
-          <div className="flex items-center gap-2">
-            <div className={cn("flex items-baseline gap-1.5", saldoBorderClass(realStatus))}>
-              <span className="text-[8px] font-black uppercase tracking-wide text-white">Real</span>
-              {isDisabled ? (
-                <span className="text-sm font-black font-display text-white/30">—</span>
-              ) : (
-                <span className={cn("text-sm font-black font-display", saldoValueClass(realStatus))}>
-                  <span className="text-[9px] opacity-60 mr-0.5">R$</span>
-                  {day.saldoAcumuladoReal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); if (!isDisabled) onOpenSheet?.(day.date, 'all'); }}
-              disabled={isDisabled}
-              className={cn(
-                "w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-muted-foreground/60 transition-all",
-                isDisabled ? "cursor-not-allowed" : "hover:bg-primary/20 hover:text-primary",
-              )}
-            >
-              <Eye className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); if (!isDisabled) onOpenSheet?.(day.date, 'all'); }}
+            disabled={isDisabled}
+            className={cn(
+              "w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-muted-foreground/60 transition-all",
+              isDisabled ? "cursor-not-allowed" : "hover:bg-primary/20 hover:text-primary",
+            )}
+          >
+            <Eye className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Data Grid: Entradas / Despesas / Gastos / (Previsto) */}
+        {/* Data Grid: Entradas / Despesas / Gastos */}
         <div
           onClick={isDisabled ? undefined : onToggle}
           className={cn(
@@ -190,14 +159,6 @@ export function DayCard({
             <p className="text-xs font-bold font-display text-orange-400">
               <span className="text-[8px] font-black mr-0.5">-</span>
               {day.spending.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">Previsto</p>
-            <p className="text-xs font-bold font-display text-white/50">
-              <span className="text-[8px] font-black mr-0.5">-</span>
-              {forecast.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
           </div>
         </div>

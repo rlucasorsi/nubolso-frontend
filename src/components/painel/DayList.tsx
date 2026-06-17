@@ -9,7 +9,6 @@ interface DayListProps {
   today: string;
   onOpenSheet: (state: DailyEntriesState) => void;
   onAddEntry: (entry: Omit<CashFlowEntry, 'id'>) => void;
-  onOpenForecast: (date: string) => void;
 }
 
 export function DayList({
@@ -17,7 +16,6 @@ export function DayList({
   today,
   onOpenSheet,
   onAddEntry,
-  onOpenForecast,
 }: DayListProps) {
   const { balanceSettings } = useCashFlow();
   const [expandedDate, setExpandedDate] = useState<string | null>(today);
@@ -38,7 +36,6 @@ export function DayList({
           onToggle={() => toggleDay(day.date)}
           onOpenSheet={(date, filter) => onOpenSheet({ date, filter })}
           onAddEntry={onAddEntry}
-          onOpenForecast={() => onOpenForecast(day.date)}
         />
       ))}
     </div>

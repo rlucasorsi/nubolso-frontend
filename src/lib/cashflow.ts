@@ -24,10 +24,8 @@ export interface DayData {
   income: number;
   expense: number;
   spending: number;
-  forecast: number;
   saldoDiario: number;
-  saldoAcumulado: number;     // balance WITH forecast applied
-  saldoAcumuladoReal: number; // balance WITHOUT forecast (baseline)
+  saldoAcumulado: number;
   descriptions: string[];
   entryIds: string[];
   isBeforeStartDate: boolean;
@@ -366,14 +364,12 @@ export function generatePeriods(
   saldoInicial: { value: number; date: string },
   numFuturePeriods: number = 3,
   startDay: number = 20,
-  forecasts: Record<string, number> = {},
 ): Period[] {
   const periodStarts = getPeriodRanges(entries, saldoInicial, numFuturePeriods, startDay);
   const allEntries = [...entries, ...virtualEntries];
 
   const periods: Period[] = [];
   let runningBalance = 0;
-  let runningBalanceReal = 0;
   let started = false;
 
   for (const ps of periodStarts) {
@@ -382,7 +378,6 @@ export function generatePeriods(
     const end = new Date(ps.end + 'T00:00:00');
     const periodSaldoInicial = runningBalance;
     let acumulado = runningBalance;
-    let acumuladoReal = runningBalanceReal;
     let totalIncome = 0;
     let totalExpense = 0;
     let totalSpending = 0;
@@ -405,26 +400,19 @@ export function generatePeriods(
         .filter(Boolean);
       const entryIds = dayEntries.map((e) => e.id);
       const hasPendingRecurring = dayEntries.some((e) => e.isVirtual === true);
-      const forecast = forecasts[dateStr] ?? 0;
 
-      const saldoDiarioReal = income - expense - spending;
-      // Forecast also decreases saldo
-      const saldoDiario = saldoDiarioReal - forecast;
+      const saldoDiario = income - expense - spending;
       const isBeforeStartDate = dateStr < saldoInicial.date;
 
       if (isBeforeStartDate) {
         acumulado = 0;
-        acumuladoReal = 0;
       } else if (!started && dateStr === saldoInicial.date) {
         acumulado = saldoInicial.value + saldoDiario;
-        acumuladoReal = saldoInicial.value + saldoDiarioReal;
         started = true;
       } else if (started) {
         acumulado += saldoDiario;
-        acumuladoReal += saldoDiarioReal;
       } else {
         acumulado = 0;
-        acumuladoReal = 0;
       }
       totalIncome += income;
       totalExpense += expense;
@@ -435,10 +423,8 @@ export function generatePeriods(
         income,
         expense,
         spending,
-        forecast,
         saldoDiario,
         saldoAcumulado: acumulado,
-        saldoAcumuladoReal: acumuladoReal,
         descriptions,
         entryIds,
         isBeforeStartDate,
@@ -459,7 +445,6 @@ export function generatePeriods(
     });
 
     runningBalance = acumulado;
-    runningBalanceReal = acumuladoReal;
   }
 
   return periods;

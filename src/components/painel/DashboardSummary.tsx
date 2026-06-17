@@ -35,7 +35,7 @@ export function DashboardSummary({
   today,
   balanceSettings,
 }: DashboardSummaryProps) {
-  const { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, dangerDay, warningDay, chartData, yDomain, yTicks, hasForecast } =
+  const { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, dangerDay, warningDay, chartData, yDomain, yTicks } =
     useMemo(() => {
       let maxExpenseDay = period.days[0];
       let maxExpenseAmount = 0;
@@ -64,19 +64,15 @@ export function DashboardSummary({
           d.saldoAcumulado < balanceSettings.greenThreshold,
       );
 
-      const hasForecast = period.days.some((d) => d.forecast > 0);
-
       const chartData = period.days.map((d) => ({
         date: d.date,
-        saldoPast: d.date <= today ? d.saldoAcumuladoReal : null,
-        saldoFuture: d.date >= today ? d.saldoAcumuladoReal : null,
-        saldoForecast: hasForecast && d.date >= today ? d.saldoAcumulado : null,
+        saldoPast: d.date <= today ? d.saldoAcumulado : null,
+        saldoFuture: d.date >= today ? d.saldoAcumulado : null,
         income: d.income,
         totalExpense: d.expense + d.spending,
-        forecast: d.forecast,
       }));
 
-      const saldoValues = period.days.flatMap((d) => [d.saldoAcumulado, d.saldoAcumuladoReal]);
+      const saldoValues = period.days.map((d) => d.saldoAcumulado);
       const rawMin = Math.min(...saldoValues, balanceSettings.yellowThreshold);
       const rawMax = Math.max(...saldoValues, balanceSettings.greenThreshold);
       const range = Math.max(rawMax - rawMin, 1);
@@ -91,7 +87,7 @@ export function DashboardSummary({
       const yTicks: number[] = [];
       for (let v = yDomain[0]; v <= yDomain[1] + 1e-6; v += niceStep) yTicks.push(v);
 
-      return { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, dangerDay, warningDay, chartData, yDomain, yTicks, hasForecast };
+      return { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, dangerDay, warningDay, chartData, yDomain, yTicks };
     }, [period, today, balanceSettings]);
 
   const getZoneColor = (value: number) => {
@@ -102,8 +98,7 @@ export function DashboardSummary({
 
   const chartConfig = {
     saldoPast: { label: 'Realizado', color: '#7b5cff' },
-    saldoFuture: { label: 'Futuro real', color: '#FEF08A' },
-    saldoForecast: { label: 'Previsto', color: '#22d3ee' },
+    saldoFuture: { label: 'Projetado', color: '#FEF08A' },
   };
 
   const renderTooltipContent = ({ active, payload, label }: any) => {
@@ -112,7 +107,7 @@ export function DashboardSummary({
     if (!entry) return null;
 
     const value = entry.value as number;
-    const row = entry.payload as { income: number; totalExpense: number; forecast: number };
+    const row = entry.payload as { income: number; totalExpense: number };
     const [y, m, d] = (label as string).split('-').map(Number);
     const dateLabel = new Date(y, m - 1, d).toLocaleDateString('pt-BR', {
       weekday: 'short',
@@ -136,12 +131,6 @@ export function DashboardSummary({
             <div className="flex items-center justify-between gap-4 text-[11px]">
               <span className="text-red-400/70 font-medium">Saídas</span>
               <span className="text-red-400 font-bold">{formatCurrency(row.totalExpense)}</span>
-            </div>
-          )}
-          {row.forecast > 0 && (
-            <div className="flex items-center justify-between gap-4 text-[11px]">
-              <span className="text-violet-400/70 font-medium">Previsto</span>
-              <span className="text-violet-400 font-bold">- {formatCurrency(row.forecast)}</span>
             </div>
           )}
         </div>
@@ -220,10 +209,6 @@ export function DashboardSummary({
                     <stop offset="5%" stopColor="#7b5cff" stopOpacity={0.25}/>
                     <stop offset="95%" stopColor="#7b5cff" stopOpacity={0}/>
                   </linearGradient>
-                  <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.12}/>
-                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0}/>
-                  </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-white/[0.06]" />
 
@@ -291,22 +276,6 @@ export function DashboardSummary({
                   dot={false}
                 />
 
-                {/* Previsto com forecast (azul pontilhado) */}
-                {hasForecast && (
-                  <Area
-                    type="monotone"
-                    dataKey="saldoForecast"
-                    name="Previsto"
-                    stroke="#22d3ee"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeDasharray="4 4"
-                    fillOpacity={1}
-                    fill="url(#colorForecast)"
-                    dot={false}
-                  />
-                )}
-
                 {/* Today marker */}
                 <ReferenceLine
                   x={today}
@@ -328,12 +297,6 @@ export function DashboardSummary({
               <div className="w-3 h-[2px] border-t-2 border-dashed" style={{ borderColor: '#FEF08A' }} />
               <span>Futuro real</span>
             </div>
-            {hasForecast && (
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-[2px] border-t-2 border-dashed" style={{ borderColor: '#22d3ee' }} />
-                <span className="text-cyan-400/80">Previsto</span>
-              </div>
-            )}
             <div className="flex items-center gap-2">
               <div className="w-3 border-t border-dashed border-white/30" />
               <span>Hoje</span>

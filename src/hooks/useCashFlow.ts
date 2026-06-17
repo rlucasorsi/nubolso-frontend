@@ -20,7 +20,6 @@ import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invo
 
 const START_DAY_KEY = 'cashflow_start_day';
 const BALANCE_SETTINGS_KEY = 'cashflow_balance_settings';
-const FORECASTS_KEY = 'cashflow_daily_forecasts';
 
 export interface BalanceSettings {
   greenThreshold: number;
@@ -66,31 +65,6 @@ export function useCashFlow() {
     load(BALANCE_SETTINGS_KEY, { greenThreshold: 0.01, yellowThreshold: 0 }),
   );
   const [simulationAdjustment, setSimulationAdjustment] = useState(0);
-  const [forecasts, setForecasts] = useState<Record<string, number>>(() =>
-    load(FORECASTS_KEY, {}),
-  );
-
-  const setForecast = useCallback((dates: string[], amount: number) => {
-    setForecasts((prev) => {
-      const next = { ...prev };
-      for (const d of dates) {
-        if (amount > 0) next[d] = amount;
-        else delete next[d];
-      }
-      save(FORECASTS_KEY, next);
-      return next;
-    });
-  }, []);
-
-  const clearForecast = useCallback(
-    (date: string) => setForecast([date], 0),
-    [setForecast],
-  );
-
-  const clearAllForecasts = useCallback(() => {
-    setForecasts({});
-    save(FORECASTS_KEY, {});
-  }, []);
 
   // Maps a paid invoice's linked Transaction id back to its invoice id, so the
   // resulting CashFlowEntry can be identified as a credit card invoice payment
@@ -230,8 +204,8 @@ export function useCashFlow() {
   }, [recurringTemplates, rawEntries, creditCardInvoices, periodRanges]);
 
   const periods = useMemo(
-    () => generatePeriods(entries, virtualEntries, saldoInicial, 60, startDay, forecasts),
-    [entries, virtualEntries, saldoInicial, startDay, forecasts],
+    () => generatePeriods(entries, virtualEntries, saldoInicial, 60, startDay),
+    [entries, virtualEntries, saldoInicial, startDay],
   );
 
   // Includes skipped entries so the drawer can show them as "Ignorado" with a
@@ -352,9 +326,5 @@ export function useCashFlow() {
     balanceSettings,
     updateBalanceSettings,
     setSimulationAdjustment,
-    forecasts,
-    setForecast,
-    clearForecast,
-    clearAllForecasts,
   };
 }
