@@ -8,7 +8,7 @@ export default function PainelPage() {
   const { addEntry, updateEntry, deleteEntry } = useCashFlow();
 
   useEffect(() => {
-    document.title = 'Painel — Fluxo de Caixa';
+    document.title = 'Painel — nubolso';
   }, []);
 
   return (

@@ -81,7 +81,7 @@ export default function RegisterPage() {
               Criar sua conta
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Junte-se ao CashFlow e começe a projetar seu futuro financeiro hoje.
+              Junte-se ao NuBolso e comece a projetar seu futuro financeiro hoje.
             </p>
           </div>
 

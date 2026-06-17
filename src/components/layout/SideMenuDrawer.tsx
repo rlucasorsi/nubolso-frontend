@@ -57,7 +57,7 @@ export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps)
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-white/5">
-          <span className="text-xl font-bold font-display text-brand-gradient">CASHFLOW</span>
+          <span className="text-xl font-bold font-display"><span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span></span>
           <button
             type="button"
             onClick={onClose}

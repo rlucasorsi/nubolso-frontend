@@ -5,7 +5,7 @@ import { RecurringTemplatesView } from '@/components/painel/RecurringTemplatesVi
 
 export default function RecorrentesPage() {
   useEffect(() => {
-    document.title = 'Contas Recorrentes — Fluxo de Caixa';
+    document.title = 'Contas Recorrentes — nubolso';
   }, []);
 
   return <RecurringTemplatesView />;

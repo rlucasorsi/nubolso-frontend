@@ -48,8 +48,8 @@ export default function PrivateLayout({
             <Menu className="h-5 w-5" />
           </button>
 
-          <Link href="/painel" className="text-xl font-bold font-display text-brand-gradient">
-            CASHFLOW
+          <Link href="/painel" className="text-xl font-bold font-display">
+            <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
           </Link>
         </div>
 

@@ -79,8 +79,7 @@ export default function LoginPage() {
               <BarChart3 className="h-8 w-8 text-white" strokeWidth={2.5} />
             </div>
             <h1 className="text-4xl font-bold tracking-tight">
-              <span className="text-foreground">Cash</span>
-              <span className="text-brand-gradient">Flow</span>
+              <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground max-w-xs">
               Organize suas finanças e tenha clareza para decidir melhor.

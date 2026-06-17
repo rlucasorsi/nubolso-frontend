@@ -5,7 +5,7 @@ import { CreditCardsView } from '@/components/credit-cards/CreditCardsView';
 
 export default function CartoesPage() {
   useEffect(() => {
-    document.title = 'Cartões de Crédito — Fluxo de Caixa';
+    document.title = 'Cartões de Crédito — nubolso';
   }, []);
 
   return <CreditCardsView />;

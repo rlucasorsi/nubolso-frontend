@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 export default function MetasPage() {
   useEffect(() => {
-    document.title = 'Metas e Objetivos — Fluxo de Caixa';
+    document.title = 'Metas e Objetivos — nubolso';
   }, []);
 
   return <GoalsView />;

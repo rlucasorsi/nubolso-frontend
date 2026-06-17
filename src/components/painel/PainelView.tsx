@@ -139,7 +139,7 @@ export function PainelView({
       <div className="px-5 pt-10 pb-4 space-y-2">
          <div className="flex items-center justify-between gap-4">
             <h1 className="text-3xl font-black font-display tracking-tight text-white leading-none">
-              Fluxo de Caixa
+              <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
             </h1>
             <div className="shrink-0">
                <AddEntryDrawer
