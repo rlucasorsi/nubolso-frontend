@@ -8,21 +8,8 @@ import type { DeleteRecurringTemplateRequest } from '../model/api/delete-recurri
 export async function deleteRecurringTemplateAction(data: DeleteRecurringTemplateRequest) {
   try {
     await recurringTemplatesService.remove({ id: data.id });
-
-    return {
-      success: true,
-      data: null,
-      errors: null,
-      message: null,
-    };
   } catch (error) {
     const message = extractErrorMessage(error, ERROR_KEYS.AN_ERROR_OCCURED);
-
-    return {
-      success: false,
-      data: null,
-      errors: null,
-      message,
-    };
+    throw new Error(message);
   }
 }

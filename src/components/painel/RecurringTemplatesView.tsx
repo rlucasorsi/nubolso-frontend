@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { AddButton } from '@/components/ui/add-button';
 import {
   AlertDialog,
@@ -13,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { RotateCw, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { RotateCw, Pencil, Trash2, Archive, Loader2, Search, ChevronDown } from 'lucide-react';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { formatCurrency } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
@@ -24,14 +25,35 @@ import { useDeleteRecurringTemplate } from '@/modules/recurring-templates/hooks/
 import { useUpdateRecurringTemplate } from '@/modules/recurring-templates/hooks/use-update-recurring-template';
 import { RecurringTemplate } from '@/modules/recurring-templates/service/recurring-templates-service';
 
+type TypeFilter = 'all' | 'income' | 'expense' | 'spending';
+
+const TYPE_ORDER = ['income', 'expense', 'spending'] as const;
+
+const TYPE_FILTER_LABELS: Record<TypeFilter, string> = {
+  all: 'Todos',
+  income: 'Receita',
+  expense: 'Despesa',
+  spending: 'Gasto',
+};
+
 export function RecurringTemplatesView() {
   const { data: recurringTemplates, isLoading, isError, refetch } = useGetRecurringTemplates();
-  const deactivateTemplateMutation = useDeleteRecurringTemplate();
-  const reactivateTemplateMutation = useUpdateRecurringTemplate();
+  const archiveMutation = useUpdateRecurringTemplate();
+  const reactivateMutation = useUpdateRecurringTemplate();
+  const deleteMutation = useDeleteRecurringTemplate();
 
   const [templateDrawerOpen, setTemplateDrawerOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<RecurringTemplate | undefined>(undefined);
-  const [deactivateTemplateId, setDeactivateTemplateId] = useState<string | null>(null);
+  const [archiveTemplateId, setArchiveTemplateId] = useState<string | null>(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    income: true,
+    expense: true,
+    spending: true,
+  });
 
   const handleNewTemplate = () => {
     setEditingTemplate(undefined);
@@ -43,15 +65,66 @@ export function RecurringTemplatesView() {
     setTemplateDrawerOpen(true);
   };
 
-  const handleDeactivateTemplate = () => {
-    if (deactivateTemplateId) {
-      deactivateTemplateMutation.mutate({ id: deactivateTemplateId });
-      setDeactivateTemplateId(null);
+  const handleArchiveTemplate = async () => {
+    if (!archiveTemplateId) return;
+    const id = archiveTemplateId;
+    setArchiveTemplateId(null);
+    setActionError(null);
+    try {
+      await archiveMutation.mutateAsync({ id, isActive: false });
+    } catch (err: any) {
+      setActionError(err?.message ?? 'Não foi possível arquivar a conta recorrente');
     }
   };
 
+  const handleReactivateTemplate = async (id: string) => {
+    setActionError(null);
+    try {
+      await reactivateMutation.mutateAsync({ id, isActive: true });
+    } catch (err: any) {
+      setActionError(err?.message ?? 'Não foi possível reativar a conta recorrente');
+    }
+  };
+
+  const handleDeleteTemplate = async () => {
+    if (!deleteTemplateId) return;
+    const id = deleteTemplateId;
+    setDeleteTemplateId(null);
+    setActionError(null);
+    try {
+      await deleteMutation.mutateAsync({ id });
+    } catch (err: any) {
+      setActionError(err?.message ?? 'Não foi possível excluir a conta recorrente');
+    }
+  };
+
+  const toggleGroup = (type: string) => {
+    setExpandedGroups((prev) => ({ ...prev, [type]: !prev[type] }));
+  };
+
+  const filtered = useMemo(() => {
+    if (!recurringTemplates) return [];
+    const q = query.trim().toLowerCase();
+    return recurringTemplates.filter((t) => {
+      const matchesType = typeFilter === 'all' || t.type.toLowerCase() === typeFilter;
+      const matchesQuery = !q || t.description.toLowerCase().includes(q);
+      return matchesType && matchesQuery;
+    });
+  }, [recurringTemplates, typeFilter, query]);
+
+  const groups = useMemo(
+    () =>
+      TYPE_ORDER.map((type) => ({
+        type,
+        cfg: TYPE_CONFIG[type],
+        templates: filtered.filter((t) => t.type.toLowerCase() === type),
+      })).filter((g) => g.templates.length > 0),
+    [filtered],
+  );
+
   return (
     <div className="container max-w-2xl mx-auto py-6 px-4 space-y-4">
+      {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -65,7 +138,48 @@ export function RecurringTemplatesView() {
         <AddButton onClick={handleNewTemplate} title="Nova conta recorrente" label="Adicionar" />
       </div>
 
-      <div className="space-y-2">
+      {/* Search + type filter */}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 pointer-events-none" />
+          <Input
+            placeholder="Buscar por nome..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-9 bg-white/[0.03] border-white/10 focus-visible:ring-primary/30 placeholder:text-muted-foreground/30"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          {(['all', 'income', 'expense', 'spending'] as TypeFilter[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTypeFilter(t)}
+              className={cn(
+                'px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
+                typeFilter === t
+                  ? t === 'all'
+                    ? 'bg-primary text-white shadow-glow'
+                    : cn(
+                        t === 'income' && 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
+                        t === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',
+                        t === 'spending' && 'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
+                      )
+                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {TYPE_FILTER_LABELS[t]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {actionError && (
+        <p className="text-sm text-red-400 font-medium px-1">{actionError}</p>
+      )}
+
+      {/* Content */}
+      <div className="space-y-8">
         {isError ? (
           <ServerErrorState onRetry={refetch} />
         ) : isLoading ? (
@@ -76,67 +190,125 @@ export function RecurringTemplatesView() {
           <p className="text-sm text-muted-foreground">
             Nenhuma conta recorrente cadastrada. Use o botão acima para adicionar água, luz, condomínio, etc.
           </p>
+        ) : groups.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhuma conta encontrada com os filtros selecionados.</p>
         ) : (
-          recurringTemplates.map((template) => {
-            const cfg = TYPE_CONFIG[template.type.toLowerCase() as keyof typeof TYPE_CONFIG];
-            const isDeactivating =
-              deactivateTemplateMutation.isPending && deactivateTemplateMutation.variables?.id === template.id;
-            const isReactivating =
-              reactivateTemplateMutation.isPending && reactivateTemplateMutation.variables?.id === template.id;
+          groups.map(({ type, cfg, templates }) => {
+            const isExpanded = expandedGroups[type];
+            const total = templates.reduce((acc, t) => acc + t.estimatedAmount, 0);
+
             return (
-              <div
-                key={template.id}
-                className={cn(
-                  "flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5",
-                  !template.isActive && "opacity-50",
-                )}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={cn("p-2 rounded-xl shrink-0", cfg.bg)}>
-                    {cfg.icon('sm')}
+              <div key={type} className="space-y-3">
+                {/* Group header */}
+                <button
+                  onClick={() => toggleGroup(type)}
+                  className="w-full flex items-center gap-4 group/header"
+                >
+                  <div className={cn('w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/header:scale-110', cfg.bg)}>
+                    {cfg.icon('md')}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate">{template.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Dia {template.dayOfMonth} · {formatCurrency(template.estimatedAmount)}
-                      {!template.isActive && ' · Inativo'}
+                  <h4 className={cn('text-xs font-black uppercase tracking-[0.25em]', cfg.color)}>
+                    {cfg.label}
+                  </h4>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent mx-2" />
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm font-black text-white font-display">
+                      {formatCurrency(total)}
                     </p>
+                    <ChevronDown className={cn(
+                      'w-4 h-4 text-muted-foreground/30 transition-transform duration-300',
+                      isExpanded ? 'rotate-180' : '',
+                    )} />
                   </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" onClick={() => handleEditTemplate(template)} title="Editar">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  {template.isActive ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDeactivateTemplateId(template.id)}
-                      disabled={isDeactivating}
-                      title="Desativar"
-                    >
-                      {isDeactivating ? (
-                        <Loader2 className="h-4 w-4 text-red-500/60 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4 text-red-500/60" />
-                      )}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => reactivateTemplateMutation.mutate({ id: template.id, isActive: true })}
-                      disabled={isReactivating}
-                      title="Reativar"
-                    >
-                      {isReactivating ? (
-                        <Loader2 className="h-4 w-4 text-emerald-500/60 animate-spin" />
-                      ) : (
-                        <RotateCw className="h-4 w-4 text-emerald-500/60" />
-                      )}
-                    </Button>
-                  )}
-                </div>
+                </button>
+
+                {/* Template rows */}
+                {isExpanded && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    {templates.map((template) => {
+                      const isArchiving = archiveMutation.isPending && archiveMutation.variables?.id === template.id;
+                      const isReactivating = reactivateMutation.isPending && reactivateMutation.variables?.id === template.id;
+                      const isDeleting = deleteMutation.isPending && deleteMutation.variables?.id === template.id;
+
+                      return (
+                        <div
+                          key={template.id}
+                          className={cn(
+                            'relative flex items-center justify-between gap-3 p-4 rounded-2xl bg-[#1c1a24] border border-transparent hover:border-white/5 transition-all',
+                            !template.isActive && 'opacity-50',
+                          )}
+                        >
+                          <div className={cn('absolute left-0 top-4 bottom-4 w-1 rounded-r-full', cfg.bar)} />
+
+                          <div className="flex items-center gap-3 min-w-0 pl-2">
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold truncate">{template.description}</p>
+                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                {template.category && (
+                                  <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1">
+                                    <span
+                                      className="h-1.5 w-1.5 rounded-full"
+                                      style={{ backgroundColor: template.category.color }}
+                                    />
+                                    {template.category.name}
+                                  </p>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                  Dia {template.dayOfMonth} · {formatCurrency(template.estimatedAmount)}
+                                  {!template.isActive && ' · Arquivado'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button variant="ghost" size="icon" onClick={() => handleEditTemplate(template)} title="Editar">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+
+                            {template.isActive ? (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setArchiveTemplateId(template.id)}
+                                disabled={isArchiving}
+                                title="Arquivar"
+                              >
+                                {isArchiving
+                                  ? <Loader2 className="h-4 w-4 text-amber-500/60 animate-spin" />
+                                  : <Archive className="h-4 w-4 text-amber-500/60" />}
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleReactivateTemplate(template.id)}
+                                disabled={isReactivating}
+                                title="Reativar"
+                              >
+                                {isReactivating
+                                  ? <Loader2 className="h-4 w-4 text-emerald-500/60 animate-spin" />
+                                  : <RotateCw className="h-4 w-4 text-emerald-500/60" />}
+                              </Button>
+                            )}
+
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setDeleteTemplateId(template.id)}
+                              disabled={isDeleting}
+                              title="Excluir permanentemente"
+                            >
+                              {isDeleting
+                                ? <Loader2 className="h-4 w-4 text-red-500/60 animate-spin" />
+                                : <Trash2 className="h-4 w-4 text-red-500/60" />}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })
@@ -149,17 +321,18 @@ export function RecurringTemplatesView() {
         template={editingTemplate}
       />
 
-      <AlertDialog open={!!deactivateTemplateId} onOpenChange={(open) => !open && setDeactivateTemplateId(null)}>
+      {/* Archive dialog */}
+      <AlertDialog open={!!archiveTemplateId} onOpenChange={(open) => !open && setArchiveTemplateId(null)}>
         <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
           <AlertDialogHeader className="space-y-4">
-            <div className="w-16 h-16 rounded-[1.5rem] bg-red-500/10 flex items-center justify-center mx-auto mb-2 text-red-500">
-              <Trash2 className="w-8 h-8" />
+            <div className="w-16 h-16 rounded-[1.5rem] bg-amber-500/10 flex items-center justify-center mx-auto mb-2 text-amber-500">
+              <Archive className="w-8 h-8" />
             </div>
             <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              Desativar Conta Recorrente?
+              Arquivar Conta Recorrente?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              Ela deixará de gerar novas estimativas mensais. Lançamentos já efetivados continuam no histórico e você pode reativá-la depois.
+              Ela deixará de gerar novas estimativas mensais. Lançamentos já efetivados continuam no histórico e você pode reativá-la a qualquer momento.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
@@ -167,10 +340,38 @@ export function RecurringTemplatesView() {
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeactivateTemplate}
+              onClick={handleArchiveTemplate}
+              className="flex-1 h-12 rounded-2xl bg-amber-500 text-white hover:bg-amber-600 transition-all font-bold shadow-lg shadow-amber-500/20"
+            >
+              Arquivar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete dialog */}
+      <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => !open && setDeleteTemplateId(null)}>
+        <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
+          <AlertDialogHeader className="space-y-4">
+            <div className="w-16 h-16 rounded-[1.5rem] bg-red-500/10 flex items-center justify-center mx-auto mb-2 text-red-500">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
+              Excluir Conta Recorrente?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
+              Esta ação é permanente e não pode ser desfeita. A conta recorrente e todas as suas configurações serão removidas definitivamente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
+            <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTemplate}
               className="flex-1 h-12 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all font-bold shadow-lg shadow-red-500/20"
             >
-              Desativar
+              Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

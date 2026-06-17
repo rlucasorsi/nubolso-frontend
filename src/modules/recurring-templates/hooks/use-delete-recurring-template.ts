@@ -15,5 +15,12 @@ export const useDeleteRecurringTemplate = () => {
         type: 'all',
       });
     },
+    onError: async () => {
+      await client.refetchQueries({
+        queryKey: ['list_recurring_templates'],
+        exact: false,
+        type: 'all',
+      });
+    },
   });
 };

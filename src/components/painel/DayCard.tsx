@@ -73,7 +73,7 @@ export function DayCard({
       }`} />
 
       <div className="p-5">
-        {/* Header row: date/weekday */}
+        {/* Header row: date/weekday — saldo + eye button */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center leading-none shrink-0">
@@ -81,9 +81,19 @@ export function DayCard({
               <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-[0.1em]">{MONTH_SHORT[d.getMonth()]}</span>
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white tracking-tight font-display leading-none">
-                {WEEK_DAYS[d.getDay()]}
-              </h4>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-sm font-bold text-white tracking-tight font-display leading-none">
+                  {WEEK_DAYS[d.getDay()]}
+                </h4>
+                {day.hasPendingRecurring && (
+                  <div
+                    className="w-4 h-4 rounded flex items-center justify-center text-amber-400 shrink-0"
+                    title="Há lançamentos recorrentes estimados (não efetivados) neste dia"
+                  >
+                    <RotateCw className="w-3 h-3" />
+                  </div>
+                )}
+              </div>
               {statusLine && (
                 <p className={cn(
                   "hidden sm:block text-[9px] font-semibold mt-0.5",
@@ -95,39 +105,29 @@ export function DayCard({
             </div>
           </div>
 
-          {day.hasPendingRecurring && (
-            <div
-              className="w-7 h-7 rounded-lg bg-amber-400/10 flex items-center justify-center text-amber-400 shrink-0"
-              title="Há lançamentos recorrentes estimados (não efetivados) neste dia"
-            >
-              <RotateCw className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-2">
+            <div className={cn("flex items-baseline gap-1.5 text-right", saldoBorderClass(saldoStatus))}>
+              <span className="text-[8px] font-black uppercase tracking-wide text-white">Saldo</span>
+              {isDisabled ? (
+                <span className="text-sm font-black font-display text-white/30">—</span>
+              ) : (
+                <span className={cn("text-sm font-black font-display", saldoValueClass(saldoStatus))}>
+                  <span className="text-[9px] opacity-60 mr-0.5">R$</span>
+                  {day.saldoAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              )}
             </div>
-          )}
-        </div>
-
-        {/* Saldo row */}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
-          <div className={cn("flex items-baseline gap-1.5", saldoBorderClass(saldoStatus))}>
-            <span className="text-[8px] font-black uppercase tracking-wide text-white">Saldo</span>
-            {isDisabled ? (
-              <span className="text-sm font-black font-display text-white/30">—</span>
-            ) : (
-              <span className={cn("text-sm font-black font-display", saldoValueClass(saldoStatus))}>
-                <span className="text-[9px] opacity-60 mr-0.5">R$</span>
-                {day.saldoAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </span>
-            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); if (!isDisabled) onOpenSheet?.(day.date, 'all'); }}
+              disabled={isDisabled}
+              className={cn(
+                "w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-muted-foreground/60 transition-all shrink-0",
+                isDisabled ? "cursor-not-allowed" : "hover:bg-primary/20 hover:text-primary",
+              )}
+            >
+              <Eye className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); if (!isDisabled) onOpenSheet?.(day.date, 'all'); }}
-            disabled={isDisabled}
-            className={cn(
-              "w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-muted-foreground/60 transition-all",
-              isDisabled ? "cursor-not-allowed" : "hover:bg-primary/20 hover:text-primary",
-            )}
-          >
-            <Eye className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Data Grid: Entradas / Despesas / Gastos */}

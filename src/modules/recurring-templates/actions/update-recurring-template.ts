@@ -7,22 +7,9 @@ import type { UpdateRecurringTemplateRequest } from '../model/api/update-recurri
 
 export async function updateRecurringTemplateAction(data: UpdateRecurringTemplateRequest) {
   try {
-    const response = await recurringTemplatesService.update(data);
-
-    return {
-      success: true,
-      data: response,
-      errors: null,
-      message: null,
-    };
+    return await recurringTemplatesService.update(data);
   } catch (error) {
     const message = extractErrorMessage(error, ERROR_KEYS.AN_ERROR_OCCURED);
-
-    return {
-      success: false,
-      data: null,
-      errors: null,
-      message,
-    };
+    throw new Error(message);
   }
 }
