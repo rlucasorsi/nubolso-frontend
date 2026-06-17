@@ -1,10 +1,11 @@
 import '@/index.css';
 import { Providers } from './providers';
 import type { Metadata, Viewport } from 'next';
+import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Fluxo de Caixa',
-  description: 'Sistema de controle de fluxo de caixa',
+  title: 'Nubolso',
+  description: 'Nubolso - Controle financeiro pessoal',
 };
 
 export const viewport: Viewport = {
@@ -18,7 +19,7 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
