@@ -15,6 +15,9 @@ import { useCreatePurchase } from '@/modules/credit-cards/hooks/use-create-purch
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { PurchaseSimulationPreview } from './PurchaseSimulationPreview';
 import { purchaseFormSchema } from '@/lib/schemas/credit-cards';
+import { cn } from '@/lib/utils';
+
+type InputMode = 'total' | 'installment';
 
 interface AddPurchaseDrawerProps {
   open: boolean;
@@ -35,12 +38,19 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
   const [amount, setAmount] = useState('');
   const [installmentsCount, setInstallmentsCount] = useState(1);
   const [purchaseDate, setPurchaseDate] = useState(getTodayDateString());
+  const [inputMode, setInputMode] = useState<InputMode>('total');
   const [error, setError] = useState<string | null>(null);
 
   const simulateMutation = useSimulatePurchase();
   const createMutation = useCreatePurchase();
 
   const numericAmount = parseFloat(amount.replace(',', '.'));
+
+  // Total amount sent to backend depends on input mode
+  const totalAmount = inputMode === 'installment' && !Number.isNaN(numericAmount)
+    ? numericAmount * installmentsCount
+    : numericAmount;
+
   const isFormValid =
     !!cardId &&
     description.trim() !== '' &&
@@ -51,17 +61,17 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
 
   useEffect(() => {
     if (open) return;
-
     setDescription('');
     setAmount('');
     setInstallmentsCount(1);
     setPurchaseDate(getTodayDateString());
+    setInputMode('total');
     setError(null);
     simulateMutation.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Debounced preview: re-simulate whenever the form is valid and changes.
+  // Debounced preview: re-simulate whenever the form is valid and any value changes.
   useEffect(() => {
     if (!open || !isFormValid || !cardId) return;
 
@@ -69,7 +79,7 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
       simulateMutation.mutate({
         cardId,
         description,
-        totalAmount: numericAmount,
+        totalAmount,
         installmentsCount,
         purchaseDate,
       });
@@ -77,7 +87,7 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
 
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, cardId, description, numericAmount, installmentsCount, purchaseDate, isFormValid]);
+  }, [open, cardId, description, totalAmount, installmentsCount, purchaseDate, isFormValid]);
 
   async function handleConfirm() {
     const result = purchaseFormSchema.safeParse({
@@ -97,7 +107,7 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
       await createMutation.mutateAsync({
         cardId,
         description,
-        totalAmount: numericAmount,
+        totalAmount,
         installmentsCount,
         purchaseDate,
       });
@@ -110,6 +120,11 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
   const handleOpenChange = (o: boolean) => {
     if (!o) onClose();
   };
+
+  // Derived display: when in installment mode, show computed total alongside
+  const computedTotal = inputMode === 'installment' && !Number.isNaN(numericAmount) && numericAmount > 0
+    ? numericAmount * installmentsCount
+    : null;
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
@@ -132,17 +147,44 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             onChange={setDescription}
           />
 
+          {/* Mode toggle */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+              Forma de Entrada
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => { setInputMode('total'); setAmount(''); }}
+                className={cn(
+                  'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
+                  inputMode === 'total'
+                    ? 'bg-primary text-white shadow-glow'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                Valor Total
+              </button>
+              <button
+                type="button"
+                onClick={() => { setInputMode('installment'); setAmount(''); }}
+                className={cn(
+                  'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
+                  inputMode === 'installment'
+                    ? 'bg-primary text-white shadow-glow'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                Valor da Parcela
+              </button>
+            </div>
+          </div>
+
           <AmountInputField
-            label="Valor Total"
+            label={inputMode === 'total' ? 'Valor Total' : 'Valor da Parcela'}
             required
             value={amount}
             onChange={setAmount}
-          />
-
-          <DateInputField
-            label="Data da Compra"
-            value={purchaseDate}
-            onChange={setPurchaseDate}
           />
 
           <NumberInputField
@@ -152,6 +194,24 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             min={1}
             max={48}
             suffix="x"
+          />
+
+          {/* Show computed total when in installment mode */}
+          {computedTotal !== null && (
+            <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.03] border border-white/5">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Total da compra
+              </span>
+              <span className="text-sm font-black font-display text-white">
+                R$ {computedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+          )}
+
+          <DateInputField
+            label="Data da Compra"
+            value={purchaseDate}
+            onChange={setPurchaseDate}
           />
 
           {error && <p className="text-xs text-destructive text-center">{error}</p>}
