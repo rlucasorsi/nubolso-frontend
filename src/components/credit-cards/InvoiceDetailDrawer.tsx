@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/app-drawer';
-import { Loader2, RotateCcw } from 'lucide-react';
+import { Loader2, RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -27,8 +27,8 @@ import { MONTH_SHORT } from '@/components/painel/config';
 import { useGetInvoice } from '@/modules/credit-cards/hooks/use-get-invoice';
 import { useUpdateInvoicePaymentDate } from '@/modules/credit-cards/hooks/use-update-invoice-payment-date';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
+import { useDeletePurchase } from '@/modules/credit-cards/hooks/use-delete-purchase';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
-import type { CreditCardInstallmentLite } from '@/modules/credit-cards/model/api/purchase';
 import { PayInvoiceForm } from './PayInvoiceForm';
 
 interface InvoiceDetailDrawerProps {
@@ -41,16 +41,22 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
   const { data: invoice, isLoading } = useGetInvoice(invoiceId ?? undefined, open);
   const updatePaymentDateMutation = useUpdateInvoicePaymentDate();
   const reopenMutation = useReopenInvoice();
+  const deletePurchaseMutation = useDeletePurchase();
   const [paymentDate, setPaymentDate] = useState('');
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
   const [reopenError, setReopenError] = useState<string | null>(null);
+  const [deletePurchaseId, setDeletePurchaseId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (invoice) setPaymentDate(invoice.paymentDate);
   }, [invoice]);
 
   useEffect(() => {
-    if (open) setReopenError(null);
+    if (open) {
+      setReopenError(null);
+      setDeleteError(null);
+    }
   }, [open]);
 
   const handleOpenChange = (o: boolean) => {
@@ -75,18 +81,34 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     }
   };
 
-  const groups = useMemo(
-    () =>
-      (invoice?.installments ?? []).reduce<Record<string, CreditCardInstallmentLite[]>>(
-        (acc, installment) => {
-          const key = installment.purchaseDescription ?? 'Outros';
-          acc[key] = acc[key] ? [...acc[key], installment] : [installment];
-          return acc;
-        },
-        {},
-      ),
-    [invoice?.installments],
-  );
+  const handleDeletePurchase = async () => {
+    if (!deletePurchaseId || !invoice) return;
+    setDeleteError(null);
+    try {
+      await deletePurchaseMutation.mutateAsync({
+        purchaseId: deletePurchaseId,
+        invoiceId: invoice.id,
+        cardId: invoice.cardId,
+      });
+      setDeletePurchaseId(null);
+    } catch (err) {
+      setDeleteError(extractErrorMessage(err, 'Não foi possível excluir a compra'));
+      setDeletePurchaseId(null);
+    }
+  };
+
+  const groups = useMemo(() => {
+    const map = new Map<string, { purchaseId: string; description: string; installments: typeof invoice.installments; total: number }>();
+    for (const inst of invoice?.installments ?? []) {
+      if (!map.has(inst.purchaseId)) {
+        map.set(inst.purchaseId, { purchaseId: inst.purchaseId, description: inst.purchaseDescription ?? 'Outros', installments: [], total: 0 });
+      }
+      const g = map.get(inst.purchaseId)!;
+      g.installments.push(inst);
+      g.total += inst.amount;
+    }
+    return [...map.values()];
+  }, [invoice?.installments]);
 
   return (
     <>
@@ -144,20 +166,35 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
 
                 <div className="space-y-4">
                   <h3 className="text-base font-bold font-display">Itens da Fatura</h3>
+                  {deleteError && (
+                    <p className="text-xs text-destructive font-medium">{deleteError}</p>
+                  )}
                   <div className="space-y-2">
-                    {Object.entries(groups).length === 0 ? (
+                    {groups.length === 0 ? (
                       <div className="glass-card rounded-2xl p-8 text-center">
                         <p className="text-sm text-muted-foreground">Nenhum item nesta fatura.</p>
                       </div>
                     ) : (
-                      Object.entries(groups).map(([description, items]) => (
-                        <div key={description} className="glass-card rounded-2xl p-4 space-y-2">
-                          <p className="text-sm font-bold">{description}</p>
-                          {items.map((item) => (
+                      groups.map((group) => (
+                        <div key={group.purchaseId} className="glass-card rounded-2xl p-4 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-bold truncate">{group.description}</p>
+                            {!invoice.isPaid && (
+                              <button
+                                onClick={() => setDeletePurchaseId(group.purchaseId)}
+                                disabled={deletePurchaseMutation.isPending}
+                                className="shrink-0 w-7 h-7 rounded-lg bg-red-500/5 text-red-500/40 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center"
+                                title="Excluir compra"
+                              >
+                                {deletePurchaseMutation.isPending && deletePurchaseMutation.variables?.purchaseId === group.purchaseId
+                                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  : <Trash2 className="h-3.5 w-3.5" />}
+                              </button>
+                            )}
+                          </div>
+                          {group.installments.map((item) => (
                             <div key={item.id} className="flex items-center justify-between text-xs text-muted-foreground">
-                              <span>
-                                Parcela {item.number}/{item.totalCount}
-                              </span>
+                              <span>Parcela {item.number}/{item.totalCount}</span>
                               <span className="font-bold text-foreground">{formatCurrency(item.amount)}</span>
                             </div>
                           ))}
@@ -193,6 +230,33 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
           )}
         </DrawerContent>
       </Sheet>
+
+      <AlertDialog open={!!deletePurchaseId} onOpenChange={(open) => !open && setDeletePurchaseId(null)}>
+        <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
+          <AlertDialogHeader className="space-y-4">
+            <div className="w-16 h-16 rounded-[1.5rem] bg-red-500/10 flex items-center justify-center mx-auto mb-2 text-red-500">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
+              Excluir Compra?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
+              Todas as parcelas desta compra serão removidas de todas as faturas. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
+            <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePurchase}
+              className="flex-1 h-12 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all font-bold shadow-lg shadow-red-500/20"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={reopenDialogOpen} onOpenChange={setReopenDialogOpen}>
         <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">

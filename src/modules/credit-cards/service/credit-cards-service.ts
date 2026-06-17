@@ -106,6 +106,7 @@ function mapInstallment(
     referenceMonth: invoice?.referenceMonth ?? 0,
     referenceYear: invoice?.referenceYear ?? 0,
     paymentDate: invoice?.paymentDate ? invoice.paymentDate.split('T')[0] : '',
+    purchaseId: installment.purchaseId,
     purchaseDescription: installment.purchase?.description,
   };
 }

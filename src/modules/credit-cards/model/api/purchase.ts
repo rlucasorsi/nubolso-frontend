@@ -1,5 +1,6 @@
 export interface CreditCardInstallmentLite {
   id: string;
+  purchaseId: string;
   number: number;
   totalCount: number;
   amount: number;
