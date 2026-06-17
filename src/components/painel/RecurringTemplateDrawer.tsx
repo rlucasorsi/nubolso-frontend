@@ -43,10 +43,10 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
       template
         ? {
             description: template.description,
-            estimatedAmount: String(template.estimatedAmount).replace('.', ','),
+            estimatedAmount: template.estimatedAmount.toFixed(2).replace('.', ','),
             type: template.type.toLowerCase() as FlowType,
             dayOfMonth: template.dayOfMonth,
-            categoryId: template.categoryId,
+            categoryId: template.categoryId ?? undefined,
           }
         : DEFAULT_VALUES,
     );
@@ -70,7 +70,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
       estimatedAmount: numAmount,
       type: values.type,
       dayOfMonth: values.dayOfMonth,
-      categoryId: values.categoryId,
+      categoryId: values.categoryId ?? undefined,
     };
 
     try {

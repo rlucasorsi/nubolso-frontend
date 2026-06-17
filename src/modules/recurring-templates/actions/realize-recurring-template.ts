@@ -7,22 +7,9 @@ import type { RealizeRecurringTemplateRequest } from '../model/api/realize-recur
 
 export async function realizeRecurringTemplateAction(data: RealizeRecurringTemplateRequest) {
   try {
-    const response = await recurringTemplatesService.realize(data);
-
-    return {
-      success: true,
-      data: response,
-      errors: null,
-      message: null,
-    };
+    return await recurringTemplatesService.realize(data);
   } catch (error) {
     const message = extractErrorMessage(error, ERROR_KEYS.AN_ERROR_OCCURED);
-
-    return {
-      success: false,
-      data: null,
-      errors: null,
-      message,
-    };
+    throw new Error(message);
   }
 }

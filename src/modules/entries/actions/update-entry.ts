@@ -7,22 +7,9 @@ import type { UpdateEntryRequest } from '../model/api/update-entry';
 
 export async function updateEntryAction(data: UpdateEntryRequest) {
   try {
-    const response = await entriesService.update(data);
-
-    return {
-      success: true,
-      data: response,
-      errors: null,
-      message: null,
-    };
+    return await entriesService.update(data);
   } catch (error) {
     const message = extractErrorMessage(error, ERROR_KEYS.AN_ERROR_OCCURED);
-
-    return {
-      success: false,
-      data: null,
-      errors: null,
-      message,
-    };
+    throw new Error(message);
   }
 }

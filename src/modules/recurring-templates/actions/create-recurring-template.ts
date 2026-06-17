@@ -7,22 +7,9 @@ import type { CreateRecurringTemplateRequest } from '../model/api/create-recurri
 
 export async function createRecurringTemplateAction(data: CreateRecurringTemplateRequest) {
   try {
-    const response = await recurringTemplatesService.create(data);
-
-    return {
-      success: true,
-      data: response,
-      errors: null,
-      message: null,
-    };
+    return await recurringTemplatesService.create(data);
   } catch (error) {
     const message = extractErrorMessage(error, ERROR_KEYS.AN_ERROR_OCCURED);
-
-    return {
-      success: false,
-      data: null,
-      errors: null,
-      message,
-    };
+    throw new Error(message);
   }
 }

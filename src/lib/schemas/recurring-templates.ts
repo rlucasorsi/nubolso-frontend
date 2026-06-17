@@ -16,7 +16,7 @@ export const recurringTemplateFormSchema = z.object({
   estimatedAmount: positiveAmount,
   type: z.enum(['income', 'expense', 'spending']),
   dayOfMonth: z.number().int().min(1).max(31),
-  categoryId: z.string().optional(),
+  categoryId: z.string().nullish(),
 });
 
 export type RecurringTemplateFormSchema = z.infer<typeof recurringTemplateFormSchema>;
