@@ -49,12 +49,20 @@ export async function setCookie(name: string, value: string | null, options?: { 
   if (typeof window === 'undefined') {
     const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
-    cookieStore.set(name, encodedValue, { path: '/', sameSite: 'lax' });
+    cookieStore.set(name, encodedValue, {
+      path: '/',
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+    });
 
     return;
   }
 
-  setCookieClient(name, encodedValue, { path: '/', sameSite: 'lax' });
+  setCookieClient(name, encodedValue, {
+    path: '/',
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+  });
 }
 
 /**
