@@ -28,6 +28,7 @@ export interface CreatePurchaseRequest {
   totalAmount: number;
   installmentsCount: number;
   purchaseDate: string;
+  strategy?: 'FIRST' | 'LAST';
 }
 
 export type CreatePurchaseResponse = CreditCardPurchase;

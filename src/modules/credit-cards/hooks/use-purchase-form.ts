@@ -119,7 +119,7 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true }:
     setApiError(null);
 
     try {
-      await createMutation.mutateAsync({ cardId, description, totalAmount, installmentsCount, purchaseDate });
+      await createMutation.mutateAsync({ cardId, description, totalAmount, installmentsCount, purchaseDate, strategy });
       onSuccess();
     } catch (err) {
       setApiError(extractErrorMessage(err, 'Não foi possível registrar a compra'));
