@@ -25,7 +25,7 @@ export function PainelView({
   onUpdateEntry,
   onDeleteEntry,
 }: PainelViewProps) {
-  const { periods, currentBalance, balanceSettings, saldoInicial, allEntries, isLoading, isError, refetchAll } = useCashFlow();
+  const { periods, allDays, currentBalance, balanceSettings, saldoInicial, allEntries, isLoading, isError, refetchAll } = useCashFlow();
 
   const [periodIdx, setPeriodIdx] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -159,6 +159,7 @@ export function PainelView({
       <div className="mt-2">
         <DashboardSummary
           period={period}
+          allDays={allDays}
           currentBalance={currentBalance}
           today={today}
           balanceSettings={balanceSettings}

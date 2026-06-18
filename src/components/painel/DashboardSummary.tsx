@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Period, formatCurrency, formatCurrencyCompact, formatDateAxis, formatDateLong } from '@/lib/cashflow';
 import { BalanceSettings } from '@/hooks/useCashFlow';
 import { Card } from '@/components/ui/card';
@@ -15,9 +15,11 @@ import {
   YAxis,
   ReferenceLine,
 } from 'recharts';
+import { cn } from '@/lib/utils';
 
 interface DashboardSummaryProps {
   period: Period;
+  allDays: Period['days'];
   currentBalance: number;
   today: string;
   balanceSettings: BalanceSettings;
@@ -29,12 +31,27 @@ const ZONE_COLORS = {
   danger: '#ef4444',
 };
 
+type ChartView = 'period' | '60' | '90';
+
 export function DashboardSummary({
   period,
+  allDays,
   currentBalance,
   today,
   balanceSettings,
 }: DashboardSummaryProps) {
+  const [chartView, setChartView] = useState<ChartView>('period');
+
+  const activeChartDays = useMemo(() => {
+    if (chartView === 'period') return period.days;
+    const n = chartView === '60' ? 60 : 90;
+    const start = period.startDate;
+    const endDate = new Date(start + 'T00:00:00');
+    endDate.setDate(endDate.getDate() + n - 1);
+    const endStr = endDate.toISOString().split('T')[0];
+    return allDays.filter((d) => d.date >= start && d.date <= endStr);
+  }, [chartView, period, allDays]);
+
   const { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, dangerDay, warningDay, chartData, yDomain, yTicks } =
     useMemo(() => {
       let maxExpenseDay = period.days[0];
@@ -64,7 +81,7 @@ export function DashboardSummary({
           d.saldoAcumulado < balanceSettings.greenThreshold,
       );
 
-      const chartData = period.days.map((d) => ({
+      const chartData = activeChartDays.map((d) => ({
         date: d.date,
         saldoPast: d.date <= today ? d.saldoAcumulado : null,
         saldoFuture: d.date >= today ? d.saldoAcumulado : null,
@@ -72,7 +89,7 @@ export function DashboardSummary({
         totalExpense: d.expense + d.spending,
       }));
 
-      const saldoValues = period.days.map((d) => d.saldoAcumulado);
+      const saldoValues = activeChartDays.map((d) => d.saldoAcumulado);
       const rawMin = Math.min(...saldoValues, balanceSettings.yellowThreshold);
       const rawMax = Math.max(...saldoValues, balanceSettings.greenThreshold);
       const range = Math.max(rawMax - rawMin, 1);
@@ -88,7 +105,7 @@ export function DashboardSummary({
       for (let v = yDomain[0]; v <= yDomain[1] + 1e-6; v += niceStep) yTicks.push(v);
 
       return { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, dangerDay, warningDay, chartData, yDomain, yTicks };
-    }, [period, today, balanceSettings]);
+    }, [period, activeChartDays, today, balanceSettings]);
 
   const getZoneColor = (value: number) => {
     if (value >= balanceSettings.greenThreshold) return ZONE_COLORS.positive;
@@ -100,6 +117,8 @@ export function DashboardSummary({
     saldoPast: { label: 'Realizado', color: '#7b5cff' },
     saldoFuture: { label: 'Projetado', color: '#FEF08A' },
   };
+
+  const xTickInterval = Math.max(Math.ceil(activeChartDays.length / 6) - 1, 0);
 
   const renderTooltipContent = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
@@ -197,13 +216,32 @@ export function DashboardSummary({
       </div>
 
       {/* Projection Chart */}
-      <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-8">
-        <div className="space-y-6">
-          <h3 className="text-lg font-bold text-white font-display">Projeção de saldo no mês</h3>
+      <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-8">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-base font-bold text-white font-display">Projeção de saldo</h3>
+            <div className="flex gap-0.5 bg-white/5 rounded-xl p-1">
+              {(['period', '60', '90'] as ChartView[]).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setChartView(v)}
+                  className={cn(
+                    'px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all',
+                    chartView === v
+                      ? 'bg-primary text-white shadow-glow'
+                      : 'text-muted-foreground hover:text-white',
+                  )}
+                >
+                  {v === 'period' ? 'Período' : `${v}d`}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          <div className="h-[260px] mt-4">
+          <div className="h-[240px] w-full">
             <ChartContainer config={chartConfig} className="h-full w-full">
-              <AreaChart data={chartData} margin={{ top: 16, right: 54, left: -12, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 12, right: 12, left: 4, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#7b5cff" stopOpacity={0.25}/>
@@ -216,17 +254,17 @@ export function DashboardSummary({
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 9, fill: '#94a3b8' }}
                   tickFormatter={formatDateAxis}
-                  interval={Math.ceil(period.days.length / 5) - 1}
+                  interval={xTickInterval}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  width={52}
+                  width={62}
                   ticks={yTicks}
                   domain={yDomain}
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 9, fill: '#94a3b8' }}
                   tickFormatter={formatCurrencyCompact}
                 />
                 <ChartTooltip
@@ -234,23 +272,19 @@ export function DashboardSummary({
                   cursor={{ stroke: 'rgba(255,255,255,0.15)', strokeDasharray: '3 3' }}
                 />
 
-                {/* Threshold markers */}
                 <ReferenceLine
                   y={balanceSettings.greenThreshold}
                   stroke={ZONE_COLORS.warning}
                   strokeOpacity={0.4}
                   strokeDasharray="4 4"
-                  label={{ value: 'Atenção', position: 'right', fill: ZONE_COLORS.warning, fontSize: 9, fontWeight: 700, opacity: 0.8 }}
                 />
                 <ReferenceLine
                   y={balanceSettings.yellowThreshold}
                   stroke={ZONE_COLORS.danger}
                   strokeOpacity={0.4}
                   strokeDasharray="4 4"
-                  label={{ value: 'Crítico', position: 'right', fill: ZONE_COLORS.danger, fontSize: 9, fontWeight: 700, opacity: 0.8 }}
                 />
 
-                {/* Realized Data */}
                 <Area
                   type="monotone"
                   dataKey="saldoPast"
@@ -263,7 +297,6 @@ export function DashboardSummary({
                   dot={false}
                 />
 
-                {/* Projected without forecast */}
                 <Area
                   type="monotone"
                   dataKey="saldoFuture"
@@ -276,19 +309,18 @@ export function DashboardSummary({
                   dot={false}
                 />
 
-                {/* Today marker */}
                 <ReferenceLine
                   x={today}
                   stroke="#cbd5e1"
                   strokeOpacity={0.35}
                   strokeDasharray="3 3"
-                  label={{ value: 'Hoje', position: 'insideTopRight', fill: '#cbd5e1', fontSize: 10, fontWeight: 700, opacity: 0.7, dy: -4 }}
+                  label={{ value: 'Hoje', position: 'insideTopRight', fill: '#cbd5e1', fontSize: 9, fontWeight: 700, opacity: 0.7, dy: -4 }}
                 />
               </AreaChart>
             </ChartContainer>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
             <div className="flex items-center gap-2">
               <div className="w-3 h-0.5 bg-primary rounded-full" />
               <span>Realizado</span>
@@ -301,11 +333,19 @@ export function DashboardSummary({
               <div className="w-3 border-t border-dashed border-white/30" />
               <span>Hoje</span>
             </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 border-t-2 border-dashed" style={{ borderColor: ZONE_COLORS.warning }} />
+              <span style={{ color: ZONE_COLORS.warning }}>Atenção</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 border-t-2 border-dashed" style={{ borderColor: ZONE_COLORS.danger }} />
+              <span style={{ color: ZONE_COLORS.danger }}>Crítico</span>
+            </div>
           </div>
         </div>
       </Card>
 
-      {/* Alerts & Insights List (Vertical Cards) */}
+      {/* Alerts & Insights List */}
       <div className="space-y-3">
         {dangerDay && (
           <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">

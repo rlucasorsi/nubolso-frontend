@@ -4,6 +4,8 @@ export interface UserProfile {
   email: string;
   currentBalance: number;
   balanceStartDate: string | null;
+  greenThreshold: number;
+  yellowThreshold: number;
 }
 
 export type GetMeResponse = UserProfile;
@@ -12,6 +14,8 @@ export interface UpdateUserRequest {
   name?: string;
   currentBalance?: number;
   balanceStartDate?: string;
+  greenThreshold?: number;
+  yellowThreshold?: number;
 }
 
 export type UpdateUserResponse = UserProfile;

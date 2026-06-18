@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/app-drawer';
-import { Loader2, RotateCcw, Trash2 } from 'lucide-react';
+import { Loader2, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -30,6 +30,7 @@ import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoic
 import { useDeletePurchase } from '@/modules/credit-cards/hooks/use-delete-purchase';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { PayInvoiceForm } from './PayInvoiceForm';
+import { AddPurchaseDrawer } from './AddPurchaseDrawer';
 
 interface InvoiceDetailDrawerProps {
   invoiceId: string | null;
@@ -47,6 +48,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
   const [reopenError, setReopenError] = useState<string | null>(null);
   const [deletePurchaseId, setDeletePurchaseId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [addPurchaseOpen, setAddPurchaseOpen] = useState(false);
 
   useEffect(() => {
     if (invoice) setPaymentDate(invoice.paymentDate);
@@ -165,7 +167,16 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                 )}
 
                 <div className="space-y-4">
-                  <h3 className="text-base font-bold font-display">Itens da Fatura</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base font-bold font-display">Itens da Fatura</h3>
+                    <button
+                      onClick={() => setAddPurchaseOpen(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-xs font-bold hover:bg-primary/25 transition-colors"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Adicionar
+                    </button>
+                  </div>
                   {deleteError && (
                     <p className="text-xs text-destructive font-medium">{deleteError}</p>
                   )}
@@ -257,6 +268,12 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AddPurchaseDrawer
+        open={addPurchaseOpen}
+        onClose={() => setAddPurchaseOpen(false)}
+        cardId={invoice?.cardId ?? null}
+      />
 
       <AlertDialog open={reopenDialogOpen} onOpenChange={setReopenDialogOpen}>
         <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">

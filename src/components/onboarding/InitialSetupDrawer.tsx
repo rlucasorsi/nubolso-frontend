@@ -10,9 +10,7 @@ import {
   SheetDescription,
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { DatePicker } from '@/components/ui/date-picker';
+import { AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { ArrowRight } from 'lucide-react';
 import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
 
@@ -55,30 +53,19 @@ export function InitialSetupDrawer({ open }: InitialSetupDrawerProps) {
         </DrawerHeader>
 
         <div className="flex-1 px-6 pb-6 space-y-6">
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Saldo Atual
-            </Label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold font-display text-primary">
-                R$
-              </span>
-              <Input
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="0,00"
-                type="number"
-                className="glass-input h-14 pl-12 text-xl font-bold font-display rounded-xl"
-              />
-            </div>
-          </div>
+          <DateInputField
+            label="Data de Referência"
+            required
+            value={date}
+            onChange={setDate}
+          />
 
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Data de Referência
-            </Label>
-            <DatePicker date={date} onChange={setDate} className="h-12" />
-          </div>
+          <AmountInputField
+            label="Saldo Atual"
+            required
+            value={value}
+            onChange={setValue}
+          />
         </div>
 
         <DrawerFooter>

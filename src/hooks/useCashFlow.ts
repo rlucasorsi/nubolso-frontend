@@ -19,7 +19,6 @@ import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/us
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
 
 const START_DAY_KEY = 'cashflow_start_day';
-const BALANCE_SETTINGS_KEY = 'cashflow_balance_settings';
 
 export interface BalanceSettings {
   greenThreshold: number;
@@ -61,8 +60,12 @@ export function useCashFlow() {
   const [startDay, setStartDay] = useState<number>(() =>
     load(START_DAY_KEY, 20),
   );
-  const [balanceSettings, setBalanceSettings] = useState<BalanceSettings>(() =>
-    load(BALANCE_SETTINGS_KEY, { greenThreshold: 0.01, yellowThreshold: 0 }),
+  const balanceSettings: BalanceSettings = useMemo(
+    () => ({
+      greenThreshold: me?.greenThreshold ?? 0,
+      yellowThreshold: me?.yellowThreshold ?? 0,
+    }),
+    [me],
   );
   const [simulationAdjustment, setSimulationAdjustment] = useState(0);
 
@@ -161,10 +164,12 @@ export function useCashFlow() {
 
   const updateBalanceSettings = useCallback(
     (settings: BalanceSettings) => {
-      setBalanceSettings(settings);
-      save(BALANCE_SETTINGS_KEY, settings);
+      updateMeMutation.mutate({
+        greenThreshold: settings.greenThreshold,
+        yellowThreshold: settings.yellowThreshold,
+      });
     },
-    [],
+    [updateMeMutation],
   );
 
   // Range covered by all periods (historical + future), used to synthesize
