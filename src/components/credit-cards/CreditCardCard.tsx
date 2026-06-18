@@ -5,6 +5,7 @@ import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-in
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CreditCardCardProps {
   card: CreditCardType;
@@ -12,7 +13,7 @@ interface CreditCardCardProps {
 }
 
 export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
-  const { data: invoices } = useGetCardInvoices(card.id);
+  const { data: invoices, isLoading } = useGetCardInvoices(card.id);
 
   const unpaidInvoices = (invoices ?? [])
     .filter((invoice) => !invoice.isPaid)
@@ -58,7 +59,9 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 block">
               Fatura Atual
             </span>
-            {currentInvoice ? (
+            {isLoading ? (
+              <Skeleton className="h-3 w-28 mt-1" />
+            ) : currentInvoice ? (
               <span className="text-xs text-muted-foreground">
                 A pagar em {formatDateLong(currentInvoice.paymentDate)}
               </span>
@@ -66,18 +69,26 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
               <span className="text-xs text-muted-foreground">Sem faturas em aberto</span>
             )}
           </div>
-          <span className="text-lg font-bold text-foreground shrink-0">
-            {formatCurrency(currentInvoice?.totalAmount ?? 0)}
-          </span>
+          {isLoading ? (
+            <Skeleton className="h-6 w-20 shrink-0" />
+          ) : (
+            <span className="text-lg font-bold text-foreground shrink-0">
+              {formatCurrency(currentInvoice?.totalAmount ?? 0)}
+            </span>
+          )}
         </div>
 
         <div className="flex justify-between items-end px-1">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
             Próxima Fatura
           </span>
-          <span className="text-sm font-bold text-primary/80">
-            {formatCurrency(nextInvoice?.totalAmount ?? 0)}
-          </span>
+          {isLoading ? (
+            <Skeleton className="h-4 w-16" />
+          ) : (
+            <span className="text-sm font-bold text-primary/80">
+              {formatCurrency(nextInvoice?.totalAmount ?? 0)}
+            </span>
+          )}
         </div>
       </div>
     </div>

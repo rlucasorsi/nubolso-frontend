@@ -19,6 +19,7 @@ import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-in
 import { useDeleteCreditCard } from '@/modules/credit-cards/hooks/use-delete-credit-card';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CreditCardDetailDrawerProps {
   open: boolean;
@@ -43,7 +44,7 @@ export function CreditCardDetailDrawer({
 }: CreditCardDetailDrawerProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const { data: invoices } = useGetCardInvoices(card?.id, open);
+  const { data: invoices, isLoading } = useGetCardInvoices(card?.id, open);
   const deleteMutation = useDeleteCreditCard();
 
   if (!card) return null;
@@ -77,6 +78,24 @@ export function CreditCardDetailDrawer({
       setDeleteError(extractErrorMessage(err, 'Não foi possível remover o cartão'));
     }
   };
+
+  function InvoiceRowSkeleton() {
+    return (
+      <div className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+        <div className="flex items-center gap-3 min-w-0">
+          <Skeleton className="h-9 w-9 rounded-xl shrink-0" />
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        </div>
+        <div className="space-y-2 shrink-0 items-end flex flex-col">
+          <Skeleton className="h-3.5 w-16" />
+          <Skeleton className="h-2.5 w-10" />
+        </div>
+      </div>
+    );
+  }
 
   function renderInvoiceRow(invoice: CreditCardInvoice) {
     const isOverdue = !invoice.isPaid && invoice.paymentDate < today;
@@ -134,34 +153,52 @@ export function CreditCardDetailDrawer({
             </div>
           )}
 
-          {current && (
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
-                Fatura Atual
-              </h3>
-              {renderInvoiceRow(current)}
-            </div>
-          )}
-
-          {future.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
-                Próximas Faturas
-              </h3>
-              <div className="space-y-2">{future.map(renderInvoiceRow)}</div>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">Histórico</h3>
-            {paid.length === 0 ? (
-              <div className="glass-card rounded-2xl p-8 text-center">
-                <p className="text-sm text-muted-foreground">Nenhuma fatura paga ainda.</p>
+          {isLoading ? (
+            <>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-24 ml-1" />
+                <InvoiceRowSkeleton />
               </div>
-            ) : (
-              <div className="space-y-2">{paid.map(renderInvoiceRow)}</div>
-            )}
-          </div>
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-32 ml-1" />
+                <div className="space-y-2">
+                  <InvoiceRowSkeleton />
+                  <InvoiceRowSkeleton />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {current && (
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
+                    Fatura Atual
+                  </h3>
+                  {renderInvoiceRow(current)}
+                </div>
+              )}
+
+              {future.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
+                    Próximas Faturas
+                  </h3>
+                  <div className="space-y-2">{future.map(renderInvoiceRow)}</div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">Histórico</h3>
+                {paid.length === 0 ? (
+                  <div className="glass-card rounded-2xl p-8 text-center">
+                    <p className="text-sm text-muted-foreground">Nenhuma fatura paga ainda.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">{paid.map(renderInvoiceRow)}</div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         <DrawerFooter className="flex-col sm:flex-col gap-3">

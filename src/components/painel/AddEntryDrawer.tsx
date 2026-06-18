@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { EntryForm, EntryFormValues } from './EntryForm';
 import { entryFormSchema } from '@/lib/schemas/transactions';
-import { purchaseFormSchema } from '@/lib/schemas/credit-cards';
 import { Button } from '@/components/ui/button';
 import { AddButton } from '@/components/ui/add-button';
 import { FlowType } from '@/lib/cashflow';
@@ -14,13 +13,10 @@ import {
   DrawerFooter,
   SheetTitle,
 } from '@/components/ui/app-drawer';
-import { TextInputField, AmountInputField, DateInputField, NumberInputField } from '@/components/ui/form-field';
 import { CreditCardSelect } from '@/components/credit-cards/CreditCardSelect';
-import { PurchaseSimulationPreview } from '@/components/credit-cards/PurchaseSimulationPreview';
+import { CreditPurchaseFields } from '@/components/credit-cards/CreditPurchaseFields';
 import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
-import { useSimulatePurchase } from '@/modules/credit-cards/hooks/use-simulate-purchase';
-import { useCreatePurchase } from '@/modules/credit-cards/hooks/use-create-purchase';
-import { extractErrorMessage } from '@/shared/utils/extract-error-message';
+import { usePurchaseForm } from '@/modules/credit-cards/hooks/use-purchase-form';
 
 type EntryMode = 'debito' | 'credito';
 
@@ -59,38 +55,26 @@ export function AddEntryDrawer({
   // Crédito (compra parcelada no cartão)
   const cardsQuery = useGetCreditCards();
   const activeCards = useMemo(() => (cardsQuery.data ?? []).filter((c) => c.isActive), [cardsQuery.data]);
-  const simulateMutation = useSimulatePurchase();
-  const createPurchaseMutation = useCreatePurchase();
-
   const [purchaseCardId, setPurchaseCardId] = useState<string | undefined>(undefined);
-  const [purchaseDescription, setPurchaseDescription] = useState('');
-  const [purchaseAmount, setPurchaseAmount] = useState('');
-  const [installmentsCount, setInstallmentsCount] = useState(1);
-  const [purchaseDate, setPurchaseDate] = useState(getInitialDate());
-  const [purchaseErrors, setPurchaseErrors] = useState<{ amount?: string; purchaseDate?: string }>({});
-  const [purchaseApiError, setPurchaseApiError] = useState<string | null>(null);
+
+  const purchaseForm = usePurchaseForm({
+    isOpen,
+    cardId: purchaseCardId,
+    defaultDate,
+    enabled: mode === 'credito',
+  });
 
   useEffect(() => {
-    if (isOpen) {
-      setMode('debito');
-
-      setValues({
-        date: getInitialDate(),
-        amount: '',
-        type: defaultType,
-        description: '',
-      });
-      setEntryErrors({});
-
-      setPurchaseCardId(undefined);
-      setPurchaseDescription('');
-      setPurchaseAmount('');
-      setInstallmentsCount(1);
-      setPurchaseDate(getInitialDate());
-      setPurchaseErrors({});
-      setPurchaseApiError(null);
-      simulateMutation.reset();
-    }
+    if (!isOpen) return;
+    setMode('debito');
+    setValues({
+      date: getInitialDate(),
+      amount: '',
+      type: defaultType,
+      description: '',
+    });
+    setEntryErrors({});
+    setPurchaseCardId(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, defaultType, defaultDate]);
 
@@ -100,32 +84,6 @@ export function AddEntryDrawer({
       setPurchaseCardId(activeCards[0].id);
     }
   }, [isOpen, purchaseCardId, activeCards]);
-
-  const numericPurchaseAmount = parseFloat(purchaseAmount.replace(',', '.'));
-  const isPurchaseValid =
-    !!purchaseCardId &&
-    purchaseAmount !== '' &&
-    !Number.isNaN(numericPurchaseAmount) &&
-    numericPurchaseAmount > 0 &&
-    purchaseDate !== '';
-
-  // Preview com debounce: re-simula sempre que o formulário de crédito é válido e muda.
-  useEffect(() => {
-    if (mode !== 'credito' || !isOpen || !isPurchaseValid || !purchaseCardId) return;
-
-    const timeout = setTimeout(() => {
-      simulateMutation.mutate({
-        cardId: purchaseCardId,
-        description: purchaseDescription,
-        totalAmount: numericPurchaseAmount,
-        installmentsCount,
-        purchaseDate,
-      });
-    }, 400);
-
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, isOpen, purchaseCardId, purchaseDescription, numericPurchaseAmount, installmentsCount, purchaseDate, isPurchaseValid]);
 
   function handleSave() {
     const result = entryFormSchema.safeParse(values);
@@ -147,36 +105,6 @@ export function AddEntryDrawer({
     });
   }
 
-  async function handleConfirmPurchase() {
-    const result = purchaseFormSchema.safeParse({
-      cardId: purchaseCardId ?? '',
-      description: purchaseDescription,
-      amount: purchaseAmount,
-      installmentsCount,
-      purchaseDate,
-    });
-    if (!result.success) {
-      const errs = result.error.flatten().fieldErrors;
-      setPurchaseErrors({ amount: errs.amount?.[0], purchaseDate: errs.purchaseDate?.[0] });
-      return;
-    }
-
-    setPurchaseErrors({});
-    setPurchaseApiError(null);
-    try {
-      await createPurchaseMutation.mutateAsync({
-        cardId: purchaseCardId,
-        description: purchaseDescription,
-        totalAmount: numericPurchaseAmount,
-        installmentsCount,
-        purchaseDate,
-      });
-      onCancel();
-    } catch (err) {
-      setPurchaseApiError(extractErrorMessage(err, 'Não foi possível registrar a compra'));
-    }
-  }
-
   function handleCancel() {
     setValues({
       date: getInitialDate(),
@@ -187,8 +115,6 @@ export function AddEntryDrawer({
     setEntryErrors({});
     onCancel();
   }
-
-  const isSaving = createPurchaseMutation.isPending;
 
   return (
     <>
@@ -260,46 +186,26 @@ export function AddEntryDrawer({
                   isLoading={cardsQuery.isLoading}
                 />
 
-                <TextInputField
-                  label="Descrição"
-                  placeholder="Ex: Notebook, Supermercado..."
-                  value={purchaseDescription}
-                  onChange={setPurchaseDescription}
-                />
-
-                <AmountInputField
-                  label="Valor Total"
-                  required
-                  value={purchaseAmount}
-                  onChange={setPurchaseAmount}
-                  error={purchaseErrors.amount}
-                />
-
-                <DateInputField
-                  label="Data da Compra"
-                  required
-                  value={purchaseDate}
-                  onChange={setPurchaseDate}
+                <CreditPurchaseFields
+                  description={purchaseForm.description}
+                  onDescriptionChange={purchaseForm.setDescription}
+                  inputMode={purchaseForm.inputMode}
+                  onInputModeChange={purchaseForm.setInputMode}
+                  amount={purchaseForm.amount}
+                  onAmountChange={purchaseForm.setAmount}
+                  amountError={purchaseForm.errors.amount}
+                  installmentsCount={purchaseForm.installmentsCount}
+                  onInstallmentsCountChange={purchaseForm.setInstallmentsCount}
+                  strategy={purchaseForm.strategy}
+                  onStrategyChange={purchaseForm.setStrategy}
+                  computedTotal={purchaseForm.computedTotal}
+                  purchaseDate={purchaseForm.purchaseDate}
+                  onPurchaseDateChange={purchaseForm.setPurchaseDate}
+                  purchaseDateError={purchaseForm.errors.purchaseDate}
                   minDate={minDate}
-                  error={purchaseErrors.purchaseDate}
-                />
-
-                <NumberInputField
-                  label="Número de Parcelas"
-                  value={installmentsCount}
-                  onChange={setInstallmentsCount}
-                  min={1}
-                  max={48}
-                  suffix="x"
-                />
-
-                {purchaseApiError && (
-                  <p className="text-xs text-destructive text-center">{purchaseApiError}</p>
-                )}
-
-                <PurchaseSimulationPreview
-                  simulation={simulateMutation.data}
-                  isLoading={simulateMutation.isPending}
+                  apiError={purchaseForm.apiError}
+                  simulation={purchaseForm.adjustedSimulation}
+                  isSimulating={purchaseForm.isSimulating}
                 />
               </div>
             )}
@@ -310,7 +216,7 @@ export function AddEntryDrawer({
               variant="outline"
               className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5"
               onClick={handleCancel}
-              disabled={isSaving}
+              disabled={purchaseForm.isConfirming}
             >
               Cancelar
             </Button>
@@ -325,10 +231,10 @@ export function AddEntryDrawer({
             ) : (
               <Button
                 className="flex-1 h-11 rounded-xl bg-gradient-primary text-white font-bold shadow-glow hover:scale-[1.02] transition-all"
-                onClick={handleConfirmPurchase}
-                disabled={!isPurchaseValid || isSaving}
+                onClick={() => purchaseForm.handleConfirm(onCancel)}
+                disabled={!purchaseForm.isValid || purchaseForm.isConfirming}
               >
-                {isSaving ? 'Confirmando...' : 'Confirmar Compra'}
+                {purchaseForm.isConfirming ? 'Confirmando...' : 'Confirmar Compra'}
               </Button>
             )}
           </DrawerFooter>
