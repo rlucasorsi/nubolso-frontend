@@ -13,6 +13,9 @@ export interface RecurringTemplate {
     name: string;
     color?: string;
   };
+  endDate?: string;
+  totalOccurrences?: number;
+  occurrenceCount?: number;
 }
 
 export const recurringTemplatesService = {

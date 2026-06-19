@@ -27,17 +27,24 @@ const DEFAULT_VALUES: RecurringTemplateFormValues = {
   type: 'expense',
   dayOfMonth: 10,
   categoryId: undefined,
+  endType: 'none',
+  endDate: undefined,
+  totalOccurrences: undefined,
 };
 
 export function RecurringTemplateDrawer({ open, onOpenChange, template }: RecurringTemplateDrawerProps) {
   const [values, setValues] = useState<RecurringTemplateFormValues>(DEFAULT_VALUES);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ estimatedAmount?: string; endDate?: string; totalOccurrences?: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const createMutation = useCreateRecurringTemplate();
   const updateMutation = useUpdateRecurringTemplate();
 
   useEffect(() => {
     if (!open) return;
+
+    setErrors({});
+    setSubmitError(null);
 
     setValues(
       template
@@ -47,10 +54,12 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
             type: template.type.toLowerCase() as FlowType,
             dayOfMonth: template.dayOfMonth,
             categoryId: template.categoryId ?? undefined,
+            endType: template.endDate ? 'date' : template.totalOccurrences ? 'count' : 'none',
+            endDate: template.endDate ? template.endDate.slice(0, 10) : undefined,
+            totalOccurrences: template.totalOccurrences ?? undefined,
           }
         : DEFAULT_VALUES,
     );
-    setError(null);
   }, [open, template]);
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -58,11 +67,22 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
   async function handleSave() {
     const result = recurringTemplateFormSchema.safeParse(values);
     if (!result.success) {
-      setError(result.error.errors[0]?.message ?? 'Dados inválidos');
+      const fieldErrors: typeof errors = {};
+      for (const issue of result.error.errors) {
+        const path = issue.path[0] as string;
+        if (path === 'estimatedAmount') fieldErrors.estimatedAmount = issue.message;
+        if (path === 'endDate') fieldErrors.endDate = issue.message;
+        if (path === 'totalOccurrences') fieldErrors.totalOccurrences = issue.message;
+      }
+      setErrors(fieldErrors);
+      if (Object.keys(fieldErrors).length === 0) {
+        setSubmitError(result.error.errors[0]?.message ?? 'Dados inválidos');
+      }
       return;
     }
 
-    setError(null);
+    setErrors({});
+    setSubmitError(null);
 
     const numAmount = parseFloat(values.estimatedAmount.replace(',', '.'));
     const payload = {
@@ -71,6 +91,8 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
       type: values.type,
       dayOfMonth: values.dayOfMonth,
       categoryId: values.categoryId ?? undefined,
+      endDate: values.endType === 'date' ? values.endDate : undefined,
+      totalOccurrences: values.endType === 'count' ? values.totalOccurrences : undefined,
     };
 
     try {
@@ -81,7 +103,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
       }
       onOpenChange(false);
     } catch (err) {
-      setError(extractErrorMessage(err, 'Não foi possível salvar a conta recorrente'));
+      setSubmitError(extractErrorMessage(err, 'Não foi possível salvar a conta recorrente'));
     }
   }
 
@@ -98,7 +120,10 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
         </DrawerHeader>
 
         <div className="flex-1 px-6 py-4">
-          <RecurringTemplateForm values={values} onChange={setValues} error={error || undefined} />
+          <RecurringTemplateForm values={values} onChange={setValues} errors={errors} />
+          {submitError && (
+            <p className="mt-3 text-sm font-medium text-balance-danger">{submitError}</p>
+          )}
         </div>
 
         <DrawerFooter>

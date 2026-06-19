@@ -14,7 +14,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { RotateCw, Pencil, Trash2, Archive, Loader2, Search, ChevronDown } from 'lucide-react';
+import { RotateCw, Pencil, Trash2, Archive, Loader2, Search, ChevronDown, CalendarClock, Hash } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { formatCurrency } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
@@ -253,8 +255,24 @@ export function RecurringTemplatesView() {
                                     {template.category.name}
                                   </p>
                                 )}
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
                                   Dia {template.dayOfMonth} · {formatCurrency(template.estimatedAmount)}
+                                  {template.endDate && (
+                                    <>
+                                      {' · '}
+                                      <CalendarClock className="h-3 w-3 inline" />
+                                      {' '}
+                                      {format(parseISO(template.endDate), "MMM/yyyy", { locale: ptBR })}
+                                    </>
+                                  )}
+                                  {template.totalOccurrences && (
+                                    <>
+                                      {' · '}
+                                      <Hash className="h-3 w-3 inline" />
+                                      {' '}
+                                      {template.occurrenceCount ?? 0}/{template.totalOccurrences}x
+                                    </>
+                                  )}
                                   {!template.isActive && ' · Arquivado'}
                                 </p>
                               </div>
