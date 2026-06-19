@@ -158,7 +158,7 @@ const MONTH_SHORT = [
 ];
 
 // Periods can run from day 1 (standard month) or a custom day (e.g. 20 to 19 of next month)
-export function getPeriodForDate(dateStr: string, startDay: number = 20): {
+export function getPeriodForDate(dateStr: string, startDay: number = 1): {
   label: string;
   startDate: string;
   endDate: string;
@@ -317,7 +317,7 @@ export function getPeriodRanges(
   entries: CashFlowEntry[],
   saldoInicial: { value: number; date: string },
   numFuturePeriods: number = 3,
-  startDay: number = 20,
+  startDay: number = 1,
 ): { start: string; end: string; label: string }[] {
   // Find date range from entries
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
@@ -363,7 +363,7 @@ export function generatePeriods(
   virtualEntries: CashFlowEntry[],
   saldoInicial: { value: number; date: string },
   numFuturePeriods: number = 3,
-  startDay: number = 20,
+  startDay: number = 1,
 ): Period[] {
   const periodStarts = getPeriodRanges(entries, saldoInicial, numFuturePeriods, startDay);
   const allEntries = [...entries, ...virtualEntries];

@@ -8,7 +8,7 @@ import { DashboardSummary } from './DashboardSummary';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { useCashFlow } from '@/hooks/useCashFlow';
 import { EntryFormValues } from './EntryForm';
-import { Filter, Loader2, Plus } from 'lucide-react';
+import { ChevronDown, Filter, Loader2, Plus } from 'lucide-react';
 import { setQuickAddHandler } from '@/lib/quickAdd';
 import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDrawer';
 import { ServerErrorState } from '@/components/ui/server-error-state';
@@ -34,6 +34,7 @@ export function PainelView({
   const [isAddingInHeader, setIsAddingInHeader] = useState(false);
   const [showFab, setShowFab] = useState(false);
   const [showPendingOnly, setShowPendingOnly] = useState(false);
+  const [showPastDays, setShowPastDays] = useState(false);
   const userNavigatedRef = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -101,6 +102,9 @@ export function PainelView({
     ? period.days.filter((d) => d.hasPendingRecurring)
     : period.days;
 
+  const pastDays = isCurrentPeriod ? displayedDays.filter((d) => d.date < today) : [];
+  const fromTodayDays = isCurrentPeriod ? displayedDays.filter((d) => d.date >= today) : displayedDays;
+
   const handleHeaderAddSave = (values: EntryFormValues) => {
     onAddEntry({
       date: values.date,
@@ -114,14 +118,17 @@ export function PainelView({
 
   const handlePrev = () => {
     userNavigatedRef.current = true;
+    setShowPastDays(false);
     setPeriodIdx((i) => Math.max(0, i - 1));
   };
   const handleNext = () => {
     userNavigatedRef.current = true;
+    setShowPastDays(false);
     setPeriodIdx((i) => Math.min(periods.length - 1, i + 1));
   };
   const handleToday = () => {
     userNavigatedRef.current = true;
+    setShowPastDays(false);
     setPeriodIdx(findTodayPeriodIdx());
   };
 
@@ -202,12 +209,33 @@ export function PainelView({
           </p>
         </div>
       ) : (
-        <DayList
-          period={{ ...period, days: displayedDays }}
-          today={today}
-          onOpenSheet={setSheet}
-          onAddEntry={onAddEntry}
-        />
+        <>
+          {isCurrentPeriod && pastDays.length > 0 && (
+            <div className="px-5 mb-1">
+              <button
+                onClick={() => setShowPastDays((v) => !v)}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors py-1"
+              >
+                <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', showPastDays && 'rotate-180')} />
+                {showPastDays ? 'Ocultar' : 'Ver'} {pastDays.length} {pastDays.length === 1 ? 'dia anterior' : 'dias anteriores'}
+              </button>
+              {showPastDays && (
+                <DayList
+                  period={{ ...period, days: pastDays }}
+                  today={today}
+                  onOpenSheet={setSheet}
+                  onAddEntry={onAddEntry}
+                />
+              )}
+            </div>
+          )}
+          <DayList
+            period={{ ...period, days: fromTodayDays }}
+            today={today}
+            onOpenSheet={setSheet}
+            onAddEntry={onAddEntry}
+          />
+        </>
       )}
 
       {/* Subtle period nav at the end of the day list */}

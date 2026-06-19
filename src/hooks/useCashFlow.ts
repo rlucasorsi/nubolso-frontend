@@ -58,7 +58,7 @@ export function useCashFlow() {
     [me],
   );
   const [startDay, setStartDay] = useState<number>(() =>
-    load(START_DAY_KEY, 20),
+    load(START_DAY_KEY, 1),
   );
   const balanceSettings: BalanceSettings = useMemo(
     () => ({
