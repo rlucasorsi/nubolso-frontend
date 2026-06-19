@@ -119,6 +119,9 @@ export function useCashFlow() {
       isActive: t.isActive,
       categoryId: t.categoryId,
       category: t.category,
+      endDate: t.endDate,
+      totalOccurrences: t.totalOccurrences,
+      occurrenceCount: t.occurrenceCount,
     }));
   }, [recurringTemplatesQuery.data]);
 

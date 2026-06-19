@@ -58,6 +58,9 @@ export interface RecurringTemplateLike {
     name: string;
     color?: string;
   };
+  endDate?: string;
+  totalOccurrences?: number;
+  occurrenceCount?: number;
 }
 
 // Decouples cashflow.ts from modules/credit-cards
@@ -225,6 +228,11 @@ export function synthesizeVirtualEntry(
   existingEntries: CashFlowEntry[],
 ): CashFlowEntry | null {
   const occurrenceDate = getTemplateOccurrenceDate(year, month, template.dayOfMonth);
+
+  if (template.endDate && occurrenceDate > template.endDate.slice(0, 10)) return null;
+
+  if (template.totalOccurrences && (template.occurrenceCount ?? 0) >= template.totalOccurrences) return null;
+
   const realized = existingEntries.find(
     (e) => e.templateId === template.id && e.date === occurrenceDate,
   );
