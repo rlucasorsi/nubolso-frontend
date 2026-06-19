@@ -158,14 +158,14 @@ export function AddFundsDrawer({
             <div className={cn(
               "w-20 h-20 rounded-full border-2 flex items-center justify-center mb-4",
               isWithdrawal
-                ? "bg-orange-500/10 border-orange-500/20"
+                ? "bg-destructive/10 border-destructive/20"
                 : "bg-primary/10 border-primary/20"
             )}>
-              <Check className={cn("h-10 w-10", isWithdrawal ? "text-orange-400" : "text-primary")} />
+              <Check className={cn("h-10 w-10", isWithdrawal ? "text-destructive" : "text-primary")} />
             </div>
             <h2 className={cn(
               "text-xl font-bold font-display mb-1",
-              isWithdrawal ? "text-orange-400" : "text-primary"
+              isWithdrawal ? "text-destructive" : "text-primary"
             )}>
               {isWithdrawal ? 'Retirada Registrada!' : 'Aporte Realizado!'}
             </h2>
@@ -195,7 +195,7 @@ export function AddFundsDrawer({
                   className={cn(
                     "flex-1 flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-bold transition-all",
                     operationType === 'withdrawal'
-                      ? "bg-orange-500 text-white shadow-sm"
+                      ? "bg-destructive text-white shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -248,10 +248,10 @@ export function AddFundsDrawer({
                             <div className="flex items-center gap-3 min-w-0">
                               <div className={cn(
                                 "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                                isNegative ? "bg-orange-500/10" : "bg-primary/10"
+                                isNegative ? "bg-destructive/10" : "bg-primary/10"
                               )}>
                                 {isNegative
-                                  ? <Minus className="h-4 w-4 text-orange-400" />
+                                  ? <Minus className="h-4 w-4 text-destructive" />
                                   : <CheckCircle2 className="h-4 w-4 text-primary" />
                                 }
                               </div>
@@ -262,7 +262,7 @@ export function AddFundsDrawer({
                             </div>
                             <p className={cn(
                               "text-sm font-bold shrink-0",
-                              isNegative ? "text-orange-400" : "text-primary"
+                              isNegative ? "text-destructive" : "text-primary"
                             )}>
                               {isNegative ? '-' : '+'}{formatCurrency(c.amount)}
                             </p>
@@ -290,7 +290,7 @@ export function AddFundsDrawer({
                 className={cn(
                   "w-full h-11 text-white font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2",
                   isWithdrawal
-                    ? "bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20"
+                    ? "bg-destructive hover:bg-red-600 shadow-lg shadow-destructive/20"
                     : "bg-gradient-primary shadow-glow"
                 )}
               >
