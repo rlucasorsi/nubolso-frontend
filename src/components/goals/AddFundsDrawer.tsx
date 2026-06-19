@@ -122,7 +122,7 @@ export function AddFundsDrawer({
         onClose();
       }, 1500);
     } catch (err) {
-      setError(extractErrorMessage(err));
+      setError(extractErrorMessage(err, 'Não foi possível registrar a operação'));
     }
   };
 

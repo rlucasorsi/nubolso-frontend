@@ -1,6 +1,18 @@
+// Next.js sanitizes Server Action errors in production and adds a `digest` property.
+// The sanitized message is never useful — always fall back to a user-friendly string.
+function isNextjsSanitizedError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false;
+  const err = error as Record<string, any>;
+  if ('digest' in err) return true;
+  if (typeof err.message === 'string' && err.message.includes('Server Components render')) return true;
+  return false;
+}
+
 export function extractErrorMessage(error: unknown, fallback = 'Erro interno do servidor'): string {
   try {
     const cleanMessage = (msg: string) => msg.trim().replace(/\.+$/, '');
+
+    if (isNextjsSanitizedError(error)) return fallback;
 
     if (typeof error === 'string') {
       return cleanMessage(error);
