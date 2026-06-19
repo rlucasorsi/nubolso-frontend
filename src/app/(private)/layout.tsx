@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCookie } from 'cookies-next';
-import { COOKIE_KEYS } from '@/shared/constants/cookie-keys.constant';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, CircleDollarSign, Target, LayoutDashboard, RotateCw, CreditCard, Menu } from 'lucide-react';
 import Link from 'next/link';
@@ -23,11 +21,6 @@ export default function PrivateLayout({
   const { data: me } = useGetMe();
   const needsOnboarding = Boolean(me && !me.balanceStartDate);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const token = getCookie(COOKIE_KEYS.ACCESS_TOKEN);
-    if (!token) router.replace('/login');
-  }, [router]);
 
   const handleLogout = async () => {
     await authService.logout();
