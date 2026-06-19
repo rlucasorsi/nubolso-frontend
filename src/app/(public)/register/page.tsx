@@ -3,12 +3,54 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { BarChart3, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { BarChart3, Mail, Lock, Eye, EyeOff, User, Check } from 'lucide-react';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { toast } from 'sonner';
 import { registerSchema } from '@/lib/schemas/auth';
+
+const PASSWORD_REQUIREMENTS = [
+  { label: 'Mínimo 8 caracteres', test: (p: string) => p.length >= 8 },
+  { label: 'Pelo menos uma letra maiúscula (A–Z)', test: (p: string) => /[A-Z]/.test(p) },
+  { label: 'Pelo menos um número (0–9)', test: (p: string) => /\d/.test(p) },
+];
+
+function mapRegisterError(error: unknown): string {
+  const raw = extractErrorMessage(error, '');
+  const lower = raw.toLowerCase();
+
+  if (
+    lower.includes('disposable') ||
+    lower.includes('descartável') ||
+    lower.includes('temporário') ||
+    lower.includes('temporary') ||
+    lower.includes('blocked domain')
+  ) {
+    return 'E-mails descartáveis não são permitidos. Use um e-mail pessoal ou profissional.';
+  }
+
+  if (
+    lower.includes('already') ||
+    lower.includes('já cadastrado') ||
+    lower.includes('duplicate') ||
+    lower.includes('exists') ||
+    lower.includes('em uso') ||
+    lower.includes('in use')
+  ) {
+    return 'Este e-mail já está cadastrado. Tente fazer login ou recuperar sua senha.';
+  }
+
+  if (lower.includes('password') || lower.includes('senha')) {
+    return raw || 'Senha inválida. Verifique os requisitos e tente novamente.';
+  }
+
+  if (lower.includes('invalid email') || lower.includes('e-mail inválido')) {
+    return 'E-mail inválido. Verifique o endereço e tente novamente.';
+  }
+
+  return raw || 'Erro ao criar conta. Tente novamente.';
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -44,7 +86,7 @@ export default function RegisterPage() {
       toast.success('Conta criada! Confira seu e-mail para o código de confirmação.');
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (error) {
-      toast.error(extractErrorMessage(error, 'Erro ao criar conta. Tente novamente.'));
+      toast.error(mapRegisterError(error));
     } finally {
       setLoading(false);
     }
@@ -144,6 +186,26 @@ export default function RegisterPage() {
               {fieldErrors.password && (
                 <p className="text-xs text-destructive px-1">{fieldErrors.password}</p>
               )}
+              <div className="mt-1 space-y-1 px-1">
+                {PASSWORD_REQUIREMENTS.map((req) => {
+                  const met = password.length > 0 && req.test(password);
+                  return (
+                    <div
+                      key={req.label}
+                      className={`flex items-center gap-1.5 text-xs transition-colors ${
+                        met ? 'text-green-400' : 'text-muted-foreground/60'
+                      }`}
+                    >
+                      {met ? (
+                        <Check className="h-3 w-3 shrink-0" />
+                      ) : (
+                        <div className="h-3 w-3 shrink-0 rounded-full border border-current" />
+                      )}
+                      <span>{req.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <button

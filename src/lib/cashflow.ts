@@ -399,10 +399,10 @@ export function generatePeriods(
         .map((e) => e.description || '')
         .filter(Boolean);
       const entryIds = dayEntries.map((e) => e.id);
-      const hasPendingRecurring = dayEntries.some((e) => e.isVirtual === true);
+      const isBeforeStartDate = dateStr < saldoInicial.date;
+      const hasPendingRecurring = !isBeforeStartDate && dayEntries.some((e) => e.isVirtual === true);
 
       const saldoDiario = income - expense - spending;
-      const isBeforeStartDate = dateStr < saldoInicial.date;
 
       if (isBeforeStartDate) {
         acumulado = 0;
