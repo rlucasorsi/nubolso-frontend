@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { CashFlowEntry, FlowType, formatCurrency } from '@/lib/cashflow';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TextInputField, AmountInputField } from '@/components/ui/form-field';
+import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { Plus, Pencil, Trash2, Check, ChevronDown, RotateCw, RotateCcw, Ban, X, CreditCard } from 'lucide-react';
 import { EntryFormValues } from './EntryForm';
 import { AddEntryDrawer } from './AddEntryDrawer';
@@ -142,7 +142,7 @@ export function DailyEntriesDrawer({
     realizeMutation.mutate({
       id: entry.templateId,
       amount: parseFloat(editValues.amount.replace(',', '.')) || 0,
-      date: entry.date,
+      date: editValues.date,
     });
 
     setRealizingId(null);
@@ -411,9 +411,18 @@ export function DailyEntriesDrawer({
                                                      }
                                                   />
                                                   {isRealizing && (
-                                                     <p className="text-[10px] text-muted-foreground/40 font-medium pl-1">
-                                                        Confira o valor acima e clique em &quot;Confirmar&quot; para efetivar este mês.
-                                                     </p>
+                                                     <>
+                                                        <DateInputField
+                                                           label="Data de efetivação"
+                                                           value={editValues.date}
+                                                           onChange={(date) =>
+                                                              setEditValues((prev) => ({ ...prev, date }))
+                                                           }
+                                                        />
+                                                        <p className="text-[10px] text-muted-foreground/40 font-medium pl-1">
+                                                           Ajuste a data se o recebimento ocorreu em dia diferente do planejado.
+                                                        </p>
+                                                     </>
                                                   )}
                                                </div>
                                             ) : (
