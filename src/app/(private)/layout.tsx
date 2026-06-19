@@ -48,8 +48,13 @@ export default function PrivateLayout({
             <Menu className="h-5 w-5" />
           </button>
 
-          <Link href="/painel" className="text-xl font-bold font-display">
-            <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
+          <Link href="/painel">
+            <img
+              src="/logo.svg"
+              alt="NuBolso"
+              className="h-8 w-auto"
+              style={{ filter: 'drop-shadow(0 0 4px rgba(157,124,255,0.5))' }}
+            />
           </Link>
         </div>
 
