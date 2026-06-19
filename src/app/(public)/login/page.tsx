@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { BarChart3, Mail, Lock, Eye, EyeOff, Check, Apple } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Check, Apple } from 'lucide-react';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
@@ -72,14 +72,30 @@ export default function LoginPage() {
         <div className="glass-card shadow-card-elegant rounded-3xl px-7 py-6 sm:px-10 sm:py-8">
           {/* Brand */}
           <div className="flex flex-col items-center text-center">
-            <div
-              className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl shadow-glow"
-              style={{ background: 'var(--gradient-primary)' }}
-            >
-              <BarChart3 className="h-8 w-8 text-white" strokeWidth={2.5} />
+            <div className="relative mb-2">
+              <div
+                aria-hidden
+                className="absolute inset-0 -z-10 animate-pulse rounded-full blur-3xl opacity-50"
+                style={{
+                  background: 'radial-gradient(circle, rgba(157,124,255,0.55) 0%, transparent 70%)',
+                  transform: 'scale(2)',
+                }}
+              />
+              <img
+                src="/logo.svg"
+                alt="NuBolso"
+                className="h-12 w-auto transition-transform duration-500 hover:scale-105"
+                style={{
+                  filter:
+                    'drop-shadow(0 0 6px rgba(157,124,255,0.5))',
+                }}
+              />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight">
-              <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
+            <h1
+              className="text-4xl font-bold tracking-tight text-white"
+              style={{ textShadow: '0 2px 6px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3)' }}
+            >
+              NuBolso
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground max-w-xs">
               Organize suas finanças e tenha clareza para decidir melhor.

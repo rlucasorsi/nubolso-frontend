@@ -6,6 +6,9 @@ import type { ReactNode } from 'react';
 export const metadata: Metadata = {
   title: 'Nubolso',
   description: 'Nubolso - Controle financeiro pessoal',
+  icons: {
+    icon: '/logo.svg',
+  },
 };
 
 export const viewport: Viewport = {
