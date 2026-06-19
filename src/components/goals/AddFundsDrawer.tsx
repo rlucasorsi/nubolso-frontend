@@ -15,7 +15,10 @@ import { AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { useGoalContributions } from '@/modules/goals/hooks/use-goal-contributions';
 import type { Goal } from '@/modules/goals/model/api/goal';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
-import { Check, CheckCircle2, Loader2, Plus } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Check, CheckCircle2, Loader2, Minus, Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+type OperationType = 'deposit' | 'withdrawal';
 
 interface AddFundsDrawerProps {
   open: boolean;
@@ -34,7 +37,7 @@ function getTodayDateString() {
 }
 
 function formatCurrency(value: number) {
-  return value.toLocaleString('pt-BR', {
+  return Math.abs(value).toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   });
@@ -56,6 +59,7 @@ export function AddFundsDrawer({
   onSubmit,
   isLoading,
 }: AddFundsDrawerProps) {
+  const [operationType, setOperationType] = useState<OperationType>('deposit');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getTodayDateString());
   const [showSuccess, setShowSuccess] = useState(false);
@@ -106,8 +110,10 @@ export function AddFundsDrawer({
 
     setError(null);
 
+    const signedAmount = operationType === 'withdrawal' ? -numericAmount : numericAmount;
+
     try {
-      await onSubmit(goal.id, numericAmount, date);
+      await onSubmit(goal.id, signedAmount, date);
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
@@ -126,47 +132,86 @@ export function AddFundsDrawer({
       setDate(getTodayDateString());
       setShowSuccess(false);
       setError(null);
+      setOperationType('deposit');
       onClose();
     }
   };
 
   if (!goal) return null;
 
+  const isWithdrawal = operationType === 'withdrawal';
+
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <DrawerContent ref={scrollContainerRef}>
         <DrawerHeader onClose={onClose}>
           <SheetTitle className="text-xl font-bold font-display text-primary">
-            Adicionar Valor
+            {isWithdrawal ? 'Retirar Valor' : 'Adicionar Valor'}
           </SheetTitle>
           <SheetDescription className="text-sm text-muted-foreground">
-            Para: {goal.name}
+            {goal.name}
           </SheetDescription>
         </DrawerHeader>
 
         {showSuccess ? (
           <div className="flex-1 flex flex-col items-center justify-center px-6 pb-6 animate-fade-in">
-            <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mb-4">
-              <Check className="h-10 w-10 text-primary" />
+            <div className={cn(
+              "w-20 h-20 rounded-full border-2 flex items-center justify-center mb-4",
+              isWithdrawal
+                ? "bg-orange-500/10 border-orange-500/20"
+                : "bg-primary/10 border-primary/20"
+            )}>
+              <Check className={cn("h-10 w-10", isWithdrawal ? "text-orange-400" : "text-primary")} />
             </div>
-            <h2 className="text-xl font-bold font-display text-primary mb-1">
-              Aporte Realizado!
+            <h2 className={cn(
+              "text-xl font-bold font-display mb-1",
+              isWithdrawal ? "text-orange-400" : "text-primary"
+            )}>
+              {isWithdrawal ? 'Retirada Registrada!' : 'Aporte Realizado!'}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Seu objetivo está mais próximo.
+              {isWithdrawal ? 'Valor retirado da reserva.' : 'Seu objetivo está mais próximo.'}
             </p>
           </div>
         ) : (
           <>
             <div className="flex-1 px-6 pb-6 space-y-4">
+              {/* Toggle depositar / retirar */}
+              <div className="flex gap-2 p-1 bg-white/5 rounded-xl">
+                <button
+                  onClick={() => setOperationType('deposit')}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-bold transition-all",
+                    operationType === 'deposit'
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                  Depositar
+                </button>
+                <button
+                  onClick={() => setOperationType('withdrawal')}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-bold transition-all",
+                    operationType === 'withdrawal'
+                      ? "bg-orange-500 text-white shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <ArrowDownLeft className="h-3.5 w-3.5" />
+                  Retirar
+                </button>
+              </div>
+
               <DateInputField
-                label="Data do Aporte"
+                label={isWithdrawal ? 'Data da Retirada' : 'Data do Aporte'}
                 value={date}
                 onChange={setDate}
               />
 
               <AmountInputField
-                label="Valor do Aporte"
+                label={isWithdrawal ? 'Valor da Retirada' : 'Valor do Aporte'}
                 value={amount}
                 onChange={setAmount}
                 autoFocus
@@ -179,7 +224,7 @@ export function AddFundsDrawer({
               {/* History */}
               <div className="pt-2">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 pl-1">
-                  Histórico de Aportes
+                  Histórico
                 </h3>
 
                 <div className="space-y-2">
@@ -189,29 +234,41 @@ export function AddFundsDrawer({
                     </div>
                   ) : contributions.length === 0 ? (
                     <div className="glass-card rounded-2xl p-6 text-center">
-                      <p className="text-sm text-muted-foreground">Nenhum aporte realizado ainda.</p>
+                      <p className="text-sm text-muted-foreground">Nenhuma movimentação ainda.</p>
                     </div>
                   ) : (
                     <>
-                      {contributions.map((c) => (
-                        <div
-                          key={c.id}
-                          className="glass-card rounded-2xl p-3 flex items-center justify-between gap-3"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                              <CheckCircle2 className="h-4 w-4 text-primary" />
+                      {contributions.map((c) => {
+                        const isNegative = c.amount < 0;
+                        return (
+                          <div
+                            key={c.id}
+                            className="glass-card rounded-2xl p-3 flex items-center justify-between gap-3"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className={cn(
+                                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                                isNegative ? "bg-orange-500/10" : "bg-primary/10"
+                              )}>
+                                {isNegative
+                                  ? <Minus className="h-4 w-4 text-orange-400" />
+                                  : <CheckCircle2 className="h-4 w-4 text-primary" />
+                                }
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold truncate">{c.description}</p>
+                                <p className="text-[11px] text-muted-foreground">{formatDate(c.date)}</p>
+                              </div>
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold truncate">{c.description}</p>
-                              <p className="text-[11px] text-muted-foreground">{formatDate(c.date)}</p>
-                            </div>
+                            <p className={cn(
+                              "text-sm font-bold shrink-0",
+                              isNegative ? "text-orange-400" : "text-primary"
+                            )}>
+                              {isNegative ? '-' : '+'}{formatCurrency(c.amount)}
+                            </p>
                           </div>
-                          <p className="text-sm font-bold text-primary shrink-0">
-                            +{formatCurrency(c.amount)}
-                          </p>
-                        </div>
-                      ))}
+                        );
+                      })}
 
                       <div ref={sentinelRef} />
 
@@ -230,10 +287,21 @@ export function AddFundsDrawer({
               <Button
                 onClick={handleConfirm}
                 disabled={!isFormValid || isLoading}
-                className="w-full h-11 bg-gradient-primary text-primary-foreground font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className={cn(
+                  "w-full h-11 text-white font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2",
+                  isWithdrawal
+                    ? "bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/20"
+                    : "bg-gradient-primary shadow-glow"
+                )}
               >
-                <Plus className="h-5 w-5" />
-                {isLoading ? 'Processando...' : 'Confirmar Aporte'}
+                {isWithdrawal
+                  ? <ArrowDownLeft className="h-5 w-5" />
+                  : <Plus className="h-5 w-5" />
+                }
+                {isLoading
+                  ? 'Processando...'
+                  : isWithdrawal ? 'Confirmar Retirada' : 'Confirmar Aporte'
+                }
               </Button>
             </DrawerFooter>
           </>

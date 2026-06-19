@@ -49,7 +49,7 @@ function mapGoal(goal: GoalApi): Goal {
     color: goal.color as Goal['color'],
     deadline: goal.deadline.split('T')[0],
     createdAt: goal.createdAt.split('T')[0],
-    contributions: goal.contributions.map(mapContribution),
+    contributions: (goal.contributions ?? []).map(mapContribution),
   };
 }
 
