@@ -136,7 +136,7 @@ export function PainelView({
   };
 
   return (
-    <div ref={rootRef} className="flex flex-col w-full pb-24">
+    <div ref={rootRef} className="flex flex-col w-full pb-24 overflow-x-hidden">
       {/* Premium Header */}
       <div className="px-5 pt-10 pb-4 space-y-2">
          <div className="flex items-center justify-between gap-4">
@@ -286,4 +286,4 @@ export function PainelView({
       )}
     </div>
   );
-}
+}

@@ -104,7 +104,7 @@ export function ImportOfxDrawer() {
         onClick={handleOpen}
       >
         <Upload className="h-3.5 w-3.5" />
-        {t('button')}
+        <span className="hidden sm:inline">{t('button')}</span>
       </Button>
 
       <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>

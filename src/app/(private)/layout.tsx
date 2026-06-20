@@ -6,12 +6,16 @@ import { Button } from '@/components/ui/button';
 import { LogOut, Settings, CircleDollarSign, Target, LayoutDashboard, RotateCw, CreditCard, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from '@/i18n/useTranslations';
+import { useLanguage, type Locale } from '@/i18n/LanguageContext';
 
 import { MobileNav } from '@/components/layout/MobileNav';
 import { SideMenuDrawer } from '@/components/layout/SideMenuDrawer';
 import { authService } from '@/services/auth';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
 import { InitialSetupDrawer } from '@/components/onboarding/InitialSetupDrawer';
+
+const LOCALES: Locale[] = ['en', 'pt-BR', 'es'];
+const FLAGS: Record<Locale, string> = { en: '🇺🇸', 'pt-BR': '🇧🇷', es: '🇪🇸' };
 
 export default function PrivateLayout({
   children,
@@ -20,6 +24,12 @@ export default function PrivateLayout({
 }) {
   const t = useTranslations('nav');
   const router = useRouter();
+  const { locale, setLocale } = useLanguage();
+
+  const cycleLocale = () => {
+    const next = LOCALES[(LOCALES.indexOf(locale) + 1) % LOCALES.length];
+    setLocale(next);
+  };
   const { data: me } = useGetMe();
   const needsOnboarding = Boolean(me && !me.balanceStartDate);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
@@ -60,6 +70,14 @@ export default function PrivateLayout({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={cycleLocale}
+            title={locale}
+            className="h-9 w-9 flex items-center justify-center rounded-xl text-lg hover:bg-white/5 transition-colors"
+          >
+            {FLAGS[locale]}
+          </button>
           <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
             <Link href="/dashboard">
               <LayoutDashboard className="h-4 w-4" />
