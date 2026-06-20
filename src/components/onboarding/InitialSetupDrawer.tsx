@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
 
 interface InitialSetupDrawerProps {
@@ -19,6 +20,7 @@ interface InitialSetupDrawerProps {
 }
 
 export function InitialSetupDrawer({ open }: InitialSetupDrawerProps) {
+  const t = useTranslations('onboarding');
   const updateMeMutation = useUpdateMe();
   const [value, setValue] = useState('');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -43,25 +45,23 @@ export function InitialSetupDrawer({ open }: InitialSetupDrawerProps) {
       >
         <DrawerHeader>
           <SheetTitle className="text-xl font-bold font-display text-primary">
-            Vamos começar!
+            {t('title')}
           </SheetTitle>
           <SheetDescription className="text-sm text-muted-foreground">
-            Informe seu saldo atual e a data de referência para ele. A partir
-            dessa data, seus lançamentos serão somados ou subtraídos a partir
-            desse valor para calcular o saldo de cada dia.
+            {t('description')}
           </SheetDescription>
         </DrawerHeader>
 
         <div className="flex-1 px-6 pb-6 space-y-6">
           <DateInputField
-            label="Data de Referência"
+            label={t('referenceDate')}
             required
             value={date}
             onChange={setDate}
           />
 
           <AmountInputField
-            label="Saldo Atual"
+            label={t('currentBalance')}
             required
             value={value}
             onChange={setValue}
@@ -74,7 +74,7 @@ export function InitialSetupDrawer({ open }: InitialSetupDrawerProps) {
             disabled={!isFormValid || updateMeMutation.isPending}
             className="w-full h-11 bg-gradient-primary text-white font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all group"
           >
-            {updateMeMutation.isPending ? 'Salvando...' : 'Começar'}
+            {updateMeMutation.isPending ? t('saving') : t('start')}
             {!updateMeMutation.isPending && (
               <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
             )}

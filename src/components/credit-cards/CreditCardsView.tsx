@@ -13,8 +13,10 @@ import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDraw
 import { CreditCardsSummary } from '@/components/credit-cards/CreditCardsSummary';
 import { AddButton } from '@/components/ui/add-button';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function CreditCardsView() {
+  const t = useTranslations('creditCardsView');
   const cardsQuery = useGetCreditCards();
   const invoicesQuery = useGetAllInvoices();
 
@@ -79,16 +81,16 @@ export function CreditCardsView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold font-display">
-            Cartões de Crédito
+            {t('title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie seus cartões e acompanhe as faturas no seu fluxo de caixa.
+            {t('subtitle')}
           </p>
         </div>
         <AddButton
           onClick={handleNewCard}
-          title="Adicionar novo cartão"
-          label="Adicionar Cartão"
+          title={t('addCardTitle')}
+          label={t('addCard')}
           className="w-full sm:w-auto"
         />
       </div>
@@ -128,7 +130,7 @@ export function CreditCardsView() {
               <div className="w-14 h-14 rounded-full bg-muted/30 flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
                 <CreditCardIcon className="h-6 w-6" />
               </div>
-              <span className="font-medium text-sm">Adicionar novo cartão</span>
+              <span className="font-medium text-sm">{t('addNewCard')}</span>
             </button>
           </div>
         </>

@@ -1,4 +1,7 @@
+'use client';
+
 import { TextInputField, NumberInputField } from '@/components/ui/form-field';
+import { useTranslations } from 'next-intl';
 
 export interface CreditCardFormValues {
   name: string;
@@ -14,10 +17,11 @@ interface CreditCardFormProps {
 }
 
 export function CreditCardForm({ values, onChange, error }: CreditCardFormProps) {
+  const t = useTranslations('creditCardForm');
   return (
     <div className="space-y-4">
       <TextInputField
-        label="Nome do Cartão"
+        label={t('cardName')}
         required
         placeholder="Ex: Nubank, Inter, Itaú..."
         value={values.name}
@@ -26,7 +30,7 @@ export function CreditCardForm({ values, onChange, error }: CreditCardFormProps)
       />
 
       <NumberInputField
-        label="Dia de Fechamento"
+        label={t('closingDay')}
         value={values.closingDay}
         onChange={(closingDay) => onChange({ ...values, closingDay })}
         min={1}
@@ -34,7 +38,7 @@ export function CreditCardForm({ values, onChange, error }: CreditCardFormProps)
       />
 
       <NumberInputField
-        label="Dia de Vencimento"
+        label={t('dueDay')}
         value={values.dueDay}
         onChange={(dueDay) => onChange({ ...values, dueDay })}
         min={1}
@@ -43,14 +47,14 @@ export function CreditCardForm({ values, onChange, error }: CreditCardFormProps)
 
       <div className="space-y-2">
         <NumberInputField
-          label="Dia de Pagamento"
+          label={t('paymentDay')}
           value={values.paymentDay}
           onChange={(paymentDay) => onChange({ ...values, paymentDay })}
           min={1}
           max={31}
         />
         <p className="text-xs text-muted-foreground pl-1">
-          Dia em que a fatura impacta o seu saldo no fluxo de caixa.
+          {t('paymentDayNote')}
         </p>
       </div>
     </div>

@@ -16,6 +16,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface DashboardSummaryProps {
   period: Period;
@@ -40,6 +41,7 @@ export function DashboardSummary({
   today,
   balanceSettings,
 }: DashboardSummaryProps) {
+  const t = useTranslations('dashboard');
   const [chartView, setChartView] = useState<ChartView>('period');
 
   const activeChartDays = useMemo(() => {
@@ -114,8 +116,8 @@ export function DashboardSummary({
   };
 
   const chartConfig = {
-    saldoPast: { label: 'Realizado', color: '#7b5cff' },
-    saldoFuture: { label: 'Projetado', color: '#FEF08A' },
+    saldoPast: { label: t('realized'), color: '#7b5cff' },
+    saldoFuture: { label: t('future'), color: '#FEF08A' },
   };
 
   const xTickInterval = Math.max(Math.ceil(activeChartDays.length / 6) - 1, 0);
@@ -128,7 +130,7 @@ export function DashboardSummary({
     const value = entry.value as number;
     const row = entry.payload as { income: number; totalExpense: number };
     const [y, m, d] = (label as string).split('-').map(Number);
-    const dateLabel = new Date(y, m - 1, d).toLocaleDateString('pt-BR', {
+    const dateLabel = new Date(y, m - 1, d).toLocaleDateString(undefined, {
       weekday: 'short',
       day: '2-digit',
       month: 'short',
@@ -142,13 +144,13 @@ export function DashboardSummary({
         <div className="space-y-1">
           {row.income > 0 && (
             <div className="flex items-center justify-between gap-4 text-[11px]">
-              <span className="text-emerald-400/70 font-medium">Entradas</span>
+              <span className="text-emerald-400/70 font-medium">{t('income')}</span>
               <span className="text-emerald-400 font-bold">{formatCurrency(row.income)}</span>
             </div>
           )}
           {row.totalExpense > 0 && (
             <div className="flex items-center justify-between gap-4 text-[11px]">
-              <span className="text-red-400/70 font-medium">Saídas</span>
+              <span className="text-red-400/70 font-medium">{t('expenses')}</span>
               <span className="text-red-400 font-bold">{formatCurrency(row.totalExpense)}</span>
             </div>
           )}
@@ -156,7 +158,7 @@ export function DashboardSummary({
         <div className="flex items-center justify-between gap-4 mt-1.5 pt-1.5 border-t border-white/10">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: getZoneColor(value) }} />
-            <span className="text-[10px] text-white/60 font-bold uppercase tracking-wide">Saldo</span>
+            <span className="text-[10px] text-white/60 font-bold uppercase tracking-wide">{t('balance')}</span>
           </div>
           <span className="text-sm font-bold text-white font-display">{formatCurrency(value)}</span>
         </div>
@@ -173,7 +175,7 @@ export function DashboardSummary({
           <div className="flex justify-between items-start">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">
-                <span>Saldo Atual</span>
+                <span>{t('currentBalance')}</span>
                 <HelpCircle className="w-3 h-3" />
               </div>
               <div className="space-y-0.5">
@@ -181,7 +183,7 @@ export function DashboardSummary({
                   {formatCurrency(currentBalance).replace('R$', 'R$ ')}
                 </h3>
                 <p className="text-[10px] text-muted-foreground/40 font-medium">
-                  Até hoje, {formatDateLong(today)}
+                  {t('upToToday', { date: formatDateLong(today) })}
                 </p>
               </div>
             </div>
@@ -196,7 +198,7 @@ export function DashboardSummary({
           <div className="flex justify-between items-start">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">
-                <span>Previsão Final do Mês</span>
+                <span>{t('monthForecast')}</span>
                 <HelpCircle className="w-3 h-3" />
               </div>
               <div className="space-y-0.5">
@@ -204,7 +206,7 @@ export function DashboardSummary({
                   {formatCurrency(period.saldoFinal).replace('R$', 'R$ ')}
                 </h3>
                 <p className="text-[10px] text-muted-foreground/40 font-medium">
-                  Projeta seu saldo em {formatDateLong(period.endDate)}
+                  {t('projectsBalance', { date: formatDateLong(period.endDate) })}
                 </p>
               </div>
             </div>
@@ -219,7 +221,7 @@ export function DashboardSummary({
       <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-8">
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-base font-bold text-white font-display">Projeção de saldo</h3>
+            <h3 className="text-base font-bold text-white font-display">{t('balanceProjection')}</h3>
             <div className="flex gap-0.5 bg-white/5 rounded-xl p-1">
               {(['period', '60', '90'] as ChartView[]).map((v) => (
                 <button
@@ -233,7 +235,7 @@ export function DashboardSummary({
                       : 'text-muted-foreground hover:text-white',
                   )}
                 >
-                  {v === 'period' ? 'Período' : `${v}d`}
+                  {v === 'period' ? t('period') : `${v}d`}
                 </button>
               ))}
             </div>
@@ -314,7 +316,7 @@ export function DashboardSummary({
                   stroke="#cbd5e1"
                   strokeOpacity={0.35}
                   strokeDasharray="3 3"
-                  label={{ value: 'Hoje', position: 'insideTopRight', fill: '#cbd5e1', fontSize: 9, fontWeight: 700, opacity: 0.7, dy: -4 }}
+                  label={{ value: t('today'), position: 'insideTopRight', fill: '#cbd5e1', fontSize: 9, fontWeight: 700, opacity: 0.7, dy: -4 }}
                 />
               </AreaChart>
             </ChartContainer>
@@ -323,23 +325,23 @@ export function DashboardSummary({
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
             <div className="flex items-center gap-2">
               <div className="w-3 h-0.5 bg-primary rounded-full" />
-              <span>Realizado</span>
+              <span>{t('realized')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-[2px] border-t-2 border-dashed" style={{ borderColor: '#FEF08A' }} />
-              <span>Futuro real</span>
+              <span>{t('future')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 border-t border-dashed border-white/30" />
-              <span>Hoje</span>
+              <span>{t('today')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 border-t-2 border-dashed" style={{ borderColor: ZONE_COLORS.warning }} />
-              <span style={{ color: ZONE_COLORS.warning }}>Atenção</span>
+              <span style={{ color: ZONE_COLORS.warning }}>{t('warning')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 border-t-2 border-dashed" style={{ borderColor: ZONE_COLORS.danger }} />
-              <span style={{ color: ZONE_COLORS.danger }}>Crítico</span>
+              <span style={{ color: ZONE_COLORS.danger }}>{t('critical')}</span>
             </div>
           </div>
         </div>
@@ -353,9 +355,9 @@ export function DashboardSummary({
                <AlertTriangle className="w-6 h-6 text-red-400" />
             </div>
             <div className="space-y-0.5">
-              <p className="text-sm font-bold text-white">Você ficará no vermelho</p>
+              <p className="text-sm font-bold text-white">{t('goingRed')}</p>
               <p className="text-xs text-red-400 font-medium tracking-wide">
-                dia {formatDateLong(dangerDay.date)} | {formatCurrency(dangerDay.saldoAcumulado)}
+                {t('onDay', { date: formatDateLong(dangerDay.date) })} | {formatCurrency(dangerDay.saldoAcumulado)}
               </p>
             </div>
           </Card>
@@ -367,9 +369,9 @@ export function DashboardSummary({
                <AlertTriangle className="w-6 h-6 text-amber-400" />
             </div>
             <div className="space-y-0.5">
-              <p className="text-sm font-bold text-white">Saldo entra na zona de atenção</p>
+              <p className="text-sm font-bold text-white">{t('warningZone')}</p>
               <p className="text-xs text-amber-400 font-medium tracking-wide">
-                dia {formatDateLong(warningDay.date)} | {formatCurrency(warningDay.saldoAcumulado)}
+                {t('onDay', { date: formatDateLong(warningDay.date) })} | {formatCurrency(warningDay.saldoAcumulado)}
               </p>
             </div>
           </Card>
@@ -380,9 +382,9 @@ export function DashboardSummary({
              <Info className="w-6 h-6 text-muted-foreground" />
           </div>
           <div className="space-y-0.5">
-            <p className="text-sm font-bold text-white">Maior despesa</p>
+            <p className="text-sm font-bold text-white">{t('largestExpense')}</p>
             <p className="text-xs text-muted-foreground/60 font-medium">
-              dia {formatDateLong(maxExpenseDay.date)} | - {formatCurrency(maxExpenseAmount)}
+              {t('onDay', { date: formatDateLong(maxExpenseDay.date) })} | - {formatCurrency(maxExpenseAmount)}
             </p>
           </div>
         </Card>
@@ -392,9 +394,9 @@ export function DashboardSummary({
              <TrendingUp className="w-6 h-6 text-muted-foreground" />
           </div>
           <div className="space-y-0.5">
-            <p className="text-sm font-bold text-white">Melhor dia</p>
+            <p className="text-sm font-bold text-white">{t('bestDay')}</p>
             <p className="text-xs text-muted-foreground/60 font-medium">
-              dia {formatDateLong(bestDay.date)} | + {formatCurrency(bestDayAmount)}
+              {t('onDay', { date: formatDateLong(bestDay.date) })} | + {formatCurrency(bestDayAmount)}
             </p>
           </div>
         </Card>

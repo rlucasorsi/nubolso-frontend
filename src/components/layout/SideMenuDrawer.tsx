@@ -18,6 +18,7 @@ import {
   LogOut,
   X,
 } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { authService } from '@/services/auth';
 
@@ -27,23 +28,25 @@ interface SideMenuDrawerProps {
   userName?: string;
 }
 
-const NAV_ITEMS = [
-  { label: 'Painel', href: '/painel', icon: LayoutDashboard },
-  { label: 'Lançamentos', href: '/entries', icon: CircleDollarSign },
-  { label: 'Cartões', href: '/cartoes', icon: CreditCard },
-  { label: 'Recorrentes', href: '/recorrentes', icon: RotateCw },
-  { label: 'Metas', href: '/metas', icon: Target },
-  { label: 'Configurações', href: '/settings', icon: Settings },
-];
-
 export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps) {
+  const t = useTranslations('nav');
+  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+
+  const NAV_ITEMS = [
+    { label: t('dashboard'), href: `/${locale}/dashboard`, icon: LayoutDashboard },
+    { label: t('entries'), href: `/${locale}/entries`, icon: CircleDollarSign },
+    { label: t('cards'), href: `/${locale}/cards`, icon: CreditCard },
+    { label: t('recurring'), href: `/${locale}/recurring`, icon: RotateCw },
+    { label: t('goals'), href: `/${locale}/goals`, icon: Target },
+    { label: t('settings'), href: `/${locale}/settings`, icon: Settings },
+  ];
 
   const handleLogout = async () => {
     onClose();
     await authService.logout();
-    router.push('/login');
+    router.push(`/${locale}/login`);
   };
 
   return (
@@ -53,11 +56,12 @@ export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps)
         className="w-[280px] p-0 bg-card border-r border-white/10 flex flex-col [&>button]:hidden"
       >
         <SheetTitle className="sr-only">Menu</SheetTitle>
-        <SheetDescription className="sr-only">Menu de navegação principal</SheetDescription>
+        <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-white/5">
-          <span className="text-xl font-bold font-display"><span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span></span>
+          <span className="text-xl font-bold font-display">
+            <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
+          </span>
           <button
             type="button"
             onClick={onClose}
@@ -67,15 +71,13 @@ export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps)
           </button>
         </div>
 
-        {/* User */}
         {userName && (
           <div className="px-5 py-3 border-b border-white/5">
-            <p className="text-xs text-muted-foreground">Olá,</p>
+            <p className="text-xs text-muted-foreground">{t('hello')}</p>
             <p className="text-sm font-semibold text-foreground truncate">{userName}</p>
           </div>
         )}
 
-        {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
           {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
             const isActive = pathname === href;
@@ -98,7 +100,6 @@ export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps)
           })}
         </nav>
 
-        {/* Footer */}
         <div className="px-3 py-4 border-t border-white/5">
           <button
             type="button"
@@ -106,7 +107,7 @@ export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps)
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all duration-200"
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            Sair
+            {t('logout')}
           </button>
         </div>
       </SheetContent>

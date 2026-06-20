@@ -31,8 +31,10 @@ import { ptBR } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
+import { useTranslations } from 'next-intl';
 
 export function EntriesView() {
+  const t = useTranslations('entries');
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -115,7 +117,7 @@ export function EntriesView() {
     <div className="flex flex-col h-full bg-background animate-in fade-in duration-500">
       <div className="px-4 py-6 space-y-4 border-b bg-card/30 backdrop-blur-xl sticky top-0 z-10">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold tracking-tight">Lançamentos</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
           <ImportOfxDrawer />
         </div>
 
@@ -123,7 +125,7 @@ export function EntriesView() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por descrição ou valor..."
+              placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 h-11 bg-background/50 border-white/10 focus:ring-primary/20 transition-all rounded-xl"
@@ -158,7 +160,7 @@ export function EntriesView() {
                     format(dateRange.from, "dd/MM/yy")
                   )
                 ) : (
-                  <span>Filtrar por período</span>
+                  <span>{t('filterPeriod')}</span>
                 )}
                 <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
               </Button>
@@ -180,7 +182,7 @@ export function EntriesView() {
                   onClick={() => setDateRange(undefined)}
                   className="text-xs hover:bg-white/5"
                 >
-                  Limpar Filtro
+                  {t('clearFilter')}
                 </Button>
               </div>
             </PopoverContent>
@@ -189,7 +191,7 @@ export function EntriesView() {
           <div className="flex items-center gap-2 px-1 h-11 shrink-0">
             <Switch id="show-recurring" checked={showRecurring} onCheckedChange={setShowRecurring} />
             <label htmlFor="show-recurring" className="text-xs font-medium text-muted-foreground cursor-pointer select-none">
-              Mostrar recorrências estimadas
+              {t('showEstimated')}
             </label>
           </div>
         </div>
@@ -207,8 +209,8 @@ export function EntriesView() {
             <div className="p-4 rounded-full bg-muted/20 mb-4">
               <Search className="h-8 w-8 text-muted-foreground/40" />
             </div>
-            <h3 className="text-lg font-medium">Nenhum lançamento encontrado</h3>
-            <p className="text-sm text-muted-foreground mt-1">Tente ajustar seus filtros de busca</p>
+            <h3 className="text-lg font-medium">{t('noResults')}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{t('noResultsHint')}</p>
           </div>
         ) : (
           entries.map((entry) => {
@@ -242,16 +244,16 @@ export function EntriesView() {
                       {entry.templateId && (
                         <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]">
                           <RotateCw className="h-2.5 w-2.5" />
-                          Recorrente
+                          Recurring
                         </Badge>
                       )}
                       {entry.isVirtual ? (
                         <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10">
-                          Estimado
+                          Estimated
                         </Badge>
                       ) : entry.templateId ? (
                         <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10">
-                          Efetivado
+                          Confirmed
                         </Badge>
                       ) : null}
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-bold">

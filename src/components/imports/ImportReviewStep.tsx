@@ -26,6 +26,7 @@ import { useGetImportBatch } from '@/modules/imports/hooks/use-get-import-batch'
 import { useConfirmImport } from '@/modules/imports/hooks/use-confirm-import';
 import { useCancelImport } from '@/modules/imports/hooks/use-cancel-import';
 import type { ImportBatchDetail, ImportItemDecision } from '@/modules/imports/model/api/ofx-import';
+import { useTranslations } from 'next-intl';
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
   INCOME: <ArrowUpRight className="h-4 w-4" />,
@@ -46,6 +47,7 @@ interface ImportReviewStepProps {
 }
 
 export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: ImportReviewStepProps) {
+  const t = useTranslations('importReview');
   const { data: batch, isLoading, isError, refetch } = useGetImportBatch(batchId);
   const confirmImport = useConfirmImport();
   const cancelImport = useCancelImport();
@@ -119,24 +121,24 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline" className="border-white/10 text-muted-foreground gap-1.5">
-            {batch.totalCount} transações
+            {t('transactions', { n: batch.totalCount })}
           </Badge>
           {batch.duplicateExactCount > 0 && (
             <Badge variant="outline" className="border-white/10 text-muted-foreground gap-1.5">
               <CopyCheck className="h-3 w-3" />
-              {batch.duplicateExactCount} já importadas
+              {batch.duplicateExactCount} {t('alreadyImported')}
             </Badge>
           )}
           {batch.possibleDuplicateCount > 0 && (
             <Badge variant="outline" className="border-amber-400/30 text-amber-400 bg-amber-400/10 gap-1.5">
               <AlertTriangle className="h-3 w-3" />
-              {batch.possibleDuplicateCount} possíveis duplicadas
+              {batch.possibleDuplicateCount} {t('possibleDuplicates')}
             </Badge>
           )}
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Desmarque os itens que não devem ser importados. Transações já importadas anteriormente são ignoradas automaticamente.
+          {t('instructions')}
         </p>
 
         <div className="space-y-2">
@@ -174,11 +176,11 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
                     </p>
                     {isExactDuplicate ? (
                       <span className="text-[9px] uppercase tracking-wider font-bold text-muted-foreground/60">
-                        Já importada
+                        {t('alreadyImportedBadge')}
                       </span>
                     ) : item.status === 'POSSIBLE_DUPLICATE' ? (
                       <span className="text-[9px] uppercase tracking-wider font-bold text-amber-400">
-                        Possível duplicada
+                        {t('possibleDuplicateBadge')}
                       </span>
                     ) : null}
                   </div>
@@ -191,15 +193,15 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
 
       <div className="p-6 border-t border-border/10 mt-auto sticky bottom-0 z-10 bg-card flex flex-col gap-3">
         <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
-          <span>{importCount} de {reviewableItems.length} serão importadas</span>
+          <span>{t('count', { count: importCount, total: reviewableItems.length })}</span>
           <button type="button" onClick={onBack} className="font-medium hover:text-foreground transition-colors">
-            Voltar
+            {t('back')}
           </button>
         </div>
 
         {confirmImport.isError && (
           <p className="text-xs font-medium text-destructive px-1">
-            {(confirmImport.error as Error)?.message ?? 'Não foi possível confirmar a importação'}
+            {(confirmImport.error as Error)?.message ?? t('confirmError')}
           </p>
         )}
 
@@ -207,19 +209,19 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5" disabled={cancelImport.isPending}>
-                Cancelar importação
+                {t('cancelImport')}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Cancelar esta importação?</AlertDialogTitle>
+                <AlertDialogTitle>{t('cancelTitle')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Nenhuma transação será criada e este lote ficará marcado como cancelado.
+                  {t('cancelDesc')}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Voltar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancel}>Cancelar importação</AlertDialogAction>
+                <AlertDialogCancel>{t('goBack')}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleCancel}>{t('cancelImport')}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -229,7 +231,7 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
             onClick={handleConfirm}
             disabled={confirmImport.isPending}
           >
-            {confirmImport.isPending ? 'Confirmando...' : `Importar ${importCount}`}
+            {confirmImport.isPending ? t('confirming') : t('importBtn', { count: importCount })}
           </Button>
         </div>
       </div>

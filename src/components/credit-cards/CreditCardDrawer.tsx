@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { CreditCardForm, CreditCardFormValues } from './CreditCardForm';
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,7 @@ import {
   SheetTitle,
 } from '@/components/ui/app-drawer';
 import { creditCardFormSchema } from '@/lib/schemas/credit-cards';
+import { useTranslations } from 'next-intl';
 
 interface CreditCardDrawerProps {
   open: boolean;
@@ -28,6 +31,7 @@ const DEFAULT_VALUES: CreditCardFormValues = {
 };
 
 export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerProps) {
+  const t = useTranslations('creditCard');
   const [values, setValues] = useState<CreditCardFormValues>(DEFAULT_VALUES);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +80,7 @@ export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerP
       }
       onOpenChange(false);
     } catch (err) {
-      setError(extractErrorMessage(err, 'Não foi possível salvar o cartão'));
+      setError(extractErrorMessage(err, t('saveError')));
     }
   }
 
@@ -85,10 +89,10 @@ export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerP
       <DrawerContent>
         <DrawerHeader onClose={() => onOpenChange(false)}>
           <SheetTitle className="text-2xl font-bold font-display text-primary">
-            {card ? 'Editar Cartão' : 'Novo Cartão'}
+            {card ? t('editCard') : t('newCard')}
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
-            Configure os dias de fechamento, vencimento e pagamento para que as faturas apareçam corretamente no seu fluxo de caixa.
+            {t('configDescription')}
           </p>
         </DrawerHeader>
 
@@ -103,7 +107,7 @@ export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerP
             onClick={() => onOpenChange(false)}
             disabled={isSaving}
           >
-            Cancelar
+            {t('cancel')}
           </Button>
 
           <Button
@@ -111,7 +115,7 @@ export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerP
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {isSaving ? t('saving') : t('save')}
           </Button>
         </DrawerFooter>
       </DrawerContent>

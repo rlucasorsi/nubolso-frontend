@@ -6,6 +6,7 @@ import { formatCurrency, formatDateLong } from '@/lib/cashflow';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslations } from 'next-intl';
 
 interface CreditCardCardProps {
   card: CreditCardType;
@@ -13,6 +14,7 @@ interface CreditCardCardProps {
 }
 
 export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
+  const t = useTranslations('creditCard');
   const { data: invoices, isLoading } = useGetCardInvoices(card.id);
 
   const unpaidInvoices = (invoices ?? [])
@@ -42,13 +44,13 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
               {card.name}
             </h3>
             <p className="text-xs font-medium text-muted-foreground line-clamp-1">
-              Fecha dia {card.closingDay} · Vence dia {card.dueDay}
+              {t('closingDueDay', { closing: card.closingDay, due: card.dueDay })}
             </p>
           </div>
         </div>
         {!card.isActive && (
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg shrink-0">
-            Inativo
+            {t('inactive')}
           </span>
         )}
       </div>
@@ -57,16 +59,16 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
         <div className="glass-card rounded-2xl p-4 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 block">
-              Fatura Atual
+              {t('currentInvoice')}
             </span>
             {isLoading ? (
               <Skeleton className="h-3 w-28 mt-1" />
             ) : currentInvoice ? (
               <span className="text-xs text-muted-foreground">
-                A pagar em {formatDateLong(currentInvoice.paymentDate)}
+                {t('payOn', { date: formatDateLong(currentInvoice.paymentDate) })}
               </span>
             ) : (
-              <span className="text-xs text-muted-foreground">Sem faturas em aberto</span>
+              <span className="text-xs text-muted-foreground">{t('noOpenInvoices')}</span>
             )}
           </div>
           {isLoading ? (
@@ -80,7 +82,7 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
 
         <div className="flex justify-between items-end px-1">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-            Próxima Fatura
+            {t('nextInvoice')}
           </span>
           {isLoading ? (
             <Skeleton className="h-4 w-16" />

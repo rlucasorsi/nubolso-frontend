@@ -25,10 +25,10 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
       <DrawerContent>
         <DrawerHeader onClose={onClose}>
           <SheetTitle className="text-2xl font-bold font-display text-primary">
-            Nova Compra
+            New Purchase
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
-            Registre uma compra parcelada e veja o impacto nas próximas faturas antes de confirmar.
+            Register an installment purchase and see the impact on upcoming invoices before confirming.
           </p>
         </DrawerHeader>
 
@@ -61,7 +61,7 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5"
             onClick={onClose}
           >
-            Cancelar
+            Cancel
           </Button>
 
           <Button
@@ -69,7 +69,7 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             onClick={() => form.handleConfirm(onClose)}
             disabled={!form.isValid || form.isConfirming}
           >
-            {form.isConfirming ? 'Confirmando...' : 'Confirmar Compra'}
+            {form.isConfirming ? 'Confirming...' : 'Confirm Purchase'}
           </Button>
         </DrawerFooter>
       </DrawerContent>

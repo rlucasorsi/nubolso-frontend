@@ -1,8 +1,11 @@
+'use client';
+
 import { FlowType } from '@/lib/cashflow';
 import { EndType } from '@/lib/schemas/recurring-templates';
 import { TypeToggle } from './TypeToggle';
 import { TextInputField, AmountInputField, NumberInputField, DateInputField } from '@/components/ui/form-field';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 export interface RecurringTemplateFormValues {
   description: string;
@@ -25,21 +28,22 @@ interface RecurringTemplateFormProps {
   };
 }
 
-const END_OPTIONS: { value: EndType; label: string }[] = [
-  { value: 'none', label: 'Sem prazo' },
-  { value: 'date', label: 'Por data' },
-  { value: 'count', label: 'Por ocorrências' },
-];
-
 export function RecurringTemplateForm({ values, onChange, errors }: RecurringTemplateFormProps) {
+  const t = useTranslations('recurringForm');
   const changeEndType = (endType: EndType) =>
     onChange({ ...values, endType, endDate: undefined, totalOccurrences: undefined });
+
+  const END_OPTIONS: { value: EndType; label: string }[] = [
+    { value: 'none', label: t('noDeadline') },
+    { value: 'date', label: t('byDate') },
+    { value: 'count', label: t('byOccurrences') },
+  ];
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Tipo de Lançamento <span className="text-balance-danger">*</span>
+          {t('entryType')} <span className="text-balance-danger">*</span>
         </label>
         <TypeToggle
           value={values.type}
@@ -48,15 +52,15 @@ export function RecurringTemplateForm({ values, onChange, errors }: RecurringTem
       </div>
 
       <TextInputField
-        label="Descrição"
+        label={t('description')}
         required
-        placeholder="Ex: Conta de água"
+        placeholder={t('descriptionPlaceholder')}
         value={values.description}
         onChange={(description) => onChange({ ...values, description })}
       />
 
       <AmountInputField
-        label="Valor Estimado"
+        label={t('estimatedAmount')}
         required
         value={values.estimatedAmount}
         onChange={(estimatedAmount) => onChange({ ...values, estimatedAmount })}
@@ -64,7 +68,7 @@ export function RecurringTemplateForm({ values, onChange, errors }: RecurringTem
       />
 
       <NumberInputField
-        label="Dia do Vencimento"
+        label={t('dueDay')}
         value={values.dayOfMonth}
         onChange={(dayOfMonth) => onChange({ ...values, dayOfMonth })}
         min={1}
@@ -73,7 +77,7 @@ export function RecurringTemplateForm({ values, onChange, errors }: RecurringTem
 
       <div className="space-y-3">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Encerramento
+          {t('termination')}
         </label>
         <div className="flex gap-2">
           {END_OPTIONS.map(({ value, label }) => (
@@ -95,7 +99,7 @@ export function RecurringTemplateForm({ values, onChange, errors }: RecurringTem
 
         {values.endType === 'date' && (
           <DateInputField
-            label="Data Final"
+            label={t('endDate')}
             required
             value={values.endDate ?? ''}
             onChange={(endDate) => onChange({ ...values, endDate })}
@@ -105,7 +109,7 @@ export function RecurringTemplateForm({ values, onChange, errors }: RecurringTem
 
         {values.endType === 'count' && (
           <NumberInputField
-            label="Número de Ocorrências"
+            label={t('occurrences')}
             value={values.totalOccurrences ?? 1}
             onChange={(totalOccurrences) => onChange({ ...values, totalOccurrences })}
             min={1}

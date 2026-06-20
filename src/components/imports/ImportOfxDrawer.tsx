@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { FileSpreadsheet, CheckCircle2, Upload, ChevronLeft } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   Sheet,
   DrawerContent,
@@ -23,14 +23,9 @@ import type { ImportBatch, ImportBatchDetail, ImportBatchStatus } from '@/module
 
 type Step = 'list' | 'upload' | 'review' | 'success';
 
-const STATUS_LABEL: Record<ImportBatchStatus, { label: string; className: string }> = {
-  PENDING_REVIEW: { label: 'Aguardando revisão', className: 'border-amber-400/30 text-amber-400 bg-amber-400/10' },
-  CONFIRMED: { label: 'Confirmado', className: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10' },
-  CANCELED: { label: 'Cancelado', className: 'border-white/10 text-muted-foreground bg-white/[0.02]' },
-  ROLLED_BACK: { label: 'Desfeito', className: 'border-white/10 text-muted-foreground bg-white/[0.02]' },
-};
-
 export function ImportOfxDrawer() {
+  const t = useTranslations('import');
+  const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<Step>('list');
   const [file, setFile] = useState<File | null>(null);
@@ -41,6 +36,13 @@ export function ImportOfxDrawer() {
   const batchesQuery = useGetImportBatches(isOpen);
   const uploadOfx = useUploadOfx();
   const rollbackImport = useRollbackImport();
+
+  const STATUS_LABEL: Record<ImportBatchStatus, { label: string; className: string }> = {
+    PENDING_REVIEW: { label: t('statusPendingReview'), className: 'border-amber-400/30 text-amber-400 bg-amber-400/10' },
+    CONFIRMED: { label: t('statusConfirmed'), className: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10' },
+    CANCELED: { label: t('statusCanceled'), className: 'border-white/10 text-muted-foreground bg-white/[0.02]' },
+    ROLLED_BACK: { label: t('statusRolledBack'), className: 'border-white/10 text-muted-foreground bg-white/[0.02]' },
+  };
 
   function reset() {
     setStep('list');
@@ -64,7 +66,7 @@ export function ImportOfxDrawer() {
 
   async function handleUpload() {
     if (!file) {
-      setFileError('Selecione um arquivo .ofx ou .qfx para continuar');
+      setFileError(t('selectFileError'));
       return;
     }
     setFileError(null);
@@ -77,7 +79,7 @@ export function ImportOfxDrawer() {
       setSelectedBatchId(batch.id);
       setStep('review');
     } catch {
-      // erro já sinalizado via estado da mutação (uploadOfx.isError)
+      // error already signaled via mutation state
     }
   }
 
@@ -85,11 +87,12 @@ export function ImportOfxDrawer() {
     try {
       await rollbackImport.mutateAsync(id);
     } catch {
-      // erro já sinalizado via estado da mutação (rollbackImport.isError)
+      // error already signaled via mutation state
     }
   }
 
   const batches = batchesQuery.data ?? [];
+  const dateLocale = locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es' : 'en-US';
 
   return (
     <>
@@ -100,7 +103,7 @@ export function ImportOfxDrawer() {
         onClick={handleOpen}
       >
         <Upload className="h-3.5 w-3.5" />
-        Importar OFX
+        {t('button')}
       </Button>
 
       <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -120,13 +123,13 @@ export function ImportOfxDrawer() {
             }
           >
             <SheetTitle className="text-2xl font-bold font-display text-primary">
-              {step === 'review' ? 'Revisar importação' : step === 'success' ? 'Importação concluída' : 'Importar extrato OFX'}
+              {step === 'review' ? t('reviewTitle') : step === 'success' ? t('successTitle') : t('listTitle')}
             </SheetTitle>
             <p className="text-sm text-muted-foreground">
-              {step === 'list' && 'Importe um extrato bancário (.ofx ou .qfx) e acompanhe o histórico de importações.'}
-              {step === 'upload' && 'Selecione o arquivo exportado pelo seu banco para iniciar a importação.'}
-              {step === 'review' && 'Confira as transações detectadas antes de confirmar a importação.'}
-              {step === 'success' && 'As transações selecionadas foram adicionadas aos seus lançamentos.'}
+              {step === 'list' && t('listDescription')}
+              {step === 'upload' && t('uploadDescription')}
+              {step === 'review' && t('reviewDescription')}
+              {step === 'success' && t('successDescription')}
             </p>
           </DrawerHeader>
 
@@ -144,8 +147,8 @@ export function ImportOfxDrawer() {
                     <div className="p-4 rounded-full bg-muted/20 mb-4">
                       <FileSpreadsheet className="h-8 w-8 text-muted-foreground/40" />
                     </div>
-                    <h3 className="text-base font-medium">Nenhuma importação ainda</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Importe um extrato para começar</p>
+                    <h3 className="text-base font-medium">{t('noImports')}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{t('importToStart')}</p>
                   </div>
                 ) : (
                   batches.map((batch: ImportBatch) => {
@@ -162,7 +165,7 @@ export function ImportOfxDrawer() {
                           <p className="text-sm font-semibold truncate">{batch.fileName}</p>
                           <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-[10px] text-muted-foreground">
-                              {format(new Date(batch.createdAt), 'dd MMM yy, HH:mm', { locale: ptBR })}
+                              {format(new Date(batch.createdAt), 'dd MMM yy, HH:mm')}
                             </span>
                             <Badge variant="outline" className={`h-5 px-1.5 text-[9px] font-bold ${statusCfg.className}`}>
                               {statusCfg.label}
@@ -174,12 +177,9 @@ export function ImportOfxDrawer() {
                             size="sm"
                             variant="outline"
                             className="h-8 rounded-lg border-white/10 hover:bg-white/5 shrink-0"
-                            onClick={() => {
-                              setSelectedBatchId(batch.id);
-                              setStep('review');
-                            }}
+                            onClick={() => { setSelectedBatchId(batch.id); setStep('review'); }}
                           >
-                            Revisar
+                            {t('review')}
                           </Button>
                         )}
                         {batch.status === 'CONFIRMED' && (
@@ -190,7 +190,7 @@ export function ImportOfxDrawer() {
                             onClick={() => handleRollback(batch.id)}
                             disabled={rollbackImport.isPending}
                           >
-                            Desfazer
+                            {t('undo')}
                           </Button>
                         )}
                       </div>
@@ -204,7 +204,7 @@ export function ImportOfxDrawer() {
                   className="flex-1 h-11 rounded-xl bg-gradient-primary text-white font-bold shadow-glow hover:scale-[1.02] transition-all"
                   onClick={() => setStep('upload')}
                 >
-                  Nova importação
+                  {t('newImport')}
                 </Button>
               </DrawerFooter>
             </>
@@ -215,10 +215,7 @@ export function ImportOfxDrawer() {
               <div className="flex-1 px-6 py-4 space-y-4">
                 <OfxFileDropzone
                   file={file}
-                  onChange={(value) => {
-                    setFile(value);
-                    setFileError(null);
-                  }}
+                  onChange={(value) => { setFile(value); setFileError(null); }}
                   onValidationError={setFileError}
                   error={fileError ?? (uploadOfx.isError ? (uploadOfx.error as Error)?.message : null)}
                 />
@@ -231,14 +228,14 @@ export function ImportOfxDrawer() {
                   onClick={() => setStep('list')}
                   disabled={uploadOfx.isPending}
                 >
-                  Voltar
+                  {t('back')}
                 </Button>
                 <Button
                   className="flex-1 h-11 rounded-xl bg-gradient-primary text-white font-bold shadow-glow hover:scale-[1.02] transition-all"
                   onClick={handleUpload}
                   disabled={uploadOfx.isPending || !file}
                 >
-                  {uploadOfx.isPending ? 'Enviando...' : 'Enviar arquivo'}
+                  {uploadOfx.isPending ? t('sending') : t('sendFile')}
                 </Button>
               </DrawerFooter>
             </>
@@ -247,10 +244,7 @@ export function ImportOfxDrawer() {
           {step === 'review' && selectedBatchId && (
             <ImportReviewStep
               batchId={selectedBatchId}
-              onConfirmed={(batch) => {
-                setSuccessBatch(batch);
-                setStep('success');
-              }}
+              onConfirmed={(batch) => { setSuccessBatch(batch); setStep('success'); }}
               onCanceled={() => setStep('list')}
               onBack={() => setStep('list')}
             />
@@ -264,11 +258,9 @@ export function ImportOfxDrawer() {
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-lg font-bold">
-                    {successBatch?.importedCount ?? 0} transações importadas
+                    {t('transactionsImported', { count: successBatch?.importedCount ?? 0 })}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Os lançamentos já aparecem na sua lista de lançamentos.
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t('entriesAppear')}</p>
                 </div>
               </div>
 
@@ -280,14 +272,14 @@ export function ImportOfxDrawer() {
                     onClick={() => handleRollback(successBatch.id)}
                     disabled={rollbackImport.isPending}
                   >
-                    {rollbackImport.isPending ? 'Desfazendo...' : 'Desfazer agora'}
+                    {rollbackImport.isPending ? t('undoing') : t('undoNow')}
                   </Button>
                 )}
                 <Button
                   className="flex-1 h-11 rounded-xl bg-gradient-primary text-white font-bold shadow-glow hover:scale-[1.02] transition-all"
                   onClick={handleClose}
                 >
-                  Concluir
+                  {t('finish')}
                 </Button>
               </DrawerFooter>
             </>

@@ -31,6 +31,7 @@ import { useDeletePurchase } from '@/modules/credit-cards/hooks/use-delete-purch
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { PayInvoiceForm } from './PayInvoiceForm';
 import { AddPurchaseDrawer } from './AddPurchaseDrawer';
+import { useTranslations } from 'next-intl';
 
 interface InvoiceDetailDrawerProps {
   invoiceId: string | null;
@@ -39,6 +40,7 @@ interface InvoiceDetailDrawerProps {
 }
 
 export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailDrawerProps) {
+  const t = useTranslations('invoiceDetail');
   const { data: invoice, isLoading } = useGetInvoice(invoiceId ?? undefined, open);
   const updatePaymentDateMutation = useUpdateInvoicePaymentDate();
   const reopenMutation = useReopenInvoice();
@@ -72,7 +74,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     try {
       await reopenMutation.mutateAsync(invoice.id);
     } catch (err) {
-      setReopenError(extractErrorMessage(err, 'Não foi possível reabrir a fatura'));
+      setReopenError(extractErrorMessage(err, t('reopenError')));
     }
   };
 
@@ -94,7 +96,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
       });
       setDeletePurchaseId(null);
     } catch (err) {
-      setDeleteError(extractErrorMessage(err, 'Não foi possível excluir a compra'));
+      setDeleteError(extractErrorMessage(err, t('deleteError')));
       setDeletePurchaseId(null);
     }
   };
@@ -103,7 +105,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     const map = new Map<string, { purchaseId: string; description: string; installments: typeof invoice.installments; total: number }>();
     for (const inst of invoice?.installments ?? []) {
       if (!map.has(inst.purchaseId)) {
-        map.set(inst.purchaseId, { purchaseId: inst.purchaseId, description: inst.purchaseDescription ?? 'Outros', installments: [], total: 0 });
+        map.set(inst.purchaseId, { purchaseId: inst.purchaseId, description: inst.purchaseDescription ?? 'Other', installments: [], total: 0 });
       }
       const g = map.get(inst.purchaseId)!;
       g.installments.push(inst);
@@ -118,10 +120,10 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
         <DrawerContent>
           <DrawerHeader onClose={onClose}>
             <SheetTitle className="text-xl font-bold font-display text-primary">
-              {invoice ? `Fatura ${MONTH_SHORT[invoice.referenceMonth - 1]}/${invoice.referenceYear}` : 'Fatura'}
+              {invoice ? `Invoice ${MONTH_SHORT[invoice.referenceMonth - 1]}/${invoice.referenceYear}` : t('title')}
             </SheetTitle>
             <p className="text-base font-bold text-white">{invoice?.cardName}</p>
-            <SheetDescription className="sr-only">Detalhes da fatura</SheetDescription>
+            <SheetDescription className="sr-only">{t('title')}</SheetDescription>
           </DrawerHeader>
 
           {isLoading || !invoice ? (
@@ -133,7 +135,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
               <div className="flex-1 px-6 pb-6 space-y-6 mt-4">
                 <div className="flex flex-col items-center text-center glass-card rounded-2xl p-6">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
-                    {invoice.isPaid ? 'Valor Pago' : 'Total da Fatura'}
+                    {invoice.isPaid ? t('paidAmount') : t('invoiceTotal')}
                   </span>
                   <span className="text-3xl font-bold font-display">
                     {formatCurrency(invoice.isPaid ? invoice.paidAmount ?? invoice.totalAmount : invoice.totalAmount)}
@@ -143,13 +145,13 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                 <div className="grid grid-cols-2 gap-3">
                   <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Fechamento
+                      {t('closing')}
                     </span>
                     <p className="text-sm font-bold">{formatDateLong(invoice.closingDate)}</p>
                   </div>
                   <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Vencimento
+                      {t('dueDate')}
                     </span>
                     <p className="text-sm font-bold">{formatDateLong(invoice.dueDate)}</p>
                   </div>
@@ -158,23 +160,23 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                 {invoice.isPaid ? (
                   <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      Pago em
+                      {t('paidOn')}
                     </span>
                     <p className="text-sm font-bold">{formatDateLong(invoice.paymentDate)}</p>
                   </div>
                 ) : (
-                  <DateInputField label="Data de Pagamento" value={paymentDate} onChange={handlePaymentDateChange} />
+                  <DateInputField label={t('paymentDate')} value={paymentDate} onChange={handlePaymentDateChange} />
                 )}
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-bold font-display">Itens da Fatura</h3>
+                    <h3 className="text-base font-bold font-display">{t('invoiceItems')}</h3>
                     <button
                       onClick={() => setAddPurchaseOpen(true)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 text-primary text-xs font-bold hover:bg-primary/25 transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" />
-                      Adicionar
+                      {t('add')}
                     </button>
                   </div>
                   {deleteError && (
@@ -183,7 +185,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                   <div className="space-y-2">
                     {groups.length === 0 ? (
                       <div className="glass-card rounded-2xl p-8 text-center">
-                        <p className="text-sm text-muted-foreground">Nenhum item nesta fatura.</p>
+                        <p className="text-sm text-muted-foreground">{t('noItems')}</p>
                       </div>
                     ) : (
                       groups.map((group) => (
@@ -205,7 +207,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                           </div>
                           {group.installments.map((item) => (
                             <div key={item.id} className="flex items-center justify-between text-xs text-muted-foreground">
-                              <span>Parcela {item.number}/{item.totalCount}</span>
+                              <span>{t('installment', { n: item.number, total: item.totalCount })}</span>
                               <span className="font-bold text-foreground">{formatCurrency(item.amount)}</span>
                             </div>
                           ))}
@@ -220,7 +222,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                 {invoice.isPaid ? (
                   <>
                     <p className="text-xs text-muted-foreground text-center">
-                      Esta fatura já foi paga. Para alterar o valor, reabra a fatura.
+                      {t('paidNote')}
                     </p>
                     <Button
                       variant="outline"
@@ -229,7 +231,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                       className="w-full h-11 rounded-xl border-white/10 hover:bg-white/5 flex items-center justify-center gap-2"
                     >
                       <RotateCcw className="h-4 w-4" />
-                      {reopenMutation.isPending ? 'Reabrindo...' : 'Reabrir Fatura'}
+                      {reopenMutation.isPending ? t('reopening') : t('reopenInvoice')}
                     </Button>
                     {reopenError && <p className="text-xs text-destructive text-center">{reopenError}</p>}
                   </>
@@ -249,21 +251,21 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
               <Trash2 className="w-8 h-8" />
             </div>
             <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              Excluir Compra?
+              {t('deleteTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              Todas as parcelas desta compra serão removidas de todas as faturas. Esta ação não pode ser desfeita.
+              {t('deleteDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
             <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              Cancelar
+              {t('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeletePurchase}
               className="flex-1 h-12 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all font-bold shadow-lg shadow-red-500/20"
             >
-              Excluir
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -282,22 +284,21 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
               <RotateCcw className="w-8 h-8" />
             </div>
             <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              Reabrir Fatura?
+              {t('reopenTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              O pagamento será revertido e o lançamento será removido do fluxo de caixa. A fatura voltará a aparecer
-              como pendente e você poderá registrar o pagamento com um novo valor.
+              {t('reopenDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
             <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              Cancelar
+              {t('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleReopen}
               className="flex-1 h-12 rounded-2xl bg-amber-500 text-white hover:bg-amber-600 transition-all font-bold shadow-lg shadow-amber-500/20"
             >
-              Reabrir
+              {t('reopen')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

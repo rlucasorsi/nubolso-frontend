@@ -1,7 +1,7 @@
 import { FlowType } from '@/lib/cashflow';
 import { TypeToggle } from './TypeToggle';
 import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
-import { CategorySelect } from './CategorySelect';
+import { useTranslations } from 'next-intl';
 
 export interface EntryFormValues {
   date: string;
@@ -19,10 +19,12 @@ interface EntryFormProps {
 }
 
 export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps) {
+  const t = useTranslations('entry');
+
   return (
     <div className="space-y-4">
       <DateInputField
-        label="Data do Lançamento"
+        label={t('entryDate')}
         required
         value={values.date}
         onChange={(date) => onChange({ ...values, date })}
@@ -32,7 +34,7 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
 
       <div className="space-y-2">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Tipo de Lançamento <span className="text-balance-danger">*</span>
+          {t('typeLabel')} <span className="text-balance-danger">*</span>
         </label>
         <TypeToggle
           value={values.type}
@@ -40,21 +42,15 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
         />
       </div>
 
-      {/* <CategorySelect
-        type={values.type}
-        value={values.categoryId}
-        onChange={(categoryId) => onChange({ ...values, categoryId })}
-      /> */}
-
       <TextInputField
-        label="Descrição"
-        placeholder="Descrição"
+        label={t('descriptionLabel')}
+        placeholder={t('descriptionLabel')}
         value={values.description}
         onChange={(description) => onChange({ ...values, description })}
       />
 
       <AmountInputField
-        label="Valor"
+        label={t('amount')}
         required
         value={values.amount}
         onChange={(amount) => onChange({ ...values, amount })}

@@ -3,23 +3,26 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, CircleDollarSign, Plus, RotateCw, CreditCard } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { triggerQuickAdd } from '@/lib/quickAdd';
 
-const NAV_ITEMS = [
-  { label: 'PAINEL', href: '/painel', icon: LayoutDashboard },
-  { label: 'LANÇAMENTOS', href: '/entries', icon: CircleDollarSign },
-  { label: 'CARTÕES', href: '/cartoes', icon: CreditCard },
-  { label: 'RECORRENTES', href: '/recorrentes', icon: RotateCw },
-];
-
 export function MobileNav() {
+  const t = useTranslations('nav');
+  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
 
+  const NAV_ITEMS = [
+    { label: t('dashboard').toUpperCase(), href: `/${locale}/dashboard`, icon: LayoutDashboard },
+    { label: t('entries').toUpperCase(), href: `/${locale}/entries`, icon: CircleDollarSign },
+    { label: t('cards').toUpperCase(), href: `/${locale}/cards`, icon: CreditCard },
+    { label: t('recurring').toUpperCase(), href: `/${locale}/recurring`, icon: RotateCw },
+  ];
+
   const handleQuickAdd = () => {
     if (!triggerQuickAdd()) {
-      router.push('/painel');
+      router.push(`/${locale}/dashboard`);
     }
   };
 
@@ -34,7 +37,7 @@ export function MobileNav() {
       <button
         type="button"
         onClick={handleQuickAdd}
-        aria-label="Novo lançamento"
+        aria-label={t('newEntry')}
         className="relative flex flex-col items-center group transition-all duration-300 py-1.5 text-muted-foreground/60"
       >
         <div className="p-1.5 rounded-lg bg-gradient-primary text-white shadow-glow transition-transform group-active:scale-95">

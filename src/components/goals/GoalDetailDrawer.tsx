@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useMemo } from 'react';
 import type { Goal, GoalContribution } from '@/modules/goals/model/api/goal';
 import {
@@ -22,6 +24,7 @@ import {
 } from 'lucide-react';
 import { AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { CircularProgress } from '@/components/ui/circular-progress';
+import { useTranslations } from 'next-intl';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -30,22 +33,17 @@ function formatCurrency(value: number) {
   });
 }
 
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const LONG_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 function formatDate(dateStr: string) {
   const date = new Date(dateStr + 'T00:00:00');
-  const months = [
-    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
-  ];
-  return `${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]}, ${date.getFullYear()}`;
+  return `${date.getDate().toString().padStart(2, '0')} ${SHORT_MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
 }
 
 function getDeadlineLabel(deadline: string) {
   const date = new Date(deadline + 'T00:00:00');
-  const months = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
-  ];
-  return `${months[date.getMonth()]} de ${date.getFullYear()}`;
+  return `${LONG_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 interface GoalDetailDrawerProps {
@@ -67,6 +65,7 @@ export function GoalDetailDrawer({
   onUpdateGoal,
   isDeleting = false,
 }: GoalDetailDrawerProps) {
+  const t = useTranslations('goalDetail');
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState<string>('');
   const [editDate, setEditDate] = useState<string>('');
@@ -141,11 +140,11 @@ export function GoalDetailDrawer({
       <DrawerContent>
         <DrawerHeader onClose={onClose}>
           <SheetTitle className="text-xl font-bold font-display text-primary">
-            Detalhes da Meta
+            {t('title')}
           </SheetTitle>
           <p className="text-base font-bold text-white">{goal.name}</p>
           <SheetDescription className="sr-only">
-            Detalhes da meta {goal.name}
+            {t('title')} {goal.name}
           </SheetDescription>
         </DrawerHeader>
 
@@ -162,7 +161,7 @@ export function GoalDetailDrawer({
                 {percent}%
               </span>
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                Concluído
+                {t('completed')}
               </span>
             </CircularProgress>
 
@@ -175,7 +174,7 @@ export function GoalDetailDrawer({
               </span>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              Faltam {formatCurrency(remaining)} para o seu sonho.
+              {t('remaining', { amount: formatCurrency(remaining) })}
             </p>
           </div>
 
@@ -185,18 +184,18 @@ export function GoalDetailDrawer({
               <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="h-3.5 w-3.5 text-primary" />
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Ritmo
+                  {t('pace')}
                 </span>
               </div>
               <p className="text-sm font-bold">
-                +{formatCurrency(monthlySavings)}/mês
+                {t('perMonth', { amount: formatCurrency(monthlySavings) })}
               </p>
             </div>
             <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
               <div className="flex items-center gap-2 mb-1">
                 <Calendar className="h-3.5 w-3.5 text-accent" />
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Prazo
+                  {t('deadline')}
                 </span>
               </div>
               <p className="text-sm font-bold">
@@ -209,7 +208,7 @@ export function GoalDetailDrawer({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold font-display">
-                Histórico de Aportes
+                {t('history')}
               </h3>
             </div>
 
@@ -217,7 +216,7 @@ export function GoalDetailDrawer({
               {sortedContributions.length === 0 ? (
                 <div className="glass-card rounded-2xl p-8 text-center">
                   <p className="text-sm text-muted-foreground">
-                    Nenhum aporte realizado ainda.
+                    {t('noContributions')}
                   </p>
                 </div>
               ) : (
@@ -231,12 +230,12 @@ export function GoalDetailDrawer({
                         <p className="text-sm font-bold">{c.description}</p>
                         <div className="space-y-3">
                           <DateInputField
-                            label="Data"
+                            label="Date"
                             value={editDate}
                             onChange={setEditDate}
                           />
                           <AmountInputField
-                            label="Valor"
+                            label="Amount"
                             value={editAmount}
                             onChange={setEditAmount}
                           />
@@ -247,7 +246,7 @@ export function GoalDetailDrawer({
                             onClick={handleUpdateEntry}
                             className="h-8 flex-1"
                           >
-                            Salvar
+                            {t('save')}
                           </Button>
                           <Button
                             size="sm"
@@ -255,7 +254,7 @@ export function GoalDetailDrawer({
                             onClick={() => setEditingEntryId(null)}
                             className="h-8 flex-1"
                           >
-                            Cancelar
+                            {t('cancel')}
                           </Button>
                         </div>
                       </div>
@@ -283,14 +282,14 @@ export function GoalDetailDrawer({
                               <button
                                 onClick={() => startEdit(c)}
                                 className="p-1 hover:text-primary transition-colors"
-                                title="Editar"
+                                title="Edit"
                               >
                                 <Edit2 className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteEntry(c.id)}
                                 className="p-1 hover:text-destructive transition-colors"
-                                title="Excluir"
+                                title="Delete"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -315,11 +314,10 @@ export function GoalDetailDrawer({
                 </div>
                 <div className="min-w-0 pt-1.5">
                   <p className="text-sm font-bold text-white tracking-tight">
-                    Excluir esta meta?
+                    {t('confirmDelete')}
                   </p>
                   <p className="text-xs text-muted-foreground/60 font-medium mt-1">
-                    Esta ação não pode ser desfeita. Todos os aportes
-                    registrados serão perdidos.
+                    {t('confirmDeleteDesc')}
                   </p>
                 </div>
               </div>
@@ -329,14 +327,14 @@ export function GoalDetailDrawer({
                   disabled={isDeleting}
                   className="flex-1 h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancelar
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={() => onDelete(goal.id)}
                   disabled={isDeleting}
                   className="flex-1 h-10 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all text-xs font-bold shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isDeleting ? 'Excluindo...' : 'Excluir'}
+                  {isDeleting ? t('deleting') : t('delete')}
                 </button>
               </div>
             </div>
@@ -347,7 +345,7 @@ export function GoalDetailDrawer({
                 className="w-full h-11 bg-gradient-primary text-primary-foreground font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <Plus className="h-5 w-5" />
-                Adicionar Aporte
+                {t('addContribution')}
               </Button>
 
               <button
@@ -355,7 +353,7 @@ export function GoalDetailDrawer({
                 className="w-full h-11 rounded-xl border border-destructive/20 text-destructive font-bold text-sm hover:bg-destructive/10 transition-all flex items-center justify-center gap-2"
               >
                 <Trash2 className="h-4 w-4" />
-                Excluir Meta
+                {t('deleteGoal')}
               </button>
             </>
           )}

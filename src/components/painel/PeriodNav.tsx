@@ -1,5 +1,6 @@
 import { Period } from '@/lib/cashflow';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface PeriodNavProps {
   periods: Period[];
@@ -18,15 +19,17 @@ export function PeriodNav({
   onToday,
   isCurrentPeriod,
 }: PeriodNavProps) {
+  const t = useTranslations('periodNav');
+  const locale = useLocale();
   const period = periods[periodIdx];
 
   const formatCycleDate = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-').map(Number);
     const date = new Date(y, m - 1, d);
-    return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
+    return date.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
   };
 
-  const cycleText = `Ciclo: ${formatCycleDate(period.startDate)} - ${formatCycleDate(period.endDate)}`;
+  const cycleText = t('cycle', { start: formatCycleDate(period.startDate), end: formatCycleDate(period.endDate) });
 
   return (
     <div className="flex flex-col gap-1.5 py-0.5 w-full">
@@ -59,7 +62,7 @@ export function PeriodNav({
               onClick={onToday}
               className="px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-primary/40 text-primary hover:border-primary hover:bg-primary/5 transition-colors"
             >
-              Hoje
+              {t('today')}
             </button>
           )}
           <span className="text-sm font-bold text-muted-foreground tracking-widest font-display leading-none">

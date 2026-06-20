@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { RecurringTemplateForm, RecurringTemplateFormValues } from './RecurringTemplateForm';
 import { Button } from '@/components/ui/button';
@@ -14,6 +16,7 @@ import {
   SheetTitle,
 } from '@/components/ui/app-drawer';
 import { recurringTemplateFormSchema } from '@/lib/schemas/recurring-templates';
+import { useTranslations } from 'next-intl';
 
 interface RecurringTemplateDrawerProps {
   open: boolean;
@@ -33,6 +36,7 @@ const DEFAULT_VALUES: RecurringTemplateFormValues = {
 };
 
 export function RecurringTemplateDrawer({ open, onOpenChange, template }: RecurringTemplateDrawerProps) {
+  const t = useTranslations('recurringDrawer');
   const [values, setValues] = useState<RecurringTemplateFormValues>(DEFAULT_VALUES);
   const [errors, setErrors] = useState<{ estimatedAmount?: string; endDate?: string; totalOccurrences?: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -103,7 +107,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
       }
       onOpenChange(false);
     } catch (err) {
-      setSubmitError(extractErrorMessage(err, 'Não foi possível salvar a conta recorrente'));
+      setSubmitError(extractErrorMessage(err, t('saveError')));
     }
   }
 
@@ -112,10 +116,10 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
       <DrawerContent>
         <DrawerHeader onClose={() => onOpenChange(false)}>
           <SheetTitle className="text-2xl font-bold font-display text-primary">
-            {template ? 'Editar Conta Recorrente' : 'Nova Conta Recorrente'}
+            {template ? t('editTitle') : t('newTitle')}
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
-            Contas como água, luz e condomínio que se repetem todo mês com um valor estimado.
+            {t('subtitle')}
           </p>
         </DrawerHeader>
 
@@ -133,7 +137,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
             onClick={() => onOpenChange(false)}
             disabled={isSaving}
           >
-            Cancelar
+            {t('cancel')}
           </Button>
 
           <Button
@@ -141,7 +145,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {isSaving ? t('saving') : t('save')}
           </Button>
         </DrawerFooter>
       </DrawerContent>

@@ -18,6 +18,7 @@ import { formatCurrency } from '@/lib/cashflow';
 import { MONTH_SHORT } from '@/components/painel/config';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 type InterestMode = 'none' | 'rate' | 'amount';
 
@@ -48,6 +49,7 @@ interface PartialPaymentDrawerProps {
 }
 
 export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentDrawerProps) {
+  const t = useTranslations('partialPayment');
   const [partialAmount, setPartialAmount] = useState('');
   const [remainderInstallments, setRemainderInstallments] = useState(1);
   const [interestMode, setInterestMode] = useState<InterestMode>('none');
@@ -134,7 +136,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
       });
       handleClose();
     } catch (err) {
-      setError(extractErrorMessage(err, 'Não foi possível registrar o pagamento'));
+      setError(extractErrorMessage(err, t('payError')));
     }
   }
 
@@ -143,7 +145,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
       <DrawerContent>
         <DrawerHeader onClose={handleClose}>
           <SheetTitle className="text-xl font-bold font-display text-primary">
-            Pagamento Parcial
+            {t('title')}
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
             Fatura {MONTH_SHORT[invoice.referenceMonth - 1]}/{invoice.referenceYear} —{' '}
@@ -154,15 +156,15 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
 
         <div className="flex-1 px-6 py-4 space-y-4">
           <AmountInputField
-            label="Valor que vai pagar agora"
+            label={t('amountNow')}
             required
             value={partialAmount}
             onChange={setPartialAmount}
-            error={amountExceedsTotal ? `Deve ser menor que ${formatCurrency(invoice.totalAmount)}` : undefined}
+            error={amountExceedsTotal ? t('amountExceeds', { amount: formatCurrency(invoice.totalAmount) }) : undefined}
           />
 
           <NumberInputField
-            label="Reparcelar restante em"
+            label={t('reinstall')}
             value={remainderInstallments}
             onChange={setRemainderInstallments}
             min={1}
@@ -172,13 +174,13 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
 
           <div className="space-y-2">
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-              Juros do banco
+              {t('bankInterest')}
             </label>
             <div className="flex gap-2">
               {([
-                ['none', 'Sem juros'],
-                ['rate', 'Taxa (% a.m.)'],
-                ['amount', 'Valor da parcela'],
+                ['none', t('noInterest')],
+                ['rate', t('interestRate')],
+                ['amount', t('installmentValue')],
               ] as [InterestMode, string][]).map(([mode, label]) => (
                 <button
                   key={mode}
@@ -199,7 +201,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
 
           {interestMode === 'rate' && (
             <NumberInputField
-              label="Taxa de juros (% a.m.)"
+              label={t('interestRate')}
               value={interestRate}
               onChange={setInterestRate}
               min={0}
@@ -211,7 +213,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
 
           {interestMode === 'amount' && (
             <AmountInputField
-              label="Valor de cada parcela (com juros)"
+              label={t('installmentValue')}
               required
               value={installmentAmount}
               onChange={setInstallmentAmount}
@@ -222,16 +224,16 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
           {showPreview && (
             <div className="rounded-xl bg-white/5 px-4 py-3 space-y-1 text-xs">
               <div className="flex justify-between text-muted-foreground">
-                <span>Restante a reparcelar</span>
+                <span>{t('remainder')}</span>
                 <span className="font-semibold text-foreground">{formatCurrency(remainderAmount)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
-                <span>Total a pagar</span>
+                <span>{t('total')}</span>
                 <span className="font-semibold text-foreground">{formatCurrency(previewTotal)}</span>
               </div>
               {previewInterest > 0.005 && (
                 <div className="flex justify-between border-t border-white/10 pt-1 mt-1">
-                  <span className="text-muted-foreground">Juros</span>
+                  <span className="text-muted-foreground">{t('interest')}</span>
                   <span className="font-semibold text-balance-danger">+ {formatCurrency(previewInterest)}</span>
                 </div>
               )}
@@ -242,7 +244,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
           {futureImpact.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-                Impacto nas próximas faturas
+                {t('futureImpact')}
               </p>
               <div className="space-y-1.5">
                 {futureImpact.map(({ year, month, newInstallment, existingTotal, total, number }) => (
@@ -256,8 +258,8 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
                       </p>
                       <p className="text-[11px] text-muted-foreground">
                         {existingTotal > 0
-                          ? `${formatCurrency(existingTotal)} + ${formatCurrency(newInstallment)} (parcela ${number}/${remainderInstallments})`
-                          : `Parcela ${number}/${remainderInstallments}`}
+                          ? `${formatCurrency(existingTotal)} + ${formatCurrency(newInstallment)} (${t('installment', { n: number, total: remainderInstallments })})`
+                          : t('installment', { n: number, total: remainderInstallments })}
                       </p>
                     </div>
                     <span className="text-sm font-bold text-balance-danger">
@@ -279,14 +281,14 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
             disabled={payMutation.isPending}
             className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5"
           >
-            Cancelar
+            {t('cancel')}
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={!isFormValid || payMutation.isPending}
             className="flex-1 h-11 bg-gradient-primary text-primary-foreground font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
-            {payMutation.isPending ? 'Processando...' : 'Confirmar'}
+            {payMutation.isPending ? t('processing') : t('confirm')}
           </Button>
         </DrawerFooter>
       </DrawerContent>

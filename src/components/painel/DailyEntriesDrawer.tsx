@@ -7,7 +7,8 @@ import { TextInputField, AmountInputField, DateInputField } from '@/components/u
 import { Plus, Pencil, Trash2, Check, ChevronDown, RotateCw, RotateCcw, Ban, X, CreditCard } from 'lucide-react';
 import { EntryFormValues } from './EntryForm';
 import { AddEntryDrawer } from './AddEntryDrawer';
-import { TYPE_CONFIG, DAY_NAMES, MONTH_SHORT } from './config';
+import { TYPE_CONFIG, WEEK_DAYS, MONTH_SHORT } from './config';
+import { useTranslations } from 'next-intl';
 import { useRealizeRecurringTemplate } from '@/modules/recurring-templates/hooks/use-realize-recurring-template';
 import { useSkipRecurringTemplate } from '@/modules/recurring-templates/hooks/use-skip-recurring-template';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
@@ -56,8 +57,6 @@ interface DailyEntriesDrawerProps {
   minDate?: string;
 }
 
-const WEEK_DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-
 export function DailyEntriesDrawer({
   sheet,
   entries,
@@ -79,6 +78,7 @@ export function DailyEntriesDrawer({
     spending: true,
   });
 
+  const t = useTranslations('dailyEntries');
   const realizeMutation = useRealizeRecurringTemplate();
   const skipMutation = useSkipRecurringTemplate();
   const reopenInvoiceMutation = useReopenInvoice();
@@ -181,7 +181,7 @@ export function DailyEntriesDrawer({
       await reopenInvoiceMutation.mutateAsync(reopenInvoiceId);
       setReopenInvoiceId(null);
     } catch (err) {
-      setReopenError(extractErrorMessage(err, 'Não foi possível reabrir a fatura'));
+      setReopenError(extractErrorMessage(err, "Couldn't reopen the invoice"));
     }
   };
 
@@ -204,18 +204,18 @@ export function DailyEntriesDrawer({
               </div>
 
               <h4 className="text-xs font-bold text-white tracking-tight font-display leading-none">
-                {WEEK_DAYS[d.getDay()]}
+                {WEEK_DAYS[d.getDay() as keyof typeof WEEK_DAYS]}
               </h4>
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <SheetTitle className="text-xl font-black font-display tracking-tight text-white leading-none">
-                  Lançamentos
+                  {t('entries')}
                 </SheetTitle>
                 <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-widest">
                   {sheet.filter === 'all'
-                    ? 'Visão do dia'
+                    ? t('dayView')
                     : TYPE_CONFIG[sheet.filter].label}
                 </p>
               </div>
@@ -227,7 +227,7 @@ export function DailyEntriesDrawer({
                   setEditingId(null);
                 }}
                 disabled={!canAdd}
-                title={!canAdd ? 'Não é possível adicionar lançamentos antes da data inicial' : undefined}
+                title={!canAdd ? t('cannotAdd') : undefined}
                 className={cn(
                   "px-4 h-10 text-xs font-bold rounded-xl active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 tracking-tight shrink-0",
                   canAdd
@@ -236,7 +236,7 @@ export function DailyEntriesDrawer({
                 )}
               >
                 <span className={cn("text-xl font-light", canAdd ? "text-white/80" : "text-muted-foreground/30")}>+</span>
-                <span>Lançamento</span>
+                <span>{t('addEntry')}</span>
               </button>
             </div>
           </DrawerHeader>
@@ -247,8 +247,8 @@ export function DailyEntriesDrawer({
                 <div className="w-20 h-20 rounded-[2rem] bg-white/[0.02] border border-white/5 flex items-center justify-center mb-6 shadow-inner">
                    <Plus className="h-10 w-10 opacity-10" />
                 </div>
-                <p className="text-base font-semibold tracking-tight">Nenhum registro encontrado</p>
-                <p className="text-xs mt-1">Sua folha está limpa para hoje.</p>
+                <p className="text-base font-semibold tracking-tight">{t('noRecords')}</p>
+                <p className="text-xs mt-1">{t('cleanSlate')}</p>
               </div>
             )}
 
@@ -321,17 +321,17 @@ export function DailyEntriesDrawer({
                                                 <div className="min-w-0 pt-1.5">
                                                    <p className="text-sm font-bold text-white tracking-tight">
                                                       {isPendingRecurring
-                                                         ? 'Ignorar este mês?'
+                                                         ? t('ignoreMonth')
                                                          : isRealizedRecurring
-                                                         ? 'Excluir lançamento recorrente?'
-                                                         : 'Excluir lançamento?'}
+                                                         ? t('deleteRecurring')
+                                                         : t('deleteEntry')}
                                                    </p>
                                                    <p className="text-xs text-muted-foreground/60 font-medium mt-1">
                                                       {isPendingRecurring
-                                                         ? 'Esta conta não aparecerá mais como estimativa neste mês. Você pode reativá-la depois pelo botão "Reativar".'
+                                                         ? t('ignoreDescription')
                                                          : isRealizedRecurring
-                                                         ? 'Volte para a estimativa do template (e efetive de novo depois) ou exclua permanentemente, marcando este mês como "Ignorado".'
-                                                         : 'Esta ação não pode ser desfeita.'}
+                                                         ? t('deleteRecurringDescription')
+                                                         : t('deleteDescription')}
                                                    </p>
                                                 </div>
                                              </div>
@@ -342,19 +342,19 @@ export function DailyEntriesDrawer({
                                                       onClick={handleDelete}
                                                       className="h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold"
                                                    >
-                                                      Voltar para estimativa
+                                                      {t('backToEstimate')}
                                                    </button>
                                                    <button
                                                       onClick={handlePermanentSkip}
                                                       className="h-10 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all text-xs font-bold shadow-lg shadow-red-500/20"
                                                    >
-                                                      Excluir permanentemente
+                                                      {t('deletePermanently')}
                                                    </button>
                                                    <button
                                                       onClick={() => setDeleteConfirmId(null)}
                                                       className="h-10 rounded-xl bg-transparent text-muted-foreground/60 hover:bg-white/5 hover:text-white transition-all text-xs font-bold"
                                                    >
-                                                      Cancelar
+                                                      {t('cancel')}
                                                    </button>
                                                 </div>
                                              ) : isPendingRecurring ? (
@@ -363,13 +363,13 @@ export function DailyEntriesDrawer({
                                                       onClick={() => setDeleteConfirmId(null)}
                                                       className="flex-1 h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold"
                                                    >
-                                                      Cancelar
+                                                      {t('cancel')}
                                                    </button>
                                                    <button
                                                       onClick={handlePermanentSkip}
                                                       className="flex-1 h-10 rounded-xl bg-amber-400 text-[#1c1a24] hover:bg-amber-300 transition-all text-xs font-bold shadow-lg shadow-amber-400/20"
                                                    >
-                                                      Ignorar
+                                                      {t('ignore')}
                                                    </button>
                                                 </div>
                                              ) : (
@@ -378,13 +378,13 @@ export function DailyEntriesDrawer({
                                                       onClick={() => setDeleteConfirmId(null)}
                                                       className="flex-1 h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold"
                                                    >
-                                                      Cancelar
+                                                      {t('cancel')}
                                                    </button>
                                                    <button
                                                       onClick={handleDelete}
                                                       className="flex-1 h-10 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all text-xs font-bold shadow-lg shadow-red-500/20"
                                                    >
-                                                      Excluir
+                                                      {t('delete')}
                                                    </button>
                                                 </div>
                                              )}
@@ -396,7 +396,7 @@ export function DailyEntriesDrawer({
                                             {(isEditing || isRealizing) ? (
                                                <div className="space-y-4">
                                                   <TextInputField
-                                                     label="Descrição"
+                                                     label={t('entries')}
                                                      value={editValues.description}
                                                      onChange={(description) =>
                                                         setEditValues((prev) => ({ ...prev, description }))
@@ -404,7 +404,6 @@ export function DailyEntriesDrawer({
                                                      autoFocus
                                                   />
                                                   <AmountInputField
-                                                     label="Valor"
                                                      value={editValues.amount}
                                                      onChange={(amount) =>
                                                         setEditValues((prev) => ({ ...prev, amount }))
@@ -413,14 +412,14 @@ export function DailyEntriesDrawer({
                                                   {isRealizing && (
                                                      <>
                                                         <DateInputField
-                                                           label="Data de efetivação"
+                                                           label={t('realizationDate')}
                                                            value={editValues.date}
                                                            onChange={(date) =>
                                                               setEditValues((prev) => ({ ...prev, date }))
                                                            }
                                                         />
                                                         <p className="text-[10px] text-muted-foreground/40 font-medium pl-1">
-                                                           Ajuste a data se o recebimento ocorreu em dia diferente do planejado.
+                                                           {t('dateNote')}
                                                         </p>
                                                      </>
                                                   )}
@@ -444,27 +443,27 @@ export function DailyEntriesDrawer({
                                                         {entry.templateId && (
                                                           <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]">
                                                             <RotateCw className="h-2.5 w-2.5" />
-                                                            Recorrente
+                                                            {t('recurring')}
                                                           </Badge>
                                                         )}
                                                         {entry.creditCardInvoiceId && (
                                                           <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]">
                                                             <CreditCard className="h-2.5 w-2.5" />
-                                                            Fatura
+                                                            {t('invoice')}
                                                           </Badge>
                                                         )}
                                                         {entry.isSkipped ? (
                                                           <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/50 bg-white/[0.02]">
                                                             <Ban className="h-2.5 w-2.5" />
-                                                            Ignorado
+                                                            {t('skipped')}
                                                           </Badge>
                                                         ) : entry.isVirtual ? (
                                                           <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10">
-                                                            Estimado
+                                                            {t('estimated')}
                                                           </Badge>
                                                         ) : entry.templateId ? (
                                                           <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10">
-                                                            Efetivado
+                                                            {t('confirmed')}
                                                           </Badge>
                                                         ) : null}
                                                      </div>
@@ -493,7 +492,7 @@ export function DailyEntriesDrawer({
                                                   className="flex-1 h-10 rounded-xl bg-white/5 text-muted-foreground/60 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
                                                >
                                                   <RotateCcw className="h-4 w-4" />
-                                                  Reativar
+                                                  {t('reactivate')}
                                                </button>
                                             ) : isPendingInvoice ? (
                                                <button
@@ -501,7 +500,7 @@ export function DailyEntriesDrawer({
                                                   className="flex-1 h-10 rounded-xl bg-amber-400/10 text-amber-400 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
                                                >
                                                   <CreditCard className="h-4 w-4" />
-                                                  Pagar Fatura
+                                                  {t('payInvoice')}
                                                </button>
                                             ) : entry.isVirtual ? (
                                                isRealizing ? (
@@ -511,7 +510,7 @@ export function DailyEntriesDrawer({
                                                         className="flex-1 h-10 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 text-xs font-bold px-4"
                                                      >
                                                         <Check className="h-4 w-4" />
-                                                        Confirmar
+                                                        {t('confirm')}
                                                      </button>
                                                      <button
                                                         onClick={() => setRealizingId(null)}
@@ -527,7 +526,7 @@ export function DailyEntriesDrawer({
                                                         className="flex-1 h-10 rounded-xl bg-amber-400/10 text-amber-400 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
                                                      >
                                                         <RotateCw className="h-4 w-4" />
-                                                        Efetivar
+                                                        {t('apply')}
                                                      </button>
                                                      <button
                                                         onClick={() => setDeleteConfirmId(entry.id)}
@@ -547,7 +546,7 @@ export function DailyEntriesDrawer({
                                                   className="flex-1 h-10 rounded-xl bg-white/5 text-muted-foreground/60 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
                                                >
                                                   <RotateCcw className="h-4 w-4" />
-                                                  Reabrir Fatura
+                                                  {t('reopenInvoice')}
                                                </button>
                                             ) : (
                                                <>
@@ -621,23 +620,22 @@ export function DailyEntriesDrawer({
               <RotateCcw className="w-8 h-8" />
             </div>
             <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              Reabrir Fatura?
+              {t('reopenTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              O pagamento será revertido e o lançamento será removido do fluxo de caixa. A fatura voltará a aparecer
-              como pendente e você poderá registrar o pagamento com um novo valor.
+              {t('reopenDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
             <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              Cancelar
+              {t('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleReopenInvoice}
               disabled={reopenInvoiceMutation.isPending}
               className="flex-1 h-12 rounded-2xl bg-amber-500 text-white hover:bg-amber-600 transition-all font-bold shadow-lg shadow-amber-500/20"
             >
-              {reopenInvoiceMutation.isPending ? 'Reabrindo...' : 'Reabrir'}
+              {reopenInvoiceMutation.isPending ? t('reopening') : t('reopen')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

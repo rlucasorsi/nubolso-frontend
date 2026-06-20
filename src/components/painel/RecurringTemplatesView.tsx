@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { RotateCw, Pencil, Trash2, Archive, Loader2, Search, ChevronDown, CalendarClock, Hash } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useTranslations, useLocale } from 'next-intl';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { formatCurrency } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
@@ -31,14 +31,9 @@ type TypeFilter = 'all' | 'income' | 'expense' | 'spending';
 
 const TYPE_ORDER = ['income', 'expense', 'spending'] as const;
 
-const TYPE_FILTER_LABELS: Record<TypeFilter, string> = {
-  all: 'Todos',
-  income: 'Receita',
-  expense: 'Despesa',
-  spending: 'Gasto',
-};
-
 export function RecurringTemplatesView() {
+  const t = useTranslations('recurring');
+  const locale = useLocale();
   const { data: recurringTemplates, isLoading, isError, refetch } = useGetRecurringTemplates();
   const archiveMutation = useUpdateRecurringTemplate();
   const reactivateMutation = useUpdateRecurringTemplate();
@@ -56,6 +51,13 @@ export function RecurringTemplatesView() {
     expense: true,
     spending: true,
   });
+
+  const TYPE_FILTER_LABELS: Record<TypeFilter, string> = {
+    all: t('filterAll'),
+    income: t('filterIncome'),
+    expense: t('filterExpense'),
+    spending: t('filterSpending'),
+  };
 
   const handleNewTemplate = () => {
     setEditingTemplate(undefined);
@@ -75,7 +77,7 @@ export function RecurringTemplatesView() {
     try {
       await archiveMutation.mutateAsync({ id, isActive: false });
     } catch (err: any) {
-      setActionError(err?.message ?? 'Não foi possível arquivar a conta recorrente');
+      setActionError(err?.message ?? t('archiveError'));
     }
   };
 
@@ -84,7 +86,7 @@ export function RecurringTemplatesView() {
     try {
       await reactivateMutation.mutateAsync({ id, isActive: true });
     } catch (err: any) {
-      setActionError(err?.message ?? 'Não foi possível reativar a conta recorrente');
+      setActionError(err?.message ?? t('reactivateError'));
     }
   };
 
@@ -96,7 +98,7 @@ export function RecurringTemplatesView() {
     try {
       await deleteMutation.mutateAsync({ id });
     } catch (err: any) {
-      setActionError(err?.message ?? 'Não foi possível excluir a conta recorrente');
+      setActionError(err?.message ?? t('deleteError'));
     }
   };
 
@@ -107,9 +109,9 @@ export function RecurringTemplatesView() {
   const filtered = useMemo(() => {
     if (!recurringTemplates) return [];
     const q = query.trim().toLowerCase();
-    return recurringTemplates.filter((t) => {
-      const matchesType = typeFilter === 'all' || t.type.toLowerCase() === typeFilter;
-      const matchesQuery = !q || t.description.toLowerCase().includes(q);
+    return recurringTemplates.filter((tmpl) => {
+      const matchesType = typeFilter === 'all' || tmpl.type.toLowerCase() === typeFilter;
+      const matchesQuery = !q || tmpl.description.toLowerCase().includes(q);
       return matchesType && matchesQuery;
     });
   }, [recurringTemplates, typeFilter, query]);
@@ -119,33 +121,29 @@ export function RecurringTemplatesView() {
       TYPE_ORDER.map((type) => ({
         type,
         cfg: TYPE_CONFIG[type],
-        templates: filtered.filter((t) => t.type.toLowerCase() === type),
+        templates: filtered.filter((tmpl) => tmpl.type.toLowerCase() === type),
       })).filter((g) => g.templates.length > 0),
     [filtered],
   );
 
   return (
     <div className="container max-w-2xl mx-auto py-6 px-4 space-y-4">
-      {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <RotateCw className="h-5 w-5 text-primary" />
-            <h1 className="text-2xl font-bold font-display">Contas Recorrentes</h1>
+            <h1 className="text-2xl font-bold font-display">{t('title')}</h1>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Água, luz, condomínio e outras contas que se repetem todo mês com um valor estimado.
-          </p>
+          <p className="text-sm text-muted-foreground">{t('description')}</p>
         </div>
-        <AddButton onClick={handleNewTemplate} title="Nova conta recorrente" label="Adicionar" />
+        <AddButton onClick={handleNewTemplate} title={t('add')} label={t('add')} />
       </div>
 
-      {/* Search + type filter */}
       <div className="space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 pointer-events-none" />
           <Input
-            placeholder="Buscar por nome..."
+            placeholder={t('searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9 bg-white/[0.03] border-white/10 focus-visible:ring-primary/30 placeholder:text-muted-foreground/30"
@@ -153,34 +151,31 @@ export function RecurringTemplatesView() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {(['all', 'income', 'expense', 'spending'] as TypeFilter[]).map((t) => (
+          {(['all', 'income', 'expense', 'spending'] as TypeFilter[]).map((type) => (
             <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
+              key={type}
+              onClick={() => setTypeFilter(type)}
               className={cn(
                 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
-                typeFilter === t
-                  ? t === 'all'
+                typeFilter === type
+                  ? type === 'all'
                     ? 'bg-primary text-white shadow-glow'
                     : cn(
-                        t === 'income' && 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
-                        t === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',
-                        t === 'spending' && 'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
+                        type === 'income' && 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
+                        type === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',
+                        type === 'spending' && 'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
                       )
                   : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
               )}
             >
-              {TYPE_FILTER_LABELS[t]}
+              {TYPE_FILTER_LABELS[type]}
             </button>
           ))}
         </div>
       </div>
 
-      {actionError && (
-        <p className="text-sm text-red-400 font-medium px-1">{actionError}</p>
-      )}
+      {actionError && <p className="text-sm text-red-400 font-medium px-1">{actionError}</p>}
 
-      {/* Content */}
       <div className="space-y-8">
         {isError ? (
           <ServerErrorState onRetry={refetch} />
@@ -189,19 +184,16 @@ export function RecurringTemplatesView() {
             <div key={i} className="h-[68px] w-full bg-card/50 animate-pulse rounded-2xl border border-white/5" />
           ))
         ) : !recurringTemplates || recurringTemplates.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhuma conta recorrente cadastrada. Use o botão acima para adicionar água, luz, condomínio, etc.
-          </p>
+          <p className="text-sm text-muted-foreground">{t('noTemplates')}</p>
         ) : groups.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma conta encontrada com os filtros selecionados.</p>
+          <p className="text-sm text-muted-foreground">{t('noResults')}</p>
         ) : (
           groups.map(({ type, cfg, templates }) => {
             const isExpanded = expandedGroups[type];
-            const total = templates.reduce((acc, t) => acc + t.estimatedAmount, 0);
+            const total = templates.reduce((acc, tmpl) => acc + tmpl.estimatedAmount, 0);
 
             return (
               <div key={type} className="space-y-3">
-                {/* Group header */}
                 <button
                   onClick={() => toggleGroup(type)}
                   className="w-full flex items-center gap-4 group/header"
@@ -214,17 +206,11 @@ export function RecurringTemplatesView() {
                   </h4>
                   <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent mx-2" />
                   <div className="flex items-center gap-3">
-                    <p className="text-sm font-black text-white font-display">
-                      {formatCurrency(total)}
-                    </p>
-                    <ChevronDown className={cn(
-                      'w-4 h-4 text-muted-foreground/30 transition-transform duration-300',
-                      isExpanded ? 'rotate-180' : '',
-                    )} />
+                    <p className="text-sm font-black text-white font-display">{formatCurrency(total)}</p>
+                    <ChevronDown className={cn('w-4 h-4 text-muted-foreground/30 transition-transform duration-300', isExpanded ? 'rotate-180' : '')} />
                   </div>
                 </button>
 
-                {/* Template rows */}
                 {isExpanded && (
                   <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                     {templates.map((template) => {
@@ -248,21 +234,18 @@ export function RecurringTemplatesView() {
                               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                 {template.category && (
                                   <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1">
-                                    <span
-                                      className="h-1.5 w-1.5 rounded-full"
-                                      style={{ backgroundColor: template.category.color }}
-                                    />
+                                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: template.category.color }} />
                                     {template.category.name}
                                   </p>
                                 )}
                                 <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
-                                  Dia {template.dayOfMonth} · {formatCurrency(template.estimatedAmount)}
+                                  {t('day', { day: template.dayOfMonth })} · {formatCurrency(template.estimatedAmount)}
                                   {template.endDate && (
                                     <>
                                       {' · '}
                                       <CalendarClock className="h-3 w-3 inline" />
                                       {' '}
-                                      {format(parseISO(template.endDate), "MMM/yyyy", { locale: ptBR })}
+                                      {format(parseISO(template.endDate), 'MMM/yyyy')}
                                     </>
                                   )}
                                   {template.totalOccurrences && (
@@ -273,14 +256,14 @@ export function RecurringTemplatesView() {
                                       {template.occurrenceCount ?? 0}/{template.totalOccurrences}x
                                     </>
                                   )}
-                                  {!template.isActive && ' · Arquivado'}
+                                  {!template.isActive && ` · ${t('archived')}`}
                                 </p>
                               </div>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-1 shrink-0">
-                            <Button variant="ghost" size="icon" onClick={() => handleEditTemplate(template)} title="Editar">
+                            <Button variant="ghost" size="icon" onClick={() => handleEditTemplate(template)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
 
@@ -290,7 +273,6 @@ export function RecurringTemplatesView() {
                                 size="icon"
                                 onClick={() => setArchiveTemplateId(template.id)}
                                 disabled={isArchiving}
-                                title="Arquivar"
                               >
                                 {isArchiving
                                   ? <Loader2 className="h-4 w-4 text-amber-500/60 animate-spin" />
@@ -302,7 +284,6 @@ export function RecurringTemplatesView() {
                                 size="icon"
                                 onClick={() => handleReactivateTemplate(template.id)}
                                 disabled={isReactivating}
-                                title="Reativar"
                               >
                                 {isReactivating
                                   ? <Loader2 className="h-4 w-4 text-emerald-500/60 animate-spin" />
@@ -315,7 +296,6 @@ export function RecurringTemplatesView() {
                               size="icon"
                               onClick={() => setDeleteTemplateId(template.id)}
                               disabled={isDeleting}
-                              title="Excluir permanentemente"
                             >
                               {isDeleting
                                 ? <Loader2 className="h-4 w-4 text-red-500/60 animate-spin" />
@@ -339,7 +319,6 @@ export function RecurringTemplatesView() {
         template={editingTemplate}
       />
 
-      {/* Archive dialog */}
       <AlertDialog open={!!archiveTemplateId} onOpenChange={(open) => !open && setArchiveTemplateId(null)}>
         <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
           <AlertDialogHeader className="space-y-4">
@@ -347,27 +326,26 @@ export function RecurringTemplatesView() {
               <Archive className="w-8 h-8" />
             </div>
             <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              Arquivar Conta Recorrente?
+              {t('archiveTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              Ela deixará de gerar novas estimativas mensais. Lançamentos já efetivados continuam no histórico e você pode reativá-la a qualquer momento.
+              {t('archiveDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
             <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              Cancelar
+              {t('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleArchiveTemplate}
               className="flex-1 h-12 rounded-2xl bg-amber-500 text-white hover:bg-amber-600 transition-all font-bold shadow-lg shadow-amber-500/20"
             >
-              Arquivar
+              {t('archive')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete dialog */}
       <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => !open && setDeleteTemplateId(null)}>
         <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
           <AlertDialogHeader className="space-y-4">
@@ -375,21 +353,21 @@ export function RecurringTemplatesView() {
               <Trash2 className="w-8 h-8" />
             </div>
             <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              Excluir Conta Recorrente?
+              {t('deleteTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              Esta ação é permanente e não pode ser desfeita. A conta recorrente e todas as suas configurações serão removidas definitivamente.
+              {t('deleteDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
             <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              Cancelar
+              {t('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteTemplate}
               className="flex-1 h-12 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all font-bold shadow-lg shadow-red-500/20"
             >
-              Excluir
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

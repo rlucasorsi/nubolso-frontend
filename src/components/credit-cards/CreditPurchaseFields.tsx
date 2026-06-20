@@ -52,15 +52,15 @@ export function CreditPurchaseFields({
   return (
     <>
       <TextInputField
-        label="Descrição"
-        placeholder="Ex: Notebook, Supermercado..."
+        label="Description"
+        placeholder="e.g., Notebook, Supermarket..."
         value={description}
         onChange={onDescriptionChange}
       />
 
       <div className="space-y-2">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-          Forma de Entrada
+          Input Mode
         </label>
         <div className="flex gap-2">
           <button
@@ -73,7 +73,7 @@ export function CreditPurchaseFields({
                 : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
             )}
           >
-            Valor Total
+            Total Amount
           </button>
           <button
             type="button"
@@ -85,13 +85,13 @@ export function CreditPurchaseFields({
                 : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
             )}
           >
-            Valor da Parcela
+            Installment Amount
           </button>
         </div>
       </div>
 
       <AmountInputField
-        label={inputMode === 'total' ? 'Valor Total' : 'Valor da Parcela'}
+        label={inputMode === 'total' ? 'Total Amount' : 'Installment Amount'}
         required
         value={amount}
         onChange={onAmountChange}
@@ -99,7 +99,7 @@ export function CreditPurchaseFields({
       />
 
       <NumberInputField
-        label="Número de Parcelas"
+        label="Number of Installments"
         value={installmentsCount}
         onChange={onInstallmentsCountChange}
         min={1}
@@ -110,7 +110,7 @@ export function CreditPurchaseFields({
       {installmentsCount > 1 && (
         <div className="space-y-2">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-            Diferença de centavos
+            Cent difference
           </label>
           <div className="flex gap-2">
             <button
@@ -123,7 +123,7 @@ export function CreditPurchaseFields({
                   : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
               )}
             >
-              1ª Parcela
+              1st Installment
             </button>
             <button
               type="button"
@@ -135,7 +135,7 @@ export function CreditPurchaseFields({
                   : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
               )}
             >
-              Última Parcela
+              Last Installment
             </button>
           </div>
         </div>
@@ -144,7 +144,7 @@ export function CreditPurchaseFields({
       {computedTotal !== null && (
         <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.03] border border-white/5">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Total da compra
+            Purchase Total
           </span>
           <span className="text-sm font-black font-display text-white">
             R$ {computedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -153,7 +153,7 @@ export function CreditPurchaseFields({
       )}
 
       <DateInputField
-        label="Data da Compra"
+        label="Purchase Date"
         value={purchaseDate}
         onChange={onPurchaseDateChange}
         minDate={minDate}

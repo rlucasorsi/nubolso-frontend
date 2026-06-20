@@ -14,6 +14,7 @@ import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDraw
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { ActionsSection } from './ActionsSection';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
+import { useTranslations } from 'next-intl';
 
 interface PainelViewProps {
   onAddEntry: (entry: Omit<CashFlowEntry, 'id'>) => void;
@@ -26,6 +27,7 @@ export function PainelView({
   onUpdateEntry,
   onDeleteEntry,
 }: PainelViewProps) {
+  const t = useTranslations('dashboard');
   const { periods, allDays, currentBalance, balanceSettings, saldoInicial, allEntries, isLoading, isError, refetchAll } = useCashFlow();
 
   const [periodIdx, setPeriodIdx] = useState(0);
@@ -90,7 +92,7 @@ export function PainelView({
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] gap-3 text-muted-foreground">
         <Loader2 className="h-6 w-6 text-primary animate-spin" />
-        <p className="text-sm font-medium">Carregando seu fluxo de caixa...</p>
+        <p className="text-sm font-medium">{t('loadingCashflow')}</p>
       </div>
     );
   }
@@ -177,11 +179,10 @@ export function PainelView({
 
       <div className="px-5 py-4 flex items-center justify-between">
         <h3 className="text-xl font-bold font-display text-white">
-          Dias do período
+          {t('periodDays')}
         </h3>
         <button
           onClick={() => setShowPendingOnly((prev) => !prev)}
-          title="Mostrar apenas dias com lançamentos pendentes (não efetivados ou faturas não pagas)"
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-semibold transition-colors",
             showPendingOnly
@@ -190,7 +191,7 @@ export function PainelView({
           )}
         >
           <Filter className="w-4 h-4" />
-          <span>{showPendingOnly ? 'Com pendências' : 'Filtrar'}</span>
+          <span>{showPendingOnly ? t('withPending') : t('filter')}</span>
           {pendingDaysCount > 0 && (
             <span
               className={cn(
@@ -207,7 +208,7 @@ export function PainelView({
       {displayedDays.length === 0 ? (
         <div className="px-5 py-12 text-center">
           <p className="text-sm text-muted-foreground/60 font-medium">
-            Nenhum dia com pendências neste período.
+            {t('noPendingDays')}
           </p>
         </div>
       ) : (
@@ -219,7 +220,9 @@ export function PainelView({
                 className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors py-1"
               >
                 <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', showPastDays && 'rotate-180')} />
-                {showPastDays ? 'Ocultar' : 'Ver'} {pastDays.length} {pastDays.length === 1 ? 'dia anterior' : 'dias anteriores'}
+                {pastDays.length === 1
+                  ? `${showPastDays ? t('hide') : t('show')} 1 ${t('previousDay')}`
+                  : `${showPastDays ? t('hide') : t('show')} ${pastDays.length} ${t('previousDays')}`}
               </button>
               {showPastDays && (
                 <DayList
@@ -275,7 +278,7 @@ export function PainelView({
       {showFab && !isAddingInHeader && !sheet && (
         <button
           onClick={() => setIsAddingInHeader(true)}
-          aria-label="Novo lançamento"
+          aria-label={t('loadingCashflow')}
           className="hidden sm:flex fixed z-[60] bottom-8 right-8 w-12 h-12 rounded-full bg-gradient-primary text-white shadow-glow items-center justify-center hover:scale-105 active:scale-95 transition-all animate-fade-in"
         >
           <Plus className="w-6 h-6" />

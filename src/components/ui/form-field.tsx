@@ -1,7 +1,10 @@
+'use client';
+
 import * as React from "react"
 import { Input } from "@/components/ui/input"
 import { DatePicker } from "@/components/ui/date-picker"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 interface BaseFieldProps {
   label: string
@@ -125,6 +128,7 @@ export function NumberInputField({
   error,
   className,
 }: NumberInputFieldProps) {
+  const tNum = useTranslations('numberField');
   const [text, setText] = React.useState(String(value))
 
   React.useEffect(() => {
@@ -156,7 +160,7 @@ export function NumberInputField({
           {label} {required && <span className="text-balance-danger">*</span>}
         </label>
         <span className="text-[10px] text-muted-foreground font-medium pr-1">
-          Mín: {min} · Máx: {max}
+          {tNum('range', { min, max })}
         </span>
       </div>
       <div className="relative">

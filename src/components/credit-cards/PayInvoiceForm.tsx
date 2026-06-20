@@ -6,12 +6,14 @@ import { usePayInvoice } from '@/modules/credit-cards/hooks/use-pay-invoice';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { PartialPaymentDrawer } from './PartialPaymentDrawer';
+import { useTranslations } from 'next-intl';
 
 interface PayInvoiceFormProps {
   invoice: CreditCardInvoice;
 }
 
 export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
+  const t = useTranslations('payInvoice');
   const [partialOpen, setPartialOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +24,7 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
     try {
       await payMutation.mutateAsync({ id: invoice.id, amount: invoice.totalAmount });
     } catch (err) {
-      setError(extractErrorMessage(err, 'Não foi possível registrar o pagamento'));
+      setError(extractErrorMessage(err, t('payError')));
     }
   }
 
@@ -35,7 +37,7 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
             disabled={payMutation.isPending}
             className="flex-1 h-11 rounded-xl bg-gradient-primary text-primary-foreground font-bold shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
-            {payMutation.isPending ? 'Processando...' : 'Pagar tudo'}
+            {payMutation.isPending ? t('processing') : t('payAll')}
           </Button>
 
           <Button
@@ -44,7 +46,7 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
             disabled={payMutation.isPending}
             className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5 font-bold"
           >
-            Pagamento parcial
+            {t('partialPayment')}
           </Button>
         </div>
 

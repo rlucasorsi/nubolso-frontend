@@ -44,7 +44,7 @@ export function PurchaseSimulationPreview({ simulation, isLoading }: PurchaseSim
     <div className="space-y-4">
       <div className="space-y-2">
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
-          Parcelas
+          Installments
         </h3>
         <div className="space-y-2">
           {simulation.installments.map((installment) => (
@@ -54,10 +54,10 @@ export function PurchaseSimulationPreview({ simulation, isLoading }: PurchaseSim
             >
               <div className="min-w-0">
                 <p className="text-sm font-semibold">
-                  Parcela {installment.number}/{installment.totalCount}
+                  Installment {installment.number}/{installment.totalCount}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Fatura {MONTH_SHORT[installment.referenceMonth - 1]}/{installment.referenceYear} · Paga em {formatDateLong(installment.paymentDate)}
+                  Invoice {MONTH_SHORT[installment.referenceMonth - 1]}/{installment.referenceYear} · Paid on {formatDateLong(installment.paymentDate)}
                 </p>
               </div>
               <span className="text-sm font-bold text-red-500 shrink-0">
@@ -70,7 +70,7 @@ export function PurchaseSimulationPreview({ simulation, isLoading }: PurchaseSim
 
       <div className="space-y-2">
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
-          Faturas Impactadas
+          Impacted Invoices
         </h3>
         <div className="space-y-2">
           {simulation.impactedInvoices.map((invoice) => (
@@ -80,10 +80,10 @@ export function PurchaseSimulationPreview({ simulation, isLoading }: PurchaseSim
             >
               <div className="min-w-0">
                 <p className="text-sm font-semibold">
-                  Fatura {MONTH_SHORT[invoice.referenceMonth - 1]}/{invoice.referenceYear}
+                  Invoice {MONTH_SHORT[invoice.referenceMonth - 1]}/{invoice.referenceYear}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Vence em {formatDateLong(invoice.paymentDate)}
+                  Due on {formatDateLong(invoice.paymentDate)}
                 </p>
               </div>
               <div className="text-right shrink-0">
@@ -103,12 +103,12 @@ export function PurchaseSimulationPreview({ simulation, isLoading }: PurchaseSim
         <div className="glass-card rounded-2xl p-4 border border-destructive/30 space-y-2">
           <div className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-4 w-4" />
-            <span className="text-sm font-bold">Atenção: seu saldo pode ficar negativo</span>
+            <span className="text-sm font-bold">Warning: your balance may go negative</span>
           </div>
           <div className="space-y-1">
             {negativeDays.slice(0, 3).map((day) => (
               <p key={day.date} className="text-xs text-muted-foreground">
-                {formatDateLong(day.date)}: saldo projetado de {formatCurrency(day.projected)}
+                {formatDateLong(day.date)}: projected balance of {formatCurrency(day.projected)}
               </p>
             ))}
           </div>
@@ -116,7 +116,7 @@ export function PurchaseSimulationPreview({ simulation, isLoading }: PurchaseSim
       ) : (
         <div className="glass-card rounded-2xl p-4 flex items-center gap-2 text-emerald-500">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span className="text-sm font-bold">Nenhum impacto negativo previsto no seu saldo.</span>
+          <span className="text-sm font-bold">No negative impact predicted on your balance.</span>
         </div>
       )}
     </div>

@@ -20,6 +20,7 @@ import { useDeleteCreditCard } from '@/modules/credit-cards/hooks/use-delete-cre
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslations } from 'next-intl';
 
 interface CreditCardDetailDrawerProps {
   open: boolean;
@@ -42,6 +43,7 @@ export function CreditCardDetailDrawer({
   onAddPurchase,
   onSelectInvoice,
 }: CreditCardDetailDrawerProps) {
+  const t = useTranslations('creditCardDetail');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const { data: invoices, isLoading } = useGetCardInvoices(card?.id, open);
@@ -75,7 +77,7 @@ export function CreditCardDetailDrawer({
       setConfirmDelete(false);
       onClose();
     } catch (err) {
-      setDeleteError(extractErrorMessage(err, 'Não foi possível remover o cartão'));
+      setDeleteError(extractErrorMessage(err, "Couldn't remove the card"));
     }
   };
 
@@ -109,19 +111,19 @@ export function CreditCardDetailDrawer({
           <div className={cn('p-2 rounded-xl shrink-0', cfg.bg)}>{cfg.icon('sm')}</div>
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate">
-              Fatura {MONTH_SHORT[invoice.referenceMonth - 1]}/{invoice.referenceYear}
+              {t('invoiceMonth', { month: MONTH_SHORT[invoice.referenceMonth - 1], year: invoice.referenceYear })}
             </p>
             <p className="text-xs text-muted-foreground">
-              {invoice.isPaid ? 'Paga em' : 'Vence em'} {formatDateLong(invoice.paymentDate)}
+              {invoice.isPaid ? t('paidOn') : t('dueOn')} {formatDateLong(invoice.paymentDate)}
             </p>
           </div>
         </div>
         <div className="text-right shrink-0">
           <p className="text-sm font-bold">{formatCurrency(invoice.totalAmount)}</p>
           {invoice.isPaid ? (
-            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Paga</span>
+            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">{t('paid')}</span>
           ) : isOverdue ? (
-            <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Atrasada</span>
+            <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">{t('overdue')}</span>
           ) : null}
         </div>
       </button>
@@ -134,22 +136,22 @@ export function CreditCardDetailDrawer({
         <DrawerHeader
           onClose={onClose}
           actions={
-            <Button variant="ghost" size="icon-sm" onClick={() => onEdit(card)} title="Editar cartão">
+            <Button variant="ghost" size="icon-sm" onClick={() => onEdit(card)} title="Edit card">
               <Pencil className="h-4 w-4" />
             </Button>
           }
         >
           <SheetTitle className="text-xl font-bold font-display text-primary">{card.name}</SheetTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Fecha dia {card.closingDay} · Vence dia {card.dueDay} · Paga dia {card.paymentDay}
+            {t('closingDay', { day: card.closingDay })} · {t('dueDay', { day: card.dueDay })} · {t('paymentDay', { day: card.paymentDay })}
           </p>
-          <SheetDescription className="sr-only">Detalhes do cartão {card.name}</SheetDescription>
+          <SheetDescription className="sr-only">{card.name}</SheetDescription>
         </DrawerHeader>
 
         <div className="flex-1 px-6 pb-6 space-y-6 mt-4">
           {!card.isActive && (
             <div className="glass-card rounded-2xl p-4 text-center">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Cartão Inativo</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('inactive')}</p>
             </div>
           )}
 
@@ -172,7 +174,7 @@ export function CreditCardDetailDrawer({
               {current && (
                 <div className="space-y-2">
                   <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
-                    Fatura Atual
+                    {t('currentInvoice')}
                   </h3>
                   {renderInvoiceRow(current)}
                 </div>
@@ -181,17 +183,17 @@ export function CreditCardDetailDrawer({
               {future.length > 0 && (
                 <div className="space-y-2">
                   <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
-                    Próximas Faturas
+                    {t('upcomingInvoices')}
                   </h3>
                   <div className="space-y-2">{future.map(renderInvoiceRow)}</div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">Histórico</h3>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">{t('history')}</h3>
                 {paid.length === 0 ? (
                   <div className="glass-card rounded-2xl p-8 text-center">
-                    <p className="text-sm text-muted-foreground">Nenhuma fatura paga ainda.</p>
+                    <p className="text-sm text-muted-foreground">{t('noInvoices')}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">{paid.map(renderInvoiceRow)}</div>
@@ -209,10 +211,9 @@ export function CreditCardDetailDrawer({
                   <Trash2 className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 pt-1.5">
-                  <p className="text-sm font-bold text-white tracking-tight">Remover este cartão?</p>
+                  <p className="text-sm font-bold text-white tracking-tight">{t('removeConfirm')}</p>
                   <p className="text-xs text-muted-foreground/60 font-medium mt-1">
-                    O cartão será desativado e deixará de gerar novas faturas. O histórico de compras e faturas
-                    pagas será preservado.
+                    {t('removeDesc')}
                   </p>
                   {deleteError && (
                     <p className="text-xs text-red-500 font-medium mt-2">{deleteError}</p>
@@ -225,14 +226,14 @@ export function CreditCardDetailDrawer({
                   disabled={deleteMutation.isPending}
                   className="flex-1 h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancelar
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={handleDeactivate}
                   disabled={deleteMutation.isPending}
                   className="flex-1 h-10 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all text-xs font-bold shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {deleteMutation.isPending ? 'Removendo...' : 'Remover'}
+                  {deleteMutation.isPending ? t('removing') : t('remove')}
                 </button>
               </div>
             </div>
@@ -244,7 +245,7 @@ export function CreditCardDetailDrawer({
                 className="w-full h-11 bg-gradient-primary text-primary-foreground font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <Plus className="h-5 w-5" />
-                Adicionar Compra
+                {t('addPurchase')}
               </Button>
 
               {card.isActive && (
@@ -256,7 +257,7 @@ export function CreditCardDetailDrawer({
                   className="w-full h-11 rounded-xl border border-destructive/20 text-destructive font-bold text-sm hover:bg-destructive/10 transition-all flex items-center justify-center gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Remover Cartão
+                  {t('removeCard')}
                 </button>
               )}
             </>

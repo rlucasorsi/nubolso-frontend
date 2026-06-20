@@ -1,8 +1,11 @@
+'use client';
+
 import { DayData } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
 import { Eye, RotateCw } from 'lucide-react';
-import { MONTH_SHORT } from './config';
+import { MONTH_SHORT, WEEK_DAYS } from './config';
 import { BalanceSettings } from '@/hooks/useCashFlow';
+import { useTranslations } from 'next-intl';
 
 interface DayCardProps {
   day: DayData;
@@ -13,11 +16,6 @@ interface DayCardProps {
   onOpenSheet?: (date: string, filter: any) => void;
   onAddEntry?: (entry: any) => void;
 }
-
-const WEEK_DAYS = [
-  'Domingo', 'Segunda', 'Terça', 'Quarta',
-  'Quinta', 'Sexta', 'Sábado'
-];
 
 type SaldoStatus = 'ok' | 'warning' | 'critical';
 
@@ -43,6 +41,7 @@ export function DayCard({
   onOpenSheet,
   balanceSettings,
 }: DayCardProps) {
+  const t = useTranslations('dayCard');
   const d = new Date(day.date + 'T00:00:00');
   const isNegative = day.saldoAcumulado < 0;
   const isDisabled = day.isBeforeStartDate;
@@ -50,11 +49,11 @@ export function DayCard({
   const saldoStatus = isDisabled ? 'ok' : getSaldoStatus(day.saldoAcumulado, balanceSettings);
 
   const statusLine = isToday
-    ? 'Hoje'
+    ? t('today')
     : day.isBeforeStartDate
-      ? 'Sem histórico'
+      ? t('noHistory')
       : isNegative
-        ? 'Fica negativo'
+        ? t('goesNegative')
         : null;
 
   return (
@@ -88,7 +87,7 @@ export function DayCard({
                 {day.hasPendingRecurring && (
                   <div
                     className="w-4 h-4 rounded flex items-center justify-center text-amber-400 shrink-0"
-                    title="Há lançamentos recorrentes estimados (não efetivados) neste dia"
+                    title="Recurring estimated entries pending on this day"
                   >
                     <RotateCw className="w-3 h-3" />
                   </div>
@@ -107,7 +106,7 @@ export function DayCard({
 
           <div className="flex items-center gap-2">
             <div className={cn("flex items-baseline gap-1.5 text-right", saldoBorderClass(saldoStatus))}>
-              <span className="text-[8px] font-black uppercase tracking-wide text-white">Saldo</span>
+              <span className="text-[8px] font-black uppercase tracking-wide text-white">{t('balance')}</span>
               {isDisabled ? (
                 <span className="text-sm font-black font-display text-white/30">—</span>
               ) : (
@@ -130,7 +129,7 @@ export function DayCard({
           </div>
         </div>
 
-        {/* Data Grid: Entradas / Despesas / Gastos */}
+        {/* Data Grid */}
         <div
           onClick={isDisabled ? undefined : onToggle}
           className={cn(
@@ -139,7 +138,7 @@ export function DayCard({
           )}
         >
           <div className="space-y-1">
-            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">Entradas</p>
+            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">{t('income')}</p>
             <p className="text-xs font-bold font-display text-emerald-500">
               <span className="text-[8px] font-black mr-0.5">+</span>
               {day.income.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -147,7 +146,7 @@ export function DayCard({
           </div>
 
           <div className="space-y-1">
-            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">Despesas</p>
+            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">{t('expense')}</p>
             <p className="text-xs font-bold font-display text-red-500">
               <span className="text-[8px] font-black mr-0.5">-</span>
               {day.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -155,7 +154,7 @@ export function DayCard({
           </div>
 
           <div className="space-y-1">
-            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">Gastos</p>
+            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">{t('spending')}</p>
             <p className="text-xs font-bold font-display text-orange-400">
               <span className="text-[8px] font-black mr-0.5">-</span>
               {day.spending.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

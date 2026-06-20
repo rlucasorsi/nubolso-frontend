@@ -15,8 +15,10 @@ import { AddFundsDrawer } from '@/components/goals/AddFundsDrawer';
 import { GoalsSummary } from '@/components/goals/GoalsSummary';
 import { AddButton } from '@/components/ui/add-button';
 import { Target } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function GoalsView() {
+  const t = useTranslations('goalsView');
   const goalsQuery = useGetGoals();
   const createGoalMutation = useCreateGoal();
   const updateGoalMutation = useUpdateGoal();
@@ -89,16 +91,16 @@ export function GoalsView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold font-display">
-            Metas e Objetivos
+            {t('title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Transforme seus sonhos em conquistas financeiras.
+            {t('subtitle')}
           </p>
         </div>
         <AddButton
           onClick={() => setShowCreateDrawer(true)}
-          title="Adicionar nova meta"
-          label="Adicionar Nova Meta"
+          title={t('addGoalTitle')}
+          label={t('addGoal')}
           className="w-full sm:w-auto"
         />
       </div>
@@ -147,7 +149,7 @@ export function GoalsView() {
               <div className="w-14 h-14 rounded-full bg-muted/30 flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
                 <Target className="h-6 w-6" />
               </div>
-              <span className="font-medium text-sm">Criar novo objetivo</span>
+              <span className="font-medium text-sm">{t('createNew')}</span>
             </button>
           </div>
         </>

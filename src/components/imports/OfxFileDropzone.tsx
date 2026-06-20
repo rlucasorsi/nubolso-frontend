@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { FileUp, FileCheck2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 const ALLOWED_EXTENSIONS = /\.(ofx|qfx)$/i;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -19,6 +20,7 @@ function formatFileSize(bytes: number): string {
 }
 
 export function OfxFileDropzone({ file, onChange, error, onValidationError }: OfxFileDropzoneProps) {
+  const t = useTranslations('ofxDropzone');
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -27,12 +29,12 @@ export function OfxFileDropzone({ file, onChange, error, onValidationError }: Of
 
     if (!ALLOWED_EXTENSIONS.test(candidate.name)) {
       onChange(null);
-      onValidationError?.('Formato inválido. Envie um arquivo .ofx ou .qfx');
+      onValidationError?.(t('invalidFormat'));
       return;
     }
     if (candidate.size > MAX_FILE_SIZE) {
       onChange(null);
-      onValidationError?.('Arquivo muito grande. O limite é 5MB');
+      onValidationError?.(t('fileTooLarge'));
       return;
     }
 
@@ -86,7 +88,7 @@ export function OfxFileDropzone({ file, onChange, error, onValidationError }: Of
               className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="h-3.5 w-3.5" />
-              Remover arquivo
+              {t('removeFile')}
             </button>
           </>
         ) : (
@@ -95,8 +97,8 @@ export function OfxFileDropzone({ file, onChange, error, onValidationError }: Of
               <FileUp className="h-6 w-6 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
-              <p className="text-sm font-semibold">Arraste o extrato aqui</p>
-              <p className="text-xs text-muted-foreground">ou clique para selecionar um arquivo .ofx ou .qfx (máx. 5MB)</p>
+              <p className="text-sm font-semibold">{t('dropHere')}</p>
+              <p className="text-xs text-muted-foreground">{t('dropHint')}</p>
             </div>
           </>
         )}

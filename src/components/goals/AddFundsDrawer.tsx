@@ -17,6 +17,7 @@ import type { Goal } from '@/modules/goals/model/api/goal';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { ArrowDownLeft, ArrowUpRight, Check, CheckCircle2, Loader2, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 type OperationType = 'deposit' | 'withdrawal';
 
@@ -43,13 +44,11 @@ function formatCurrency(value: number) {
   });
 }
 
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 function formatDate(dateStr: string) {
   const date = new Date(dateStr + 'T00:00:00');
-  const months = [
-    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
-  ];
-  return `${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]}, ${date.getFullYear()}`;
+  return `${date.getDate().toString().padStart(2, '0')} ${SHORT_MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
 }
 
 export function AddFundsDrawer({
@@ -59,6 +58,7 @@ export function AddFundsDrawer({
   onSubmit,
   isLoading,
 }: AddFundsDrawerProps) {
+  const t = useTranslations('addFunds');
   const [operationType, setOperationType] = useState<OperationType>('deposit');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getTodayDateString());
@@ -122,7 +122,7 @@ export function AddFundsDrawer({
         onClose();
       }, 1500);
     } catch (err) {
-      setError(extractErrorMessage(err, 'Não foi possível registrar a operação'));
+      setError(extractErrorMessage(err, "Couldn't register the operation"));
     }
   };
 
@@ -146,7 +146,7 @@ export function AddFundsDrawer({
       <DrawerContent ref={scrollContainerRef}>
         <DrawerHeader onClose={onClose}>
           <SheetTitle className="text-xl font-bold font-display text-primary">
-            {isWithdrawal ? 'Retirar Valor' : 'Adicionar Valor'}
+            {isWithdrawal ? t('withdrawTitle') : t('depositTitle')}
           </SheetTitle>
           <SheetDescription className="text-sm text-muted-foreground">
             {goal.name}
@@ -167,10 +167,10 @@ export function AddFundsDrawer({
               "text-xl font-bold font-display mb-1",
               isWithdrawal ? "text-destructive" : "text-primary"
             )}>
-              {isWithdrawal ? 'Retirada Registrada!' : 'Aporte Realizado!'}
+              {isWithdrawal ? t('withdrawDone') : t('depositDone')}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {isWithdrawal ? 'Valor retirado da reserva.' : 'Seu objetivo está mais próximo.'}
+              {isWithdrawal ? t('withdrawDoneNote') : t('depositDoneNote')}
             </p>
           </div>
         ) : (
@@ -188,7 +188,7 @@ export function AddFundsDrawer({
                   )}
                 >
                   <ArrowUpRight className="h-3.5 w-3.5" />
-                  Depositar
+                  {t('deposit')}
                 </button>
                 <button
                   onClick={() => setOperationType('withdrawal')}
@@ -200,18 +200,18 @@ export function AddFundsDrawer({
                   )}
                 >
                   <ArrowDownLeft className="h-3.5 w-3.5" />
-                  Retirar
+                  {t('withdraw')}
                 </button>
               </div>
 
               <DateInputField
-                label={isWithdrawal ? 'Data da Retirada' : 'Data do Aporte'}
+                label={isWithdrawal ? t('withdrawDate') : t('depositDate')}
                 value={date}
                 onChange={setDate}
               />
 
               <AmountInputField
-                label={isWithdrawal ? 'Valor da Retirada' : 'Valor do Aporte'}
+                label={isWithdrawal ? t('withdrawAmount') : t('depositAmount')}
                 value={amount}
                 onChange={setAmount}
                 autoFocus
@@ -224,7 +224,7 @@ export function AddFundsDrawer({
               {/* History */}
               <div className="pt-2">
                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 pl-1">
-                  Histórico
+                  {t('history')}
                 </h3>
 
                 <div className="space-y-2">
@@ -234,7 +234,7 @@ export function AddFundsDrawer({
                     </div>
                   ) : contributions.length === 0 ? (
                     <div className="glass-card rounded-2xl p-6 text-center">
-                      <p className="text-sm text-muted-foreground">Nenhuma movimentação ainda.</p>
+                      <p className="text-sm text-muted-foreground">{t('noMovements')}</p>
                     </div>
                   ) : (
                     <>
@@ -299,8 +299,8 @@ export function AddFundsDrawer({
                   : <Plus className="h-5 w-5" />
                 }
                 {isLoading
-                  ? 'Processando...'
-                  : isWithdrawal ? 'Confirmar Retirada' : 'Confirmar Aporte'
+                  ? t('processing')
+                  : isWithdrawal ? t('confirmWithdraw') : t('confirmDeposit')
                 }
               </Button>
             </DrawerFooter>

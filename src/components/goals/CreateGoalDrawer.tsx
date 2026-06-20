@@ -30,18 +30,19 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DatePicker } from '@/components/ui/date-picker';
+import { useTranslations } from 'next-intl';
 
 const ICON_OPTIONS = [
-  { name: 'home', label: 'Casa', Icon: Home },
-  { name: 'directions_car', label: 'Carro', Icon: Car },
-  { name: 'flight_takeoff', label: 'Viagem', Icon: Plane },
-  { name: 'school', label: 'Estudo', Icon: GraduationCap },
-  { name: 'payments', label: 'Dinheiro', Icon: Wallet },
-  { name: 'volunteer_activism', label: 'Vida', Icon: Heart },
-  { name: 'laptop_mac', label: 'Tech', Icon: Laptop },
-  { name: 'shield', label: 'Reserva', Icon: Shield },
-  { name: 'smartphone', label: 'Celular', Icon: Smartphone },
-  { name: 'savings', label: 'Poupança', Icon: PiggyBank },
+  { name: 'home', Icon: Home },
+  { name: 'directions_car', Icon: Car },
+  { name: 'flight_takeoff', Icon: Plane },
+  { name: 'school', Icon: GraduationCap },
+  { name: 'payments', Icon: Wallet },
+  { name: 'volunteer_activism', Icon: Heart },
+  { name: 'laptop_mac', Icon: Laptop },
+  { name: 'shield', Icon: Shield },
+  { name: 'smartphone', Icon: Smartphone },
+  { name: 'savings', Icon: PiggyBank },
 ];
 
 interface CreateGoalDrawerProps {
@@ -63,6 +64,7 @@ export function CreateGoalDrawer({
   onSubmit,
   isLoading,
 }: CreateGoalDrawerProps) {
+  const t = useTranslations('createGoal');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -110,47 +112,47 @@ export function CreateGoalDrawer({
       <DrawerContent>
         <DrawerHeader onClose={onClose}>
           <SheetTitle className="text-xl font-bold font-display text-primary">
-            Nova Meta Financeira
+            {t('title')}
           </SheetTitle>
           <SheetDescription className="text-sm text-muted-foreground">
-            Defina seus objetivos e comece a poupar hoje.
+            {t('subtitle')}
           </SheetDescription>
         </DrawerHeader>
 
         <div className="flex-1 px-6 pb-6 space-y-6">
           <div className="space-y-2">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Nome da Meta
+              {t('goalName')}
             </Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="ex: Viagem dos Sonhos"
+              placeholder={t('goalNamePlaceholder')}
               className="glass-input h-12 rounded-xl"
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Descrição
+              {t('description')}
             </Label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="ex: Eurotrip 15 dias"
+              placeholder={t('descriptionPlaceholder')}
               className="glass-input h-12 rounded-xl"
             />
           </div>
 
           <AmountInputField
-            label="Valor Alvo"
+            label={t('targetAmount')}
             value={targetAmount}
             onChange={setTargetAmount}
           />
 
           <div className="space-y-2">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Prazo Estimado
+              {t('deadline')}
             </Label>
             <DatePicker
               date={deadline}
@@ -161,7 +163,7 @@ export function CreateGoalDrawer({
 
           <div className="space-y-3">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              Ícone Representativo
+              {t('icon')}
             </Label>
             <div className="flex gap-3 overflow-x-auto pb-4 -mx-1 px-1 scrollbar-hide">
               {ICON_OPTIONS.map((opt) => {
@@ -196,7 +198,7 @@ export function CreateGoalDrawer({
             disabled={!isFormValid || isLoading}
             className="w-full h-11 bg-gradient-primary text-white font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all group"
           >
-            {isLoading ? 'Criando...' : 'Criar Objetivo'}
+            {isLoading ? t('creating') : t('createBtn')}
             {!isLoading && (
               <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
             )}

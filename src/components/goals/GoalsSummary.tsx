@@ -1,6 +1,7 @@
 'use client';
 
 import { TrendingUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface GoalsSummaryProps {
   totalPlanned: number;
@@ -22,29 +23,28 @@ export function GoalsSummary({
   activeGoals,
   nearCompletion,
 }: GoalsSummaryProps) {
+  const t = useTranslations('goalsView');
   const progressPercent =
     totalPlanned > 0 ? Math.round((totalSaved / totalPlanned) * 100) : 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Total Planejado */}
       <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-          Total Planejado
+          {t('totalPlanned')}
         </span>
         <span className="text-2xl font-bold font-display text-primary">
           {formatCurrency(totalPlanned)}
         </span>
         <div className="flex items-center gap-2 text-success text-xs mt-2">
           <TrendingUp className="h-4 w-4" />
-          <span className="font-bold">Em crescimento</span>
+          <span className="font-bold">{t('growing')}</span>
         </div>
       </div>
 
-      {/* Total Poupado */}
       <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-          Total Poupado
+          {t('totalSaved')}
         </span>
         <span className="text-2xl font-bold font-display">
           {formatCurrency(totalSaved)}
@@ -57,18 +57,17 @@ export function GoalsSummary({
         </div>
       </div>
 
-      {/* Metas Ativas */}
       <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-          Metas Ativas
+          {t('activeGoals')}
         </span>
         <span className="text-2xl font-bold font-display">
-          {activeGoals} {activeGoals !== 1 ? 'Objetivos' : 'Objetivo'}
+          {activeGoals} {activeGoals !== 1 ? t('objectives') : t('objective')}
         </span>
         <span className="text-xs font-medium text-muted-foreground mt-2">
           {nearCompletion > 0
-            ? `${nearCompletion} meta${nearCompletion > 1 ? 's' : ''} perto da conclusão ✨`
-            : 'Foco total nos objetivos'}
+            ? t('nearCompletion', { count: nearCompletion })
+            : t('focused')}
         </span>
       </div>
     </div>
