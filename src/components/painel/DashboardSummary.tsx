@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { Period, formatCurrency, formatCurrencyCompact, formatDateAxis, formatDateLong } from '@/lib/cashflow';
 import { BalanceSettings } from '@/hooks/useCashFlow';
 import { Card } from '@/components/ui/card';
@@ -16,7 +16,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface DashboardSummaryProps {
   period: Period;
@@ -193,7 +193,7 @@ export function DashboardSummary({
           </div>
         </Card>
 
-        {/* Previsão Final */}
+        {/* PrevisÃ£o Final */}
         <Card className="bg-[#1c1a24] border-none rounded-[2rem] overflow-hidden relative p-8 py-6">
           <div className="flex justify-between items-start">
             <div className="space-y-3">
@@ -404,3 +404,4 @@ export function DashboardSummary({
     </div>
   );
 }
+

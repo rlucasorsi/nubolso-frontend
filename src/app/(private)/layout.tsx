@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, CircleDollarSign, Target, LayoutDashboard, RotateCw, CreditCard, Menu } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 import { MobileNav } from '@/components/layout/MobileNav';
 import { SideMenuDrawer } from '@/components/layout/SideMenuDrawer';
@@ -21,14 +20,13 @@ export default function PrivateLayout({
 }) {
   const t = useTranslations('nav');
   const router = useRouter();
-  const locale = useLocale();
   const { data: me } = useGetMe();
   const needsOnboarding = Boolean(me && !me.balanceStartDate);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await authService.logout();
-    router.push(`/${locale}/login`);
+    router.push('/login');
   };
 
   return (
@@ -51,7 +49,7 @@ export default function PrivateLayout({
             <Menu className="h-5 w-5" />
           </button>
 
-          <Link href={`/${locale}/dashboard`}>
+          <Link href="/dashboard">
             <img
               src="/logo.svg"
               alt="NuBolso"
@@ -63,37 +61,37 @@ export default function PrivateLayout({
 
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
-            <Link href={`/${locale}/dashboard`}>
+            <Link href="/dashboard">
               <LayoutDashboard className="h-4 w-4" />
               <span>{t('dashboard')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
-            <Link href={`/${locale}/entries`}>
+            <Link href="/entries">
               <CircleDollarSign className="h-4 w-4" />
               <span>{t('entries')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
-            <Link href={`/${locale}/cards`}>
+            <Link href="/cards">
               <CreditCard className="h-4 w-4" />
               <span>{t('cards')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
-            <Link href={`/${locale}/recurring`}>
+            <Link href="/recurring">
               <RotateCw className="h-4 w-4" />
               <span>{t('recurring')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
-            <Link href={`/${locale}/goals`}>
+            <Link href="/goals">
               <Target className="h-4 w-4" />
               <span>{t('goals')}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
-            <Link href={`/${locale}/settings`}>
+            <Link href="/settings">
               <Settings className="h-4 w-4" />
               <span>{t('settings')}</span>
             </Link>

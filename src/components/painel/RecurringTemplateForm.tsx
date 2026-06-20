@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { FlowType } from '@/lib/cashflow';
 import { EndType } from '@/lib/schemas/recurring-templates';
 import { TypeToggle } from './TypeToggle';
 import { TextInputField, AmountInputField, NumberInputField, DateInputField } from '@/components/ui/form-field';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 export interface RecurringTemplateFormValues {
   description: string;
@@ -121,3 +121,4 @@ export function RecurringTemplateForm({ values, onChange, errors }: RecurringTem
     </div>
   );
 }
+

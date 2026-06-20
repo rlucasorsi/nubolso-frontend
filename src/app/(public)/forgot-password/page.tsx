@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { forgotPasswordSchema } from '@/lib/schemas/auth';
@@ -13,7 +13,6 @@ import { forgotPasswordSchema } from '@/lib/schemas/auth';
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | undefined>();
@@ -32,7 +31,7 @@ export default function ForgotPasswordPage() {
     try {
       await authService.forgotPassword({ email });
       toast.success(t('forgotSuccess'));
-      router.push(`/${locale}/reset-password?email=${encodeURIComponent(email)}`);
+      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
     } catch (error) {
       toast.error(extractErrorMessage(error, t('forgotError')));
     } finally {
@@ -92,7 +91,7 @@ export default function ForgotPasswordPage() {
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             <Link
-              href={`/${locale}/login`}
+              href="/login"
               className="inline-flex items-center gap-1 font-semibold text-brand-gradient hover:opacity-80"
             >
               <ArrowLeft className="h-4 w-4" /> {t('backToLogin')}

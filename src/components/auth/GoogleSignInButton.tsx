@@ -3,14 +3,15 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
+import { useLanguage } from '@/i18n/LanguageContext';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 
 export function GoogleSignInButton() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const locale = useLocale();
+  const { locale } = useLanguage();
 
   if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
     return null;
@@ -33,7 +34,7 @@ export function GoogleSignInButton() {
           try {
             await authService.googleLogin({ idToken: credentialResponse.credential });
             toast.success(t('welcome'));
-            router.push(`/${locale}/dashboard`);
+            router.push('/dashboard');
           } catch (error) {
             toast.error(extractErrorMessage(error, t('googleLoginError')));
           }

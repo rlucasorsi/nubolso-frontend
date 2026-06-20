@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import type { Goal } from '@/modules/goals/model/api/goal';
 import {
@@ -20,7 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { CircularProgress } from '@/components/ui/circular-progress';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   shield: Shield,
@@ -163,3 +163,4 @@ export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
     </div>
   );
 }
+

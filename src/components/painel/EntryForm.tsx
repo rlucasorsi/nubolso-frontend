@@ -1,7 +1,7 @@
-import { FlowType } from '@/lib/cashflow';
+﻿import { FlowType } from '@/lib/cashflow';
 import { TypeToggle } from './TypeToggle';
 import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 export interface EntryFormValues {
   date: string;
@@ -59,3 +59,4 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
     </div>
   );
 }
+

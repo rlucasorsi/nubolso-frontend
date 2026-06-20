@@ -18,7 +18,7 @@ import {
   LogOut,
   X,
 } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { cn } from '@/lib/utils';
 import { authService } from '@/services/auth';
 
@@ -30,23 +30,22 @@ interface SideMenuDrawerProps {
 
 export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps) {
   const t = useTranslations('nav');
-  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
 
   const NAV_ITEMS = [
-    { label: t('dashboard'), href: `/${locale}/dashboard`, icon: LayoutDashboard },
-    { label: t('entries'), href: `/${locale}/entries`, icon: CircleDollarSign },
-    { label: t('cards'), href: `/${locale}/cards`, icon: CreditCard },
-    { label: t('recurring'), href: `/${locale}/recurring`, icon: RotateCw },
-    { label: t('goals'), href: `/${locale}/goals`, icon: Target },
-    { label: t('settings'), href: `/${locale}/settings`, icon: Settings },
+    { label: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { label: t('entries'), href: '/entries', icon: CircleDollarSign },
+    { label: t('cards'), href: '/cards', icon: CreditCard },
+    { label: t('recurring'), href: '/recurring', icon: RotateCw },
+    { label: t('goals'), href: '/goals', icon: Target },
+    { label: t('settings'), href: '/settings', icon: Settings },
   ];
 
   const handleLogout = async () => {
     onClose();
     await authService.logout();
-    router.push(`/${locale}/login`);
+    router.push('/login');
   };
 
   return (

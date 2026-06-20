@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { CashFlowEntry, FlowType, formatCurrency } from '@/lib/cashflow';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Plus, Pencil, Trash2, Check, ChevronDown, RotateCw, RotateCcw, Ban, X, 
 import { EntryFormValues } from './EntryForm';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { TYPE_CONFIG, WEEK_DAYS, MONTH_SHORT } from './config';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { useRealizeRecurringTemplate } from '@/modules/recurring-templates/hooks/use-realize-recurring-template';
 import { useSkipRecurringTemplate } from '@/modules/recurring-templates/hooks/use-skip-recurring-template';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
@@ -152,7 +152,7 @@ export function DailyEntriesDrawer({
     setExpandedGroups(prev => ({ ...prev, [type]: !prev[type] }));
   };
 
-  // Reverts a realized recurring transaction back to "não efetivado": deletes
+  // Reverts a realized recurring transaction back to "nÃ£o efetivado": deletes
   // the real Transaction so the projection regenerates the estimate again.
   const handleDelete = () => {
     if (deleteConfirmId) {

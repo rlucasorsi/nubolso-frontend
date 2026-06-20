@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { ServerCrash, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface ServerErrorStateProps {
   onRetry?: () => void;
@@ -31,3 +31,4 @@ export function ServerErrorState({ onRetry }: ServerErrorStateProps) {
     </div>
   );
 }
+

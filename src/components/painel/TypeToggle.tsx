@@ -1,5 +1,5 @@
-import { FlowType } from '@/lib/cashflow';
-import { useTranslations } from 'next-intl';
+﻿import { FlowType } from '@/lib/cashflow';
+import { useTranslations } from '@/i18n/useTranslations';
 
 const ACTIVE_STYLES: Record<FlowType, string> = {
   income: 'bg-success/20 text-success border-success/50 shadow-[0_0_10px_rgba(74,222,128,0.2)]',
@@ -39,3 +39,4 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
     </div>
   );
 }
+

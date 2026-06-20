@@ -1,6 +1,7 @@
 import { Period } from '@/lib/cashflow';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface PeriodNavProps {
   periods: Period[];
@@ -20,7 +21,7 @@ export function PeriodNav({
   isCurrentPeriod,
 }: PeriodNavProps) {
   const t = useTranslations('periodNav');
-  const locale = useLocale();
+  const { locale } = useLanguage();
   const period = periods[periodIdx];
 
   const formatCycleDate = (dateStr: string) => {

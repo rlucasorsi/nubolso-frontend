@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { EntryForm, EntryFormValues } from './EntryForm';
 import { entryFormSchema } from '@/lib/schemas/transactions';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { AddButton } from '@/components/ui/add-button';
 import { FlowType } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
 import { Wallet, CreditCard as CreditCardIcon } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import {
   Sheet,
   DrawerContent,
@@ -242,3 +242,4 @@ export function AddEntryDrawer({
     </>
   );
 }
+

@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { RotateCw, Pencil, Trash2, Archive, Loader2, Search, ChevronDown, CalendarClock, Hash } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { formatCurrency } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
@@ -33,7 +33,6 @@ const TYPE_ORDER = ['income', 'expense', 'spending'] as const;
 
 export function RecurringTemplatesView() {
   const t = useTranslations('recurring');
-  const locale = useLocale();
   const { data: recurringTemplates, isLoading, isError, refetch } = useGetRecurringTemplates();
   const archiveMutation = useUpdateRecurringTemplate();
   const reactivateMutation = useUpdateRecurringTemplate();

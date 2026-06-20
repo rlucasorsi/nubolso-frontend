@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
+﻿import { Button } from '@/components/ui/button';
 import { Filter, Calendar, Settings } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface ActionsSectionProps {
   onFilterClick: () => void;
@@ -39,3 +39,4 @@ export function ActionsSection({ onFilterClick, onNavigateClick }: ActionsSectio
     </div>
   );
 }
+

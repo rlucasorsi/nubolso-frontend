@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { useCooldown } from '@/hooks/useCooldown';
@@ -23,7 +23,6 @@ export default function ResetPasswordPage() {
 function ResetPasswordContent() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const locale = useLocale();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') ?? '';
   const [code, setCode] = useState('');
@@ -49,7 +48,7 @@ function ResetPasswordContent() {
     try {
       await authService.resetPassword({ email, code, newPassword: password });
       toast.success(t('passwordReset'));
-      router.push(`/${locale}/login`);
+      router.push('/login');
     } catch (error) {
       toast.error(extractErrorMessage(error, t('invalidCode')));
     } finally {
@@ -108,7 +107,7 @@ function ResetPasswordContent() {
           {!email ? (
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {t('noEmailFound')}{' '}
-              <Link href={`/${locale}/forgot-password`} className="font-semibold text-brand-gradient hover:opacity-80">
+              <Link href="/forgot-password" className="font-semibold text-brand-gradient hover:opacity-80">
                 {t('requestNewCode')}
               </Link>
             </p>
@@ -187,7 +186,7 @@ function ResetPasswordContent() {
           )}
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            <Link href={`/${locale}/login`} className="font-semibold text-brand-gradient hover:opacity-80">
+            <Link href="/login" className="font-semibold text-brand-gradient hover:opacity-80">
               {t('backToLogin')}
             </Link>
           </p>

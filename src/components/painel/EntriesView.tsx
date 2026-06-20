@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
@@ -31,7 +31,7 @@ import { ptBR } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 export function EntriesView() {
   const t = useTranslations('entries');
@@ -270,3 +270,4 @@ export function EntriesView() {
     </div>
   );
 }
+

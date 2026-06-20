@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useGetGoals } from '@/modules/goals/hooks/use-get-goals';
@@ -15,7 +15,7 @@ import { AddFundsDrawer } from '@/components/goals/AddFundsDrawer';
 import { GoalsSummary } from '@/components/goals/GoalsSummary';
 import { AddButton } from '@/components/ui/add-button';
 import { Target } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 export function GoalsView() {
   const t = useTranslations('goalsView');
@@ -197,3 +197,4 @@ export function GoalsView() {
     </div>
   );
 }
+

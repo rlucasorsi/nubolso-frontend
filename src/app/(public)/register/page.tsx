@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, User, Check } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
@@ -50,7 +50,6 @@ function mapRegisterError(error: unknown, t: (key: string) => string): string {
 export default function RegisterPage() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const locale = useLocale();
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -79,7 +78,7 @@ export default function RegisterPage() {
     try {
       await authService.register({ name, email, password });
       toast.success(t('accountCreated'));
-      router.push(`/${locale}/verify-email?email=${encodeURIComponent(email)}`);
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (error) {
       toast.error(mapRegisterError(error, t));
     } finally {
@@ -205,7 +204,7 @@ export default function RegisterPage() {
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {t('alreadyHaveAccount')}{' '}
-            <Link href={`/${locale}/login`} className="font-semibold text-brand-gradient hover:opacity-80">
+            <Link href="/login" className="font-semibold text-brand-gradient hover:opacity-80">
               {t('loginLink')}
             </Link>
           </p>

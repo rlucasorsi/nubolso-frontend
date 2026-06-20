@@ -3,9 +3,9 @@
 import { GoalsView } from '@/components/goals/GoalsView';
 import { useEffect } from 'react';
 
-export default function MetasPage() {
+export default function GoalsPage() {
   useEffect(() => {
-    document.title = 'Metas e Objetivos — nubolso';
+    document.title = 'Goals — nubolso';
   }, []);
 
   return <GoalsView />;

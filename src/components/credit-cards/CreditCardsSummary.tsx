@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import { CreditCard, Wallet, Calendar, TrendingDown } from 'lucide-react';
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface CreditCardsSummaryProps {
   activeCardsCount: number;
@@ -53,7 +53,7 @@ export function CreditCardsSummary({
           {t('nextDue')}
         </span>
         <span className="text-2xl font-bold font-display">
-          {nextDueDate ? formatDateLong(nextDueDate) : '—'}
+          {nextDueDate ? formatDateLong(nextDueDate) : 'â€”'}
         </span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
           <Calendar className="h-4 w-4" />
@@ -78,3 +78,4 @@ export function CreditCardsSummary({
     </div>
   );
 }
+

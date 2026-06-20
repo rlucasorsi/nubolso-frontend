@@ -3,26 +3,25 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, CircleDollarSign, Plus, RotateCw, CreditCard } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { cn } from '@/lib/utils';
 import { triggerQuickAdd } from '@/lib/quickAdd';
 
 export function MobileNav() {
   const t = useTranslations('nav');
-  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
 
   const NAV_ITEMS = [
-    { label: t('dashboard').toUpperCase(), href: `/${locale}/dashboard`, icon: LayoutDashboard },
-    { label: t('entries').toUpperCase(), href: `/${locale}/entries`, icon: CircleDollarSign },
-    { label: t('cards').toUpperCase(), href: `/${locale}/cards`, icon: CreditCard },
-    { label: t('recurring').toUpperCase(), href: `/${locale}/recurring`, icon: RotateCw },
+    { label: t('dashboard').toUpperCase(), href: '/dashboard', icon: LayoutDashboard },
+    { label: t('entries').toUpperCase(), href: '/entries', icon: CircleDollarSign },
+    { label: t('cards').toUpperCase(), href: '/cards', icon: CreditCard },
+    { label: t('recurring').toUpperCase(), href: '/recurring', icon: RotateCw },
   ];
 
   const handleQuickAdd = () => {
     if (!triggerQuickAdd()) {
-      router.push(`/${locale}/dashboard`);
+      router.push('/dashboard');
     }
   };
 

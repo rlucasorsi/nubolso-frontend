@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { CreditCardForm, CreditCardFormValues } from './CreditCardForm';
@@ -15,7 +15,7 @@ import {
   SheetTitle,
 } from '@/components/ui/app-drawer';
 import { creditCardFormSchema } from '@/lib/schemas/credit-cards';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface CreditCardDrawerProps {
   open: boolean;
@@ -59,7 +59,7 @@ export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerP
   async function handleSave() {
     const result = creditCardFormSchema.safeParse(values);
     if (!result.success) {
-      setError(result.error.errors[0]?.message ?? 'Dados inválidos');
+      setError(result.error.errors[0]?.message ?? 'Dados invÃ¡lidos');
       return;
     }
 
@@ -122,3 +122,4 @@ export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerP
     </Sheet>
   );
 }
+

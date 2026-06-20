@@ -8,14 +8,13 @@ import { AmountInputField, NumberInputField } from '@/components/ui/form-field';
 import { DatePicker } from '@/components/ui/date-picker';
 import { ChevronLeft, CalendarDays, Palette, Wallet, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { getPeriodForDate } from '@/lib/cashflow';
 import { useEffect, useMemo, useState } from 'react';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
-  const locale = useLocale();
   const { startDay, updateStartDay, balanceSettings, updateBalanceSettings, saldoInicial, updateSaldoInicial, isSavingBalance } = useCashFlow();
 
   const savedBalanceValue = saldoInicial.value.toFixed(2).replace('.', ',');
@@ -75,7 +74,7 @@ export default function SettingsPage() {
     <div className="container max-w-2xl mx-auto py-6 px-4 space-y-4">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
-          <Link href={`/${locale}/dashboard`}>
+          <Link href="/dashboard">
             <ChevronLeft className="h-5 w-5" />
           </Link>
         </Button>

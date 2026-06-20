@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { DayData } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
 import { Eye, RotateCw } from 'lucide-react';
 import { MONTH_SHORT, WEEK_DAYS } from './config';
 import { BalanceSettings } from '@/hooks/useCashFlow';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface DayCardProps {
   day: DayData;
@@ -72,7 +72,7 @@ export function DayCard({
       }`} />
 
       <div className="p-5">
-        {/* Header row: date/weekday — saldo + eye button */}
+        {/* Header row: date/weekday â€” saldo + eye button */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center leading-none shrink-0">
@@ -108,7 +108,7 @@ export function DayCard({
             <div className={cn("flex items-baseline gap-1.5 text-right", saldoBorderClass(saldoStatus))}>
               <span className="text-[8px] font-black uppercase tracking-wide text-white">{t('balance')}</span>
               {isDisabled ? (
-                <span className="text-sm font-black font-display text-white/30">—</span>
+                <span className="text-sm font-black font-display text-white/30">â€”</span>
               ) : (
                 <span className={cn("text-sm font-black font-display", saldoValueClass(saldoStatus))}>
                   <span className="text-[9px] opacity-60 mr-0.5">R$</span>
@@ -165,3 +165,4 @@ export function DayCard({
     </div>
   );
 }
+

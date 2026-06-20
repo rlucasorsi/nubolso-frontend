@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -31,7 +31,7 @@ import { useDeletePurchase } from '@/modules/credit-cards/hooks/use-delete-purch
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { PayInvoiceForm } from './PayInvoiceForm';
 import { AddPurchaseDrawer } from './AddPurchaseDrawer';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface InvoiceDetailDrawerProps {
   invoiceId: string | null;
@@ -306,3 +306,4 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     </>
   );
 }
+

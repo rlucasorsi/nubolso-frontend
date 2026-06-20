@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useRef, useState } from 'react';
 import { FileUp, FileCheck2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 const ALLOWED_EXTENSIONS = /\.(ofx|qfx)$/i;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -108,3 +108,4 @@ export function OfxFileDropzone({ file, onChange, error, onValidationError }: Of
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useMemo, useState } from 'react';
 import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
@@ -13,7 +13,7 @@ import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDraw
 import { CreditCardsSummary } from '@/components/credit-cards/CreditCardsSummary';
 import { AddButton } from '@/components/ui/add-button';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 export function CreditCardsView() {
   const t = useTranslations('creditCardsView');
@@ -165,3 +165,4 @@ export function CreditCardsView() {
     </div>
   );
 }
+

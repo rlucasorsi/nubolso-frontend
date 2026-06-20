@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Check, Apple } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
@@ -14,7 +14,6 @@ import { loginSchema } from '@/lib/schemas/auth';
 export default function LoginPage() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const locale = useLocale();
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [email, setEmail] = useState('');
@@ -37,14 +36,14 @@ export default function LoginPage() {
     try {
       await authService.login({ email, password });
       toast.success(t('welcomeBack'));
-      router.push(`/${locale}/dashboard`);
+      router.push('/dashboard');
     } catch (error) {
       const err = error as { data?: { errorCode?: string } };
 
       if (err?.data?.errorCode === 'EMAIL_NOT_VERIFIED') {
         await authService.resendCode({ email });
         toast.info(t('confirmEmail'));
-        router.push(`/${locale}/verify-email?email=${encodeURIComponent(email)}`);
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
         return;
       }
 
@@ -151,7 +150,7 @@ export default function LoginPage() {
                 {t('rememberMe')}
               </button>
               <Link
-                href={`/${locale}/forgot-password`}
+                href="/forgot-password"
                 className="text-sm font-medium text-brand-gradient hover:opacity-80 transition-opacity"
               >
                 {t('forgotPassword')}
@@ -186,7 +185,7 @@ export default function LoginPage() {
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             {t('noAccount')}{' '}
-            <Link href={`/${locale}/register`} className="font-semibold text-brand-gradient hover:opacity-80">
+            <Link href="/register" className="font-semibold text-brand-gradient hover:opacity-80">
               {t('signUp')}
             </Link>
           </p>

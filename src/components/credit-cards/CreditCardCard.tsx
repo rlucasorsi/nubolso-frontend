@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import type { CreditCard as CreditCardType } from '@/modules/credit-cards/model/api/credit-card';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
@@ -6,7 +6,7 @@ import { formatCurrency, formatDateLong } from '@/lib/cashflow';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface CreditCardCardProps {
   card: CreditCardType;
@@ -96,3 +96,4 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
     </div>
   );
 }
+

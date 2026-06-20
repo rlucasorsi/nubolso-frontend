@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { CashFlowEntry, FlowType } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
 import { PeriodNav } from './PeriodNav';
@@ -14,7 +14,7 @@ import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDraw
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { ActionsSection } from './ActionsSection';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface PainelViewProps {
   onAddEntry: (entry: Omit<CashFlowEntry, 'id'>) => void;
@@ -63,7 +63,7 @@ export function PainelView({
   }, [periods]);
 
   // Show the floating "new entry" button once the user scrolls past the
-  // header/summary, giving quick access while browsing "Dias do período".
+  // header/summary, giving quick access while browsing "Dias do perÃ­odo".
   // Depends on `mounted` because the root element (and its ref) only exists
   // once the component renders past the hydration guard below.
   useEffect(() => {

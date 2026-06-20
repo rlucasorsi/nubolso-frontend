@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import type { Goal, GoalContribution } from '@/modules/goals/model/api/goal';
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { CircularProgress } from '@/components/ui/circular-progress';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -362,4 +362,5 @@ export function GoalDetailDrawer({
     </Sheet>
   );
 }
+
 

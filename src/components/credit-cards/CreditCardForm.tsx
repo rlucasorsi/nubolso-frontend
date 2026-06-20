@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { TextInputField, NumberInputField } from '@/components/ui/form-field';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 export interface CreditCardFormValues {
   name: string;
@@ -23,7 +23,7 @@ export function CreditCardForm({ values, onChange, error }: CreditCardFormProps)
       <TextInputField
         label={t('cardName')}
         required
-        placeholder="Ex: Nubank, Inter, Itaú..."
+        placeholder="Ex: Nubank, Inter, ItaÃº..."
         value={values.name}
         onChange={(name) => onChange({ ...values, name })}
         error={error}
@@ -60,3 +60,4 @@ export function CreditCardForm({ values, onChange, error }: CreditCardFormProps)
     </div>
   );
 }
+

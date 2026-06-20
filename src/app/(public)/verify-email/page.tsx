@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import { toast } from 'sonner';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { useCooldown } from '@/hooks/useCooldown';
@@ -22,7 +22,6 @@ export default function VerifyEmailPage() {
 function VerifyEmailContent() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const locale = useLocale();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') ?? '';
   const [code, setCode] = useState('');
@@ -36,14 +35,14 @@ function VerifyEmailContent() {
     try {
       await authService.verifyEmail({ email, code });
       toast.success(t('emailConfirmed'));
-      router.push(`/${locale}/dashboard`);
+      router.push('/dashboard');
     } catch (error) {
       toast.error(extractErrorMessage(error, t('invalidCode')));
       setCode('');
     } finally {
       setLoading(false);
     }
-  }, [code, email, loading, router, locale, t]);
+  }, [code, email, loading, router, t]);
 
   useEffect(() => {
     if (code.length === 6) {
@@ -102,7 +101,7 @@ function VerifyEmailContent() {
           {!email ? (
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {t('noEmailToVerify')}{' '}
-              <Link href={`/${locale}/register`} className="font-semibold text-brand-gradient hover:opacity-80">
+              <Link href="/register" className="font-semibold text-brand-gradient hover:opacity-80">
                 {t('createAccountLink')}
               </Link>
             </p>
@@ -144,7 +143,7 @@ function VerifyEmailContent() {
 
               <p className="text-center text-sm text-muted-foreground">
                 {t('wrongEmail')}{' '}
-                <Link href={`/${locale}/register`} className="font-semibold text-brand-gradient hover:opacity-80">
+                <Link href="/register" className="font-semibold text-brand-gradient hover:opacity-80">
                   {t('changeEmail')}
                 </Link>
               </p>
@@ -152,7 +151,7 @@ function VerifyEmailContent() {
           )}
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            <Link href={`/${locale}/login`} className="font-semibold text-brand-gradient hover:opacity-80">
+            <Link href="/login" className="font-semibold text-brand-gradient hover:opacity-80">
               {t('backToLogin')}
             </Link>
           </p>

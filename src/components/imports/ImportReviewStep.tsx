@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
@@ -26,7 +26,7 @@ import { useGetImportBatch } from '@/modules/imports/hooks/use-get-import-batch'
 import { useConfirmImport } from '@/modules/imports/hooks/use-confirm-import';
 import { useCancelImport } from '@/modules/imports/hooks/use-cancel-import';
 import type { ImportBatchDetail, ImportItemDecision } from '@/modules/imports/model/api/ofx-import';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
   INCOME: <ArrowUpRight className="h-4 w-4" />,
@@ -88,7 +88,7 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
       });
       onConfirmed(result);
     } catch {
-      // erro já sinalizado via estado da mutação (confirmImport.isError)
+      // erro jÃ¡ sinalizado via estado da mutaÃ§Ã£o (confirmImport.isError)
     }
   }
 
@@ -98,7 +98,7 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
       await cancelImport.mutateAsync(batch.id);
       onCanceled();
     } catch {
-      // erro já sinalizado via estado da mutação (cancelImport.isError)
+      // erro jÃ¡ sinalizado via estado da mutaÃ§Ã£o (cancelImport.isError)
     }
   }
 
@@ -238,3 +238,4 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
     </>
   );
 }
+

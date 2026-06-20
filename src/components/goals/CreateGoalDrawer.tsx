@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import {
@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DatePicker } from '@/components/ui/date-picker';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 const ICON_OPTIONS = [
   { name: 'home', Icon: Home },
@@ -90,7 +90,7 @@ export function CreateGoalDrawer({
       deadline,
     });
     if (!result.success) {
-      setFormError(result.error.errors[0]?.message ?? 'Dados inválidos');
+      setFormError(result.error.errors[0]?.message ?? 'Dados invÃ¡lidos');
       return;
     }
 
@@ -208,4 +208,5 @@ export function CreateGoalDrawer({
     </Sheet>
   );
 }
+
 

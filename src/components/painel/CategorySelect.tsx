@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { useGetCategories } from "@/modules/categories/hooks/use-get-categories";
 import {
   Select,
@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/i18n/useTranslations";
 
 interface CategorySelectProps {
   value?: string;
@@ -61,3 +61,4 @@ export function CategorySelect({ value, onChange, type }: CategorySelectProps) {
     </div>
   );
 }
+

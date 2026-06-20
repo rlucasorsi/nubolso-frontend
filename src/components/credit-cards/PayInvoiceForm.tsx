@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { usePayInvoice } from '@/modules/credit-cards/hooks/use-pay-invoice';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { PartialPaymentDrawer } from './PartialPaymentDrawer';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface PayInvoiceFormProps {
   invoice: CreditCardInvoice;
@@ -61,3 +61,4 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
     </>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { RecurringTemplateForm, RecurringTemplateFormValues } from './RecurringTemplateForm';
@@ -16,7 +16,7 @@ import {
   SheetTitle,
 } from '@/components/ui/app-drawer';
 import { recurringTemplateFormSchema } from '@/lib/schemas/recurring-templates';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface RecurringTemplateDrawerProps {
   open: boolean;
@@ -80,7 +80,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
       }
       setErrors(fieldErrors);
       if (Object.keys(fieldErrors).length === 0) {
-        setSubmitError(result.error.errors[0]?.message ?? 'Dados inválidos');
+        setSubmitError(result.error.errors[0]?.message ?? 'Dados invÃ¡lidos');
       }
       return;
     }
@@ -152,3 +152,4 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
     </Sheet>
   );
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import type { CreditCard } from '@/modules/credit-cards/model/api/credit-card';
@@ -20,7 +20,7 @@ import { useDeleteCreditCard } from '@/modules/credit-cards/hooks/use-delete-cre
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface CreditCardDetailDrawerProps {
   open: boolean;
@@ -143,7 +143,7 @@ export function CreditCardDetailDrawer({
         >
           <SheetTitle className="text-xl font-bold font-display text-primary">{card.name}</SheetTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            {t('closingDay', { day: card.closingDay })} · {t('dueDay', { day: card.dueDay })} · {t('paymentDay', { day: card.paymentDay })}
+            {t('closingDay', { day: card.closingDay })} Â· {t('dueDay', { day: card.dueDay })} Â· {t('paymentDay', { day: card.paymentDay })}
           </p>
           <SheetDescription className="sr-only">{card.name}</SheetDescription>
         </DrawerHeader>
@@ -267,3 +267,4 @@ export function CreditCardDetailDrawer({
     </Sheet>
   );
 }
+

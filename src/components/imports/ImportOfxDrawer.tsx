@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { FileSpreadsheet, CheckCircle2, Upload, ChevronLeft } from 'lucide-react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
+import { useLanguage } from '@/i18n/LanguageContext';
 import {
   Sheet,
   DrawerContent,
@@ -25,7 +26,7 @@ type Step = 'list' | 'upload' | 'review' | 'success';
 
 export function ImportOfxDrawer() {
   const t = useTranslations('import');
-  const locale = useLocale();
+  const { locale } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<Step>('list');
   const [file, setFile] = useState<File | null>(null);

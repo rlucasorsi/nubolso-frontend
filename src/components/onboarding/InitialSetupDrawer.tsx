@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import {
@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { ArrowRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
 
 interface InitialSetupDrawerProps {
@@ -84,3 +84,4 @@ export function InitialSetupDrawer({ open }: InitialSetupDrawerProps) {
     </Sheet>
   );
 }
+

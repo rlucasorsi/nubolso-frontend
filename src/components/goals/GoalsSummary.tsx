@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 import { TrendingUp } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface GoalsSummaryProps {
   totalPlanned: number;
@@ -73,3 +73,4 @@ export function GoalsSummary({
     </div>
   );
 }
+

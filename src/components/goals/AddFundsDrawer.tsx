@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -17,7 +17,7 @@ import type { Goal } from '@/modules/goals/model/api/goal';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { ArrowDownLeft, ArrowUpRight, Check, CheckCircle2, Loader2, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 type OperationType = 'deposit' | 'withdrawal';
 
@@ -104,7 +104,7 @@ export function AddFundsDrawer({
 
     const result = addFundsSchema.safeParse({ amount, date });
     if (!result.success) {
-      setError(result.error.errors[0]?.message ?? 'Dados inválidos');
+      setError(result.error.errors[0]?.message ?? 'Dados invÃ¡lidos');
       return;
     }
 
@@ -310,3 +310,4 @@ export function AddFundsDrawer({
     </Sheet>
   );
 }
+

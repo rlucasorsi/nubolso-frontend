@@ -3,9 +3,9 @@
 import { useEffect } from 'react';
 import { CreditCardsView } from '@/components/credit-cards/CreditCardsView';
 
-export default function CartoesPage() {
+export default function CardsPage() {
   useEffect(() => {
-    document.title = 'Cartões de Crédito — nubolso';
+    document.title = 'Credit Cards — nubolso';
   }, []);
 
   return <CreditCardsView />;

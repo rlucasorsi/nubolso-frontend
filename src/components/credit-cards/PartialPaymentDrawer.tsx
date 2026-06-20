@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import {
@@ -18,7 +18,7 @@ import { formatCurrency } from '@/lib/cashflow';
 import { MONTH_SHORT } from '@/components/painel/config';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/i18n/useTranslations';
 
 type InterestMode = 'none' | 'rate' | 'amount';
 
@@ -148,7 +148,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
             {t('title')}
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
-            Fatura {MONTH_SHORT[invoice.referenceMonth - 1]}/{invoice.referenceYear} —{' '}
+            Fatura {MONTH_SHORT[invoice.referenceMonth - 1]}/{invoice.referenceYear} â€”{' '}
             <span className="font-semibold text-foreground">{formatCurrency(invoice.totalAmount)}</span>
           </p>
           <SheetDescription className="sr-only">Pagamento parcial da fatura</SheetDescription>
@@ -295,3 +295,4 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
     </Sheet>
   );
 }
+

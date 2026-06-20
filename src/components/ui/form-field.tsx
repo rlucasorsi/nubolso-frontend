@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import * as React from "react"
 import { Input } from "@/components/ui/input"
 import { DatePicker } from "@/components/ui/date-picker"
 import { cn } from "@/lib/utils"
-import { useTranslations } from "next-intl"
+import { useTranslations } from "@/i18n/useTranslations"
 
 interface BaseFieldProps {
   label: string
@@ -228,3 +228,4 @@ export function DateInputField({
     </div>
   )
 }
+
