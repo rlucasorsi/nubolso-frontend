@@ -13,6 +13,7 @@ import { setQuickAddHandler } from '@/lib/quickAdd';
 import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDrawer';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { ActionsSection } from './ActionsSection';
+import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 
 interface PainelViewProps {
   onAddEntry: (entry: Omit<CashFlowEntry, 'id'>) => void;
@@ -140,7 +141,8 @@ export function PainelView({
             <h1 className="text-3xl font-black font-display tracking-tight text-white leading-none">
               <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
             </h1>
-            <div className="shrink-0">
+            <div className="shrink-0 flex items-center gap-2">
+               <ImportOfxDrawer />
                <AddEntryDrawer
                  isOpen={isAddingInHeader}
                  onOpen={() => setIsAddingInHeader(true)}
