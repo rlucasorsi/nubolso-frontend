@@ -30,6 +30,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
+import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 
 export function EntriesView() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,8 +114,9 @@ export function EntriesView() {
   return (
     <div className="flex flex-col h-full bg-background animate-in fade-in duration-500">
       <div className="px-4 py-6 space-y-4 border-b bg-card/30 backdrop-blur-xl sticky top-0 z-10">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-bold tracking-tight">Lançamentos</h1>
+          <ImportOfxDrawer />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">

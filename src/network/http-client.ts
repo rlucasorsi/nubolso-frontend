@@ -37,6 +37,9 @@ const AUTH_ENDPOINTS = [
 interface HttpRequestOptions extends RequestInit {
   includeToken?: boolean;
   params?: Record<string, any>;
+  // Body is sent as-is (must be FormData) instead of JSON-encoded, and the
+  // Content-Type header is omitted so fetch can set the multipart boundary.
+  isMultipart?: boolean;
 }
 
 export class HttpClient {
@@ -60,9 +63,13 @@ export class HttpClient {
   public static deleteWithBody = <T, K>(url: string, data: K, options?: HttpRequestOptions) =>
     this.request<T, K>(url, HttpMethod.DELETE, { ...options, body: JSON.stringify(data) });
 
-  private static async getHeaders(includeToken: boolean, customHeaders?: HeadersInit): Promise<Record<string, string>> {
+  private static async getHeaders(
+    includeToken: boolean,
+    customHeaders?: HeadersInit,
+    isMultipart?: boolean,
+  ): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
-      [HeaderKeys.CONTENT_TYPE]: CONTENT_TYPE_JSON,
+      ...(isMultipart ? {} : { [HeaderKeys.CONTENT_TYPE]: CONTENT_TYPE_JSON }),
       ...(customHeaders as Record<string, string>),
     };
 
@@ -109,14 +116,14 @@ export class HttpClient {
     body?: K,
   ): Promise<T> {
     const apiUrl = getApiUrl(url);
-    const { includeToken = true, params, ...fetchOptions } = options;
+    const { includeToken = true, params, isMultipart, ...fetchOptions } = options;
     const fullUrl = this.buildUrlWithParams(apiUrl, params);
-    const headers = await this.getHeaders(includeToken, fetchOptions.headers);
+    const headers = await this.getHeaders(includeToken, fetchOptions.headers, isMultipart);
 
     const requestInit: RequestInit = {
       method,
       headers,
-      body: ['GET', 'DELETE'].includes(method) ? undefined : JSON.stringify(body),
+      body: isMultipart ? (body as unknown as BodyInit) : ['GET', 'DELETE'].includes(method) ? undefined : JSON.stringify(body),
       ...fetchOptions,
     };
 
