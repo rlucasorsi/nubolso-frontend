@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { CircularProgress } from '@/components/ui/circular-progress';
 import { useTranslations } from '@/i18n/useTranslations';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   shield: Shield,
@@ -65,6 +66,7 @@ interface GoalCardProps {
 
 export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
   const t = useTranslations('goals');
+  const { locale } = useLanguage();
   const Icon = getGoalIcon(goal.icon);
   const colors = COLOR_MAP[goal.color] ?? COLOR_MAP.primary;
   const percent = Math.round((goal.savedAmount / goal.targetAmount) * 100);
@@ -88,10 +90,10 @@ export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
     }
 
     if (diffDays <= 365) {
-      const monthKey = String(deadline.getMonth()) as keyof typeof t;
+      const monthName = new Intl.DateTimeFormat(locale, { month: 'long' }).format(deadline);
       return {
         icon: Calendar,
-        text: t('forecast', { month: t(`months.${deadline.getMonth()}`), year: deadline.getFullYear() }),
+        text: t('forecast', { month: monthName, year: deadline.getFullYear() }),
         highlight: false,
       };
     }

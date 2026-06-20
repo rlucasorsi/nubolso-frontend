@@ -184,21 +184,7 @@
     "deadlineExpired": "Plazo vencido",
     "forecast": "Pronóstico: {month} {year}",
     "longTerm": "Meta a largo plazo ({year})",
-    "addFunds": "Agregar Fondos",
-    "months": {
-      "0": "Enero",
-      "1": "Febrero",
-      "2": "Marzo",
-      "3": "Abril",
-      "4": "Mayo",
-      "5": "Junio",
-      "6": "Julio",
-      "7": "Agosto",
-      "8": "Septiembre",
-      "9": "Octubre",
-      "10": "Noviembre",
-      "11": "Diciembre"
-    }
+    "addFunds": "Agregar Fondos"
   },
   "import": {
     "button": "Importar OFX",
@@ -417,7 +403,9 @@
     "allUnpaid": "Suma de todas las facturas sin pagar",
     "nextDueNote": "Fecha de la próxima factura a pagar",
     "noInvoicesPending": "Sin facturas pendientes",
-    "thisMonthNote": "Compras con vencimiento este mes"
+    "thisMonthNote": "Compras con vencimiento este mes",
+    "card": "tarjeta",
+    "cards": "tarjetas"
   },
   "creditCardDetail": {
     "inactive": "Tarjeta Inactiva",

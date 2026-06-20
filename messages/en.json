@@ -184,21 +184,7 @@
     "deadlineExpired": "Deadline expired",
     "forecast": "Forecast: {month} {year}",
     "longTerm": "Long-term goal ({year})",
-    "addFunds": "Add Funds",
-    "months": {
-      "0": "January",
-      "1": "February",
-      "2": "March",
-      "3": "April",
-      "4": "May",
-      "5": "June",
-      "6": "July",
-      "7": "August",
-      "8": "September",
-      "9": "October",
-      "10": "November",
-      "11": "December"
-    }
+    "addFunds": "Add Funds"
   },
   "import": {
     "button": "Import OFX",
@@ -411,6 +397,8 @@
   },
   "creditCardsSummary": {
     "activeCards": "Active Cards",
+    "card": "card",
+    "cards": "cards",
     "openInvoices": "Open Invoices",
     "nextDue": "Next Due Date",
     "currentMonth": "This Month Total",
