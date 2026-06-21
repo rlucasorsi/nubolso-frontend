@@ -620,5 +620,13 @@
     "balanceWarning": "Atenção: seu saldo pode ficar negativo",
     "projectedBalance": "{date}: saldo projetado de {amount}",
     "noNegativeImpact": "Nenhum impacto negativo previsto no seu saldo."
+  },
+  "creditCardChart": {
+    "title": "Faturas por cartão",
+    "allCards": "Todos os cartões",
+    "cardsSelected": "{count} cartões selecionados",
+    "chooseInvoice": "Escolha a fatura",
+    "previousMonths": "Meses anteriores",
+    "nextMonths": "Próximos meses"
   }
 }

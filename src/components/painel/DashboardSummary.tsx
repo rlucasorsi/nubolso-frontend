@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
+import { InvoiceMonthlyChart } from '@/components/credit-cards/InvoiceMonthlyChart';
 
 interface DashboardSummaryProps {
   period: Period;
@@ -24,6 +25,7 @@ interface DashboardSummaryProps {
   currentBalance: number;
   today: string;
   balanceSettings: BalanceSettings;
+  onSelectInvoice: (invoiceId: string) => void;
 }
 
 const ZONE_COLORS = {
@@ -40,6 +42,7 @@ export function DashboardSummary({
   currentBalance,
   today,
   balanceSettings,
+  onSelectInvoice,
 }: DashboardSummaryProps) {
   const t = useTranslations('dashboard');
   const [chartView, setChartView] = useState<ChartView>('period');
@@ -328,6 +331,8 @@ export function DashboardSummary({
           </div>
         </div>
       </Card>
+
+      <InvoiceMonthlyChart onSelectInvoice={onSelectInvoice} />
 
       {/* Alerts & Insights List */}
       <div className="space-y-3">

@@ -198,6 +198,7 @@ export function PainelView({
             currentBalance={currentBalance}
             today={today}
             balanceSettings={balanceSettings}
+            onSelectInvoice={setSelectedInvoiceId}
           />
         </TabsContent>
 
