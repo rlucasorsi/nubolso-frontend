@@ -151,7 +151,7 @@ export function EntriesView() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background animate-in fade-in duration-500">
+    <div className="flex flex-col bg-background animate-in fade-in duration-500">
       <div className="px-4 pt-6 pb-3 flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
         <ImportOfxDrawer />
@@ -233,7 +233,7 @@ export function EntriesView() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+      <div className="px-4 py-4 space-y-1">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="h-20 w-full bg-card/50 animate-pulse rounded-2xl border border-white/5 mb-3" />
