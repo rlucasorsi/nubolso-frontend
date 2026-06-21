@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, CircleDollarSign, Target, LayoutDashboard, RotateCw, CreditCard, Menu } from 'lucide-react';
 import Link from 'next/link';
@@ -10,8 +9,8 @@ import { useLanguage, type Locale } from '@/i18n/LanguageContext';
 
 import { MobileNav } from '@/components/layout/MobileNav';
 import { SideMenuDrawer } from '@/components/layout/SideMenuDrawer';
-import { authService } from '@/services/auth';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
+import { useLogout } from '@/hooks/useLogout';
 import { InitialSetupDrawer } from '@/components/onboarding/InitialSetupDrawer';
 
 const LOCALES: Locale[] = ['en', 'pt-BR', 'es'];
@@ -23,7 +22,6 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }) {
   const t = useTranslations('nav');
-  const router = useRouter();
   const { locale, setLocale } = useLanguage();
 
   const cycleLocale = () => {
@@ -34,10 +32,7 @@ export default function PrivateLayout({
   const needsOnboarding = Boolean(me && !me.balanceStartDate);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
 
-  const handleLogout = async () => {
-    await authService.logout();
-    router.push('/login');
-  };
+  const handleLogout = useLogout();
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   Sheet,
   SheetContent,
@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { cn } from '@/lib/utils';
-import { authService } from '@/services/auth';
+import { useLogout } from '@/hooks/useLogout';
 
 interface SideMenuDrawerProps {
   open: boolean;
@@ -31,7 +31,7 @@ interface SideMenuDrawerProps {
 export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps) {
   const t = useTranslations('nav');
   const pathname = usePathname();
-  const router = useRouter();
+  const logout = useLogout();
 
   const NAV_ITEMS = [
     { label: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
@@ -44,8 +44,7 @@ export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps)
 
   const handleLogout = async () => {
     onClose();
-    await authService.logout();
-    router.push('/login');
+    await logout();
   };
 
   return (
