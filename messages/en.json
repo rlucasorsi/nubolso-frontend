@@ -620,5 +620,13 @@
     "balanceWarning": "Warning: your balance may go negative",
     "projectedBalance": "{date}: projected balance of {amount}",
     "noNegativeImpact": "No negative impact predicted on your balance."
+  },
+  "creditCardChart": {
+    "title": "Invoices by card",
+    "allCards": "All cards",
+    "cardsSelected": "{count} cards selected",
+    "chooseInvoice": "Choose the invoice",
+    "previousMonths": "Previous months",
+    "nextMonths": "Next months"
   }
 }
