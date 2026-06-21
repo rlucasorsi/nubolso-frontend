@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { LogOut, Settings, CircleDollarSign, Target, LayoutDashboard, RotateCw, CreditCard, Menu } from 'lucide-react';
 import Link from 'next/link';
@@ -23,7 +22,6 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }) {
   const t = useTranslations('nav');
-  const router = useRouter();
   const { locale, setLocale } = useLanguage();
 
   const cycleLocale = () => {
@@ -36,7 +34,10 @@ export default function PrivateLayout({
 
   const handleLogout = async () => {
     await authService.logout();
-    router.push('/login');
+    // Hard navigation (not router.push) so the QueryClient cache is torn down
+    // with the page — otherwise the next user to log in on this tab would see
+    // this user's cached entries/cards/recurring templates until they refetch.
+    window.location.href = '/login';
   };
 
   return (

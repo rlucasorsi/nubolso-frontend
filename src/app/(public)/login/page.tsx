@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, Check, Apple } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -15,6 +16,7 @@ import { loginSchema } from '@/lib/schemas/auth';
 export default function LoginPage() {
   const t = useTranslations('auth');
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [email, setEmail] = useState('');
@@ -36,6 +38,9 @@ export default function LoginPage() {
 
     try {
       await authService.login({ email, password });
+      // Clear any stale cache from a previous session on this tab so this
+      // user never sees the prior account's entries/cards/recurring data.
+      queryClient.clear();
       toast.success(t('welcomeBack'));
       router.push('/dashboard');
     } catch (error) {

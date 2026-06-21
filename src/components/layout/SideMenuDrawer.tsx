@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   Sheet,
   SheetContent,
@@ -31,7 +31,6 @@ interface SideMenuDrawerProps {
 export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps) {
   const t = useTranslations('nav');
   const pathname = usePathname();
-  const router = useRouter();
 
   const NAV_ITEMS = [
     { label: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
@@ -45,7 +44,10 @@ export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps)
   const handleLogout = async () => {
     onClose();
     await authService.logout();
-    router.push('/login');
+    // Hard navigation (not router.push) so the QueryClient cache is torn down
+    // with the page — otherwise the next user to log in on this tab would see
+    // this user's cached entries/cards/recurring templates until they refetch.
+    window.location.href = '/login';
   };
 
   return (

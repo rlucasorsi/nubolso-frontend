@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,6 +23,7 @@ export default function VerifyEmailPage() {
 function VerifyEmailContent() {
   const t = useTranslations('auth');
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') ?? '';
   const [code, setCode] = useState('');
@@ -34,6 +36,9 @@ function VerifyEmailContent() {
 
     try {
       await authService.verifyEmail({ email, code });
+      // Clear any stale cache from a previous session on this tab so this
+      // user never sees the prior account's entries/cards/recurring data.
+      queryClient.clear();
       toast.success(t('emailConfirmed'));
       router.push('/dashboard');
     } catch (error) {
@@ -42,7 +47,7 @@ function VerifyEmailContent() {
     } finally {
       setLoading(false);
     }
-  }, [code, email, loading, router, t]);
+  }, [code, email, loading, queryClient, router, t]);
 
   useEffect(() => {
     if (code.length === 6) {

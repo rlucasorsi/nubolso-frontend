@@ -2,6 +2,7 @@
 
 import { GoogleLogin } from '@react-oauth/google';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
@@ -11,6 +12,7 @@ import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 export function GoogleSignInButton() {
   const t = useTranslations('auth');
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { locale } = useLanguage();
 
   if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
@@ -33,6 +35,9 @@ export function GoogleSignInButton() {
 
           try {
             await authService.googleLogin({ idToken: credentialResponse.credential });
+            // Clear any stale cache from a previous session on this tab so this
+            // user never sees the prior account's entries/cards/recurring data.
+            queryClient.clear();
             toast.success(t('welcome'));
             router.push('/dashboard');
           } catch (error) {
