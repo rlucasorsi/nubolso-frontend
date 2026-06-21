@@ -26,13 +26,25 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { format } from 'date-fns';
+import type { Locale } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
+
+function formatDayHeader(dateStr: string, dateFnsLocale: Locale) {
+  const date = new Date(dateStr + 'T12:00:00');
+  const label = format(date, 'EEEE, dd MMM', { locale: dateFnsLocale });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
 
 export function EntriesView() {
   const t = useTranslations('entries');
@@ -44,6 +56,7 @@ export function EntriesView() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showRecurring, setShowRecurring] = useState(false);
+  const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
 
   // Debounce search
   useEffect(() => {
@@ -118,22 +131,41 @@ export function EntriesView() {
     });
   }, [data, debouncedSearch, showRecurring, recurringTemplates, filters]);
 
+  const groupedByDay = useMemo(() => {
+    const map = new Map<string, CashFlowEntry[]>();
+    for (const entry of entries) {
+      const list = map.get(entry.date);
+      if (list) list.push(entry);
+      else map.set(entry.date, [entry]);
+    }
+    return Array.from(map.entries());
+  }, [entries]);
+
+  const setDayCollapsed = (date: string, collapsed: boolean) => {
+    setCollapsedDays((prev) => {
+      const next = new Set(prev);
+      if (collapsed) next.add(date);
+      else next.delete(date);
+      return next;
+    });
+  };
+
   return (
     <div className="flex flex-col h-full bg-background animate-in fade-in duration-500">
-      <div className="px-4 py-6 space-y-4 border-b bg-card/30 backdrop-blur-xl sticky top-0 z-10">
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-          <ImportOfxDrawer />
-        </div>
+      <div className="px-4 pt-6 pb-3 flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+        <ImportOfxDrawer />
+      </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
+      <div className="px-4 py-3 space-y-2 border-b bg-card/30 backdrop-blur-xl sticky top-0 z-10">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 min-w-[120px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-11 bg-background/50 border-white/10 focus:ring-primary/20 transition-all rounded-xl"
+              className="pl-9 h-10 bg-background/50 border-white/10 focus:ring-primary/20 transition-all rounded-xl"
             />
             {searchTerm && (
               <button
@@ -150,24 +182,23 @@ export function EntriesView() {
               <Button
                 variant="outline"
                 className={cn(
-                  "h-11 px-4 justify-start text-left font-normal bg-background/50 border-white/10 hover:bg-white/5 rounded-xl transition-all min-w-[240px]",
+                  "h-10 px-3 justify-start text-left font-normal bg-background/50 border-white/10 hover:bg-white/5 rounded-xl transition-all shrink-0 whitespace-nowrap",
                   !dateRange && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
                 {dateRange?.from ? (
                   dateRange.to ? (
                     <>
-                      {format(dateRange.from, "dd/MM/yy")} -{" "}
-                      {format(dateRange.to, "dd/MM/yy")}
+                      {format(dateRange.from, "dd/MM/yy")} - {format(dateRange.to, "dd/MM/yy")}
                     </>
                   ) : (
                     format(dateRange.from, "dd/MM/yy")
                   )
                 ) : (
-                  <span>{t('filterPeriod')}</span>
+                  <span className="hidden sm:inline">{t('filterPeriod')}</span>
                 )}
-                <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
+                <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 rounded-2xl border-white/10 shadow-2xl bg-card overflow-hidden" align="end">
@@ -192,20 +223,20 @@ export function EntriesView() {
               </div>
             </PopoverContent>
           </Popover>
+        </div>
 
-          <div className="flex items-center gap-2 px-1 h-11 shrink-0">
-            <Switch id="show-recurring" checked={showRecurring} onCheckedChange={setShowRecurring} />
-            <label htmlFor="show-recurring" className="text-xs font-medium text-muted-foreground cursor-pointer select-none">
-              {t('showEstimated')}
-            </label>
-          </div>
+        <div className="flex items-center gap-2">
+          <Switch id="show-recurring" checked={showRecurring} onCheckedChange={setShowRecurring} />
+          <label htmlFor="show-recurring" className="text-xs font-medium text-muted-foreground cursor-pointer select-none">
+            {t('showEstimated')}
+          </label>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-20 w-full bg-card/50 animate-pulse rounded-2xl border border-white/5" />
+            <div key={i} className="h-20 w-full bg-card/50 animate-pulse rounded-2xl border border-white/5 mb-3" />
           ))
         ) : isError ? (
           <ServerErrorState onRetry={refetch} />
@@ -218,56 +249,78 @@ export function EntriesView() {
             <p className="text-sm text-muted-foreground mt-1">{t('noResultsHint')}</p>
           </div>
         ) : (
-          entries.map((entry) => {
-            const cfg = TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.spending;
-
+          groupedByDay.map(([date, dayEntries]) => {
+            const isOpen = !collapsedDays.has(date);
             return (
-              <div
-                key={entry.id}
-                className="group bg-card/40 hover:bg-card/60 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300 flex items-center gap-4"
+              <Collapsible
+                key={date}
+                open={isOpen}
+                onOpenChange={(open) => setDayCollapsed(date, !open)}
               >
-                <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110", cfg.bg)}>
-                  {entry.type === 'income' ? <ArrowUpRight className="h-5 w-5" /> :
-                   entry.type === 'expense' ? <ArrowDownLeft className="h-5 w-5" /> :
-                   <CircleDollarSign className="h-5 w-5" />}
-                </div>
+                <CollapsibleTrigger className="flex items-center justify-between w-full py-2 group">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
+                    {formatDayHeader(date, dateFnsLocale)}
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 text-muted-foreground transition-transform",
+                      isOpen && "rotate-180"
+                    )}
+                  />
+                </CollapsibleTrigger>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
-                      {entry.description || typeT(entry.type)}
-                    </p>
-                    <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap bg-white/5 px-2 py-0.5 rounded-full">
-                      {format(new Date(entry.date.split('T')[0] + 'T12:00:00'), 'dd MMM yy', { locale: dateFnsLocale })}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <p className={cn("text-base font-bold", cfg.color)}>
-                      {cfg.sign} {formatCurrency(entry.amount)}
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      {entry.templateId && (
-                        <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]">
-                          <RotateCw className="h-2.5 w-2.5" />
-                          {dailyT('recurring')}
-                        </Badge>
-                      )}
-                      {entry.isVirtual ? (
-                        <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10">
-                          {dailyT('estimated')}
-                        </Badge>
-                      ) : entry.templateId ? (
-                        <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10">
-                          {dailyT('confirmed')}
-                        </Badge>
-                      ) : null}
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-bold">
-                        {typeT(entry.type)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                <CollapsibleContent className="space-y-3 pb-3">
+                  {dayEntries.map((entry) => {
+                    const cfg = TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.spending;
+
+                    return (
+                      <div
+                        key={entry.id}
+                        className="group bg-card/40 hover:bg-card/60 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300 flex items-center gap-4"
+                      >
+                        <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110 shrink-0", cfg.bg)}>
+                          {entry.type === 'income' ? <ArrowUpRight className="h-5 w-5" /> :
+                           entry.type === 'expense' ? <ArrowDownLeft className="h-5 w-5" /> :
+                           <CircleDollarSign className="h-5 w-5" />}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
+                              {entry.description || typeT(entry.type)}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center justify-between gap-y-1 mt-1">
+                            <p className={cn("text-base font-bold whitespace-nowrap", cfg.color)}>
+                              {cfg.sign} {formatCurrency(entry.amount)}
+                            </p>
+                            <div className="flex flex-wrap items-center justify-end gap-1.5">
+                              {entry.templateId && (
+                                <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02] whitespace-nowrap">
+                                  <RotateCw className="h-2.5 w-2.5" />
+                                  {dailyT('recurring')}
+                                </Badge>
+                              )}
+                              {entry.isVirtual ? (
+                                <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10 whitespace-nowrap">
+                                  {dailyT('estimated')}
+                                </Badge>
+                              ) : entry.templateId ? (
+                                <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10 whitespace-nowrap">
+                                  {dailyT('confirmed')}
+                                </Badge>
+                              ) : null}
+                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-bold whitespace-nowrap">
+                                {typeT(entry.type)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </CollapsibleContent>
+              </Collapsible>
             );
           })
         )}
