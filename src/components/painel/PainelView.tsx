@@ -243,18 +243,6 @@ export function PainelView({
         </>
       )}
 
-      {/* Subtle period nav at the end of the day list */}
-      <div className="px-5 pt-4 mt-2 border-t border-white/5 opacity-70">
-        <PeriodNav
-          periods={periods}
-          periodIdx={periodIdx}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onToday={handleToday}
-          isCurrentPeriod={isCurrentPeriod}
-        />
-      </div>
-
       {sheet && (
         <DailyEntriesDrawer
           sheet={sheet}

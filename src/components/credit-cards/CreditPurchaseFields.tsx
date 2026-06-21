@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextInputField, AmountInputField, DateInputField, NumberInputField } from '@/components/ui/form-field';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PurchaseSimulationPreview } from './PurchaseSimulationPreview';
 import type { SimulatePurchaseResponse } from '@/modules/credit-cards/model/api/purchase';
 import type { PurchaseInputMode, PurchaseStrategy } from '@/modules/credit-cards/hooks/use-purchase-form';
@@ -51,6 +54,7 @@ export function CreditPurchaseFields({
   isSimulating,
 }: CreditPurchaseFieldsProps) {
   const t = useTranslations('creditPurchase');
+  const [moreOptionsOpen, setMoreOptionsOpen] = useState(false);
 
   return (
     <>
@@ -111,37 +115,46 @@ export function CreditPurchaseFields({
       />
 
       {installmentsCount > 1 && (
-        <div className="space-y-2">
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-            {t('centDifference')}
-          </label>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onStrategyChange('FIRST')}
-              className={cn(
-                'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
-                strategy === 'FIRST'
-                  ? 'bg-primary text-white shadow-glow'
-                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
-              )}
-            >
-              {t('firstInstallment')}
-            </button>
-            <button
-              type="button"
-              onClick={() => onStrategyChange('LAST')}
-              className={cn(
-                'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
-                strategy === 'LAST'
-                  ? 'bg-primary text-white shadow-glow'
-                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
-              )}
-            >
-              {t('lastInstallment')}
-            </button>
-          </div>
-        </div>
+        <Collapsible open={moreOptionsOpen} onOpenChange={setMoreOptionsOpen}>
+          <CollapsibleTrigger className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors pl-1">
+            <ChevronDown
+              className={cn('h-3.5 w-3.5 transition-transform', moreOptionsOpen && 'rotate-180')}
+            />
+            {t('moreOptions')}
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="space-y-2 pt-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+              {t('centDifference')}
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => onStrategyChange('FIRST')}
+                className={cn(
+                  'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
+                  strategy === 'FIRST'
+                    ? 'bg-primary text-white shadow-glow'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                {t('firstInstallment')}
+              </button>
+              <button
+                type="button"
+                onClick={() => onStrategyChange('LAST')}
+                className={cn(
+                  'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
+                  strategy === 'LAST'
+                    ? 'bg-primary text-white shadow-glow'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                {t('lastInstallment')}
+              </button>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
 
       {computedTotal !== null && (
