@@ -113,7 +113,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
       g.total += inst.amount;
     }
     return [...map.values()];
-  }, [invoice?.installments]);
+  }, [invoice, t]);
 
   return (
     <>

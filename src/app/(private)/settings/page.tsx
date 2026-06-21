@@ -24,7 +24,7 @@ export default function SettingsPage() {
   useEffect(() => {
     setBalanceValue(savedBalanceValue);
     setBalanceDate(saldoInicial.date);
-  }, [saldoInicial.value, saldoInicial.date]);
+  }, [savedBalanceValue, saldoInicial.date]);
 
   const hasBalanceChanges = balanceValue !== savedBalanceValue || balanceDate !== saldoInicial.date;
 
