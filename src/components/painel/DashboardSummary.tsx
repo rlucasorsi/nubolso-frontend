@@ -2,7 +2,7 @@
 import { Period, formatCurrency, formatCurrencyCompact, formatDateAxis, formatDateLong } from '@/lib/cashflow';
 import { BalanceSettings } from '@/hooks/useCashFlow';
 import { Card } from '@/components/ui/card';
-import { TrendingUp, Info, AlertTriangle, HelpCircle, Wallet } from 'lucide-react';
+import { TrendingUp, Info, HelpCircle, Wallet } from 'lucide-react';
 import {
   ChartContainer,
   ChartTooltip,
@@ -54,7 +54,7 @@ export function DashboardSummary({
     return allDays.filter((d) => d.date >= start && d.date <= endStr);
   }, [chartView, period, allDays]);
 
-  const { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, dangerDay, warningDay, chartData, yDomain, yTicks } =
+  const { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, chartData, yDomain, yTicks } =
     useMemo(() => {
       let maxExpenseDay = period.days[0];
       let maxExpenseAmount = 0;
@@ -72,16 +72,6 @@ export function DashboardSummary({
           bestDay = day;
         }
       });
-
-      const dangerDay = period.days.find(
-        (d) => d.date >= today && d.saldoAcumulado < balanceSettings.yellowThreshold,
-      );
-      const warningDay = period.days.find(
-        (d) =>
-          d.date >= today &&
-          d.saldoAcumulado >= balanceSettings.yellowThreshold &&
-          d.saldoAcumulado < balanceSettings.greenThreshold,
-      );
 
       const chartData = activeChartDays.map((d) => ({
         date: d.date,
@@ -106,7 +96,7 @@ export function DashboardSummary({
       const yTicks: number[] = [];
       for (let v = yDomain[0]; v <= yDomain[1] + 1e-6; v += niceStep) yTicks.push(v);
 
-      return { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, dangerDay, warningDay, chartData, yDomain, yTicks };
+      return { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, chartData, yDomain, yTicks };
     }, [period, activeChartDays, today, balanceSettings]);
 
   const getZoneColor = (value: number) => {
@@ -169,51 +159,43 @@ export function DashboardSummary({
   return (
     <div className="px-5 space-y-6 pb-4">
       {/* Cards Row */}
-      <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {/* Saldo Atual */}
-        <Card className="bg-[#1c1a24] border-none rounded-[2rem] overflow-hidden relative p-8 py-6">
-          <div className="flex justify-between items-start">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">
-                <span>{t('currentBalance')}</span>
-                <HelpCircle className="w-3 h-3" />
-              </div>
-              <div className="space-y-0.5">
-                <h3 className="text-2xl font-bold tracking-tight text-white font-display">
-                  {formatCurrency(currentBalance).replace('R$', 'R$ ')}
-                </h3>
-                <p className="text-[10px] text-muted-foreground/40 font-medium">
-                  {t('upToToday', { date: formatDateLong(today) })}
-                </p>
-              </div>
+        <Card className="bg-[#1c1a24] border-none rounded-[1.75rem] overflow-hidden p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">
+              <span>{t('currentBalance')}</span>
+              <HelpCircle className="w-3 h-3 shrink-0" />
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[#2a2440] flex items-center justify-center text-primary-variant">
-              <Wallet className="w-5 h-5" />
+            <div className="w-7 h-7 rounded-lg bg-[#2a2440] flex items-center justify-center text-primary-variant shrink-0">
+              <Wallet className="w-3.5 h-3.5" />
             </div>
           </div>
+          <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display truncate">
+            {formatCurrency(currentBalance).replace('R$', 'R$ ')}
+          </h3>
+          <p className="text-[9px] text-muted-foreground/40 font-medium mt-0.5 truncate">
+            {t('upToToday', { date: formatDateLong(today) })}
+          </p>
         </Card>
 
         {/* Previsão Final */}
-        <Card className="bg-[#1c1a24] border-none rounded-[2rem] overflow-hidden relative p-8 py-6">
-          <div className="flex justify-between items-start">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">
-                <span>{t('monthForecast')}</span>
-                <HelpCircle className="w-3 h-3" />
-              </div>
-              <div className="space-y-0.5">
-                <h3 className="text-2xl font-bold tracking-tight text-[#fb923c] font-display">
-                  {formatCurrency(period.saldoFinal).replace('R$', 'R$ ')}
-                </h3>
-                <p className="text-[10px] text-muted-foreground/40 font-medium">
-                  {t('projectsBalance', { date: formatDateLong(period.endDate) })}
-                </p>
-              </div>
+        <Card className="bg-[#1c1a24] border-none rounded-[1.75rem] overflow-hidden p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">
+              <span>{t('monthForecast')}</span>
+              <HelpCircle className="w-3 h-3 shrink-0" />
             </div>
-            <div className="w-10 h-10 rounded-xl bg-[#32231c] flex items-center justify-center text-[#fb923c]">
-              <TrendingUp className="w-5 h-5" />
+            <div className="w-7 h-7 rounded-lg bg-[#32231c] flex items-center justify-center text-[#fb923c] shrink-0">
+              <TrendingUp className="w-3.5 h-3.5" />
             </div>
           </div>
+          <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[#fb923c] font-display truncate">
+            {formatCurrency(period.saldoFinal).replace('R$', 'R$ ')}
+          </h3>
+          <p className="text-[9px] text-muted-foreground/40 font-medium mt-0.5 truncate">
+            {t('projectsBalance', { date: formatDateLong(period.endDate) })}
+          </p>
         </Card>
       </div>
 
@@ -349,34 +331,6 @@ export function DashboardSummary({
 
       {/* Alerts & Insights List */}
       <div className="space-y-3">
-        {dangerDay && (
-          <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
-            <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center shrink-0">
-               <AlertTriangle className="w-6 h-6 text-red-400" />
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-sm font-bold text-white">{t('goingRed')}</p>
-              <p className="text-xs text-red-400 font-medium tracking-wide">
-                {t('onDay', { date: formatDateLong(dangerDay.date) })} | {formatCurrency(dangerDay.saldoAcumulado)}
-              </p>
-            </div>
-          </Card>
-        )}
-
-        {warningDay && (
-          <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
-               <AlertTriangle className="w-6 h-6 text-amber-400" />
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-sm font-bold text-white">{t('warningZone')}</p>
-              <p className="text-xs text-amber-400 font-medium tracking-wide">
-                {t('onDay', { date: formatDateLong(warningDay.date) })} | {formatCurrency(warningDay.saldoAcumulado)}
-              </p>
-            </div>
-          </Card>
-        )}
-
         <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
           <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0">
              <Info className="w-6 h-6 text-muted-foreground" />
