@@ -11,6 +11,7 @@ import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { useCooldown } from '@/hooks/useCooldown';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { resetPasswordSchema } from '@/lib/schemas/auth';
+import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
 
 export default function ResetPasswordPage() {
   return (
@@ -70,6 +71,7 @@ function ResetPasswordContent() {
 
   return (
     <main className="relative flex h-dvh items-center justify-center px-4 overflow-hidden">
+      <AuthLanguageSwitcher />
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 -left-40 h-[28rem] w-[28rem] rounded-full opacity-40 blur-3xl"

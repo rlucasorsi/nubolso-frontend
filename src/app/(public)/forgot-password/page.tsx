@@ -9,6 +9,7 @@ import { useTranslations } from '@/i18n/useTranslations';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { forgotPasswordSchema } from '@/lib/schemas/auth';
+import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth');
@@ -41,6 +42,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="relative flex h-dvh items-center justify-center px-4 overflow-hidden">
+      <AuthLanguageSwitcher />
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 -left-40 h-[28rem] w-[28rem] rounded-full opacity-40 blur-3xl"

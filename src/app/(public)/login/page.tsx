@@ -8,6 +8,7 @@ import { useTranslations } from '@/i18n/useTranslations';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
 import { toast } from 'sonner';
 import { loginSchema } from '@/lib/schemas/auth';
 
@@ -55,6 +56,7 @@ export default function LoginPage() {
 
   return (
     <main className="relative flex h-dvh items-center justify-center px-4 overflow-hidden">
+      <AuthLanguageSwitcher />
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 -left-40 h-[28rem] w-[28rem] rounded-full opacity-40 blur-3xl"
