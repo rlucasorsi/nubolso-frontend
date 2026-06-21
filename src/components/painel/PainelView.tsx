@@ -202,7 +202,21 @@ export function PainelView({
         </TabsContent>
 
         <TabsContent value="days" className="mt-2">
-          <div className="px-5 py-4 flex items-center justify-end">
+          <div className="px-5 py-4 flex items-center justify-between gap-3">
+            {isCurrentPeriod && pastDays.length > 0 ? (
+              <button
+                onClick={() => setShowPastDays((v) => !v)}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors py-1"
+              >
+                <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', showPastDays && 'rotate-180')} />
+                {pastDays.length === 1
+                  ? `${showPastDays ? t('hide') : t('show')} 1 ${t('previousDay')}`
+                  : `${showPastDays ? t('hide') : t('show')} ${pastDays.length} ${t('previousDays')}`}
+              </button>
+            ) : (
+              <span />
+            )}
+
             <button
               onClick={() => setShowPendingOnly((prev) => !prev)}
               className={cn(
@@ -235,25 +249,14 @@ export function PainelView({
             </div>
           ) : (
             <>
-              {isCurrentPeriod && pastDays.length > 0 && (
+              {isCurrentPeriod && pastDays.length > 0 && showPastDays && (
                 <div className="px-5 mb-1">
-                  <button
-                    onClick={() => setShowPastDays((v) => !v)}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors py-1"
-                  >
-                    <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', showPastDays && 'rotate-180')} />
-                    {pastDays.length === 1
-                      ? `${showPastDays ? t('hide') : t('show')} 1 ${t('previousDay')}`
-                      : `${showPastDays ? t('hide') : t('show')} ${pastDays.length} ${t('previousDays')}`}
-                  </button>
-                  {showPastDays && (
-                    <DayList
-                      period={{ ...period, days: pastDays }}
-                      today={today}
-                      onOpenSheet={setSheet}
-                      onAddEntry={onAddEntry}
-                    />
-                  )}
+                  <DayList
+                    period={{ ...period, days: pastDays }}
+                    today={today}
+                    onOpenSheet={setSheet}
+                    onAddEntry={onAddEntry}
+                  />
                 </div>
               )}
               <DayList

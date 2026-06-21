@@ -14,17 +14,28 @@ interface DashboardAlertsProps {
 export function DashboardAlerts({ period, today, balanceSettings }: DashboardAlertsProps) {
   const t = useTranslations('dashboard');
 
-  const { dangerDay, warningDay } = useMemo(() => {
-    const dangerDay = period.days.find(
-      (d) => d.date >= today && d.saldoAcumulado < balanceSettings.yellowThreshold,
-    );
-    const warningDay = period.days.find(
-      (d) =>
-        d.date >= today &&
-        d.saldoAcumulado >= balanceSettings.yellowThreshold &&
-        d.saldoAcumulado < balanceSettings.greenThreshold,
-    );
-    return { dangerDay, warningDay };
+  const { dangerDay, warningDay, isDangerNow, isWarningNow } = useMemo(() => {
+    const todayDay = period.days.find((d) => d.date === today);
+    const isDangerNow = !!todayDay && todayDay.saldoAcumulado < balanceSettings.yellowThreshold;
+    const isWarningNow =
+      !!todayDay &&
+      todayDay.saldoAcumulado >= balanceSettings.yellowThreshold &&
+      todayDay.saldoAcumulado < balanceSettings.greenThreshold;
+
+    const dangerDay = isDangerNow
+      ? todayDay
+      : period.days.find((d) => d.date > today && d.saldoAcumulado < balanceSettings.yellowThreshold);
+
+    const warningDay = isWarningNow
+      ? todayDay
+      : period.days.find(
+          (d) =>
+            d.date > today &&
+            d.saldoAcumulado >= balanceSettings.yellowThreshold &&
+            d.saldoAcumulado < balanceSettings.greenThreshold,
+        );
+
+    return { dangerDay, warningDay, isDangerNow, isWarningNow };
   }, [period, today, balanceSettings]);
 
   if (!dangerDay && !warningDay) return null;
@@ -37,9 +48,11 @@ export function DashboardAlerts({ period, today, balanceSettings }: DashboardAle
             <AlertTriangle className="w-6 h-6 text-red-400" />
           </div>
           <div className="space-y-0.5">
-            <p className="text-sm font-bold text-white">{t('goingRed')}</p>
+            <p className="text-sm font-bold text-white">{isDangerNow ? t('alreadyRed') : t('goingRed')}</p>
             <p className="text-xs text-red-400 font-medium tracking-wide">
-              {t('onDay', { date: formatDateLong(dangerDay.date) })} | {formatCurrency(dangerDay.saldoAcumulado)}
+              {isDangerNow
+                ? formatCurrency(dangerDay.saldoAcumulado)
+                : `${t('onDay', { date: formatDateLong(dangerDay.date) })} | ${formatCurrency(dangerDay.saldoAcumulado)}`}
             </p>
           </div>
         </Card>
@@ -51,9 +64,11 @@ export function DashboardAlerts({ period, today, balanceSettings }: DashboardAle
             <AlertTriangle className="w-6 h-6 text-amber-400" />
           </div>
           <div className="space-y-0.5">
-            <p className="text-sm font-bold text-white">{t('warningZone')}</p>
+            <p className="text-sm font-bold text-white">{isWarningNow ? t('alreadyWarning') : t('warningZone')}</p>
             <p className="text-xs text-amber-400 font-medium tracking-wide">
-              {t('onDay', { date: formatDateLong(warningDay.date) })} | {formatCurrency(warningDay.saldoAcumulado)}
+              {isWarningNow
+                ? formatCurrency(warningDay.saldoAcumulado)
+                : `${t('onDay', { date: formatDateLong(warningDay.date) })} | ${formatCurrency(warningDay.saldoAcumulado)}`}
             </p>
           </div>
         </Card>
