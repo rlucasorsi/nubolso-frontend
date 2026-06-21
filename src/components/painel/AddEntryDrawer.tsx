@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/app-drawer';
 import { CreditCardSelect } from '@/components/credit-cards/CreditCardSelect';
 import { CreditPurchaseFields } from '@/components/credit-cards/CreditPurchaseFields';
+import { CreditCardDrawer } from '@/components/credit-cards/CreditCardDrawer';
 import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
 import { usePurchaseForm } from '@/modules/credit-cards/hooks/use-purchase-form';
 
@@ -44,6 +45,7 @@ export function AddEntryDrawer({
   const getInitialDate = () => defaultDate || new Date().toISOString().split('T')[0];
 
   const [mode, setMode] = useState<EntryMode>('debit');
+  const [addCardOpen, setAddCardOpen] = useState(false);
 
   const [values, setValues] = useState<EntryFormValues>({
     date: getInitialDate(),
@@ -151,31 +153,39 @@ export function AddEntryDrawer({
                 </button>
                 <button
                   type="button"
-                  onClick={() => activeCards.length > 0 && setMode('credit')}
-                  disabled={activeCards.length === 0}
-                  title={activeCards.length === 0 ? t('registerCardHint') : undefined}
+                  onClick={() => setMode('credit')}
                   className={cn(
                     'flex-1 flex items-center justify-center gap-2 py-2 h-12 text-xs font-bold rounded-xl transition-all duration-300 border',
                     mode === 'credit'
                       ? 'bg-primary/20 text-primary border-primary/50 shadow-glow'
-                      : activeCards.length === 0
-                        ? 'border-white/5 bg-surface-container/50 text-muted-foreground/30 cursor-not-allowed'
-                        : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                      : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
                   )}
                 >
                   <CreditCardIcon className="h-4 w-4" />
                   {t('credit')}
                 </button>
               </div>
-              {activeCards.length === 0 && (
-                <p className="text-[10px] text-muted-foreground/60 font-medium pl-1">
-                  {t('registerCardDescription')}
-                </p>
-              )}
             </div>
 
             {mode === 'debit' ? (
               <EntryForm values={values} onChange={setValues} errors={entryErrors} minDate={minDate} />
+            ) : activeCards.length === 0 && !cardsQuery.isLoading ? (
+              <div className="flex flex-col items-center text-center gap-3 py-8 px-5 rounded-2xl bg-white/5 border border-white/10">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <CreditCardIcon className="w-6 h-6 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-white">{t('noCardTitle')}</p>
+                  <p className="text-xs text-muted-foreground/70">{t('noCardDescription')}</p>
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setAddCardOpen(true)}
+                  className="mt-1 h-10 px-5 rounded-xl bg-gradient-primary text-white text-sm font-bold shadow-glow hover:scale-[1.02] transition-all"
+                >
+                  {t('registerCardButton')}
+                </Button>
+              </div>
             ) : (
               <div className="space-y-4">
                 <CreditCardSelect
@@ -239,6 +249,8 @@ export function AddEntryDrawer({
           </DrawerFooter>
         </DrawerContent>
       </Sheet>
+
+      <CreditCardDrawer open={addCardOpen} onOpenChange={setAddCardOpen} />
     </>
   );
 }
