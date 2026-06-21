@@ -15,7 +15,7 @@ import { usePayInvoice } from '@/modules/credit-cards/hooks/use-pay-invoice';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { formatCurrency } from '@/lib/cashflow';
-import { MONTH_SHORT } from '@/components/painel/config';
+import { MONTH_KEYS } from '@/components/painel/config';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -50,6 +50,7 @@ interface PartialPaymentDrawerProps {
 
 export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentDrawerProps) {
   const t = useTranslations('partialPayment');
+  const td = useTranslations('dateNames');
   const [partialAmount, setPartialAmount] = useState('');
   const [remainderInstallments, setRemainderInstallments] = useState(1);
   const [interestMode, setInterestMode] = useState<InterestMode>('none');
@@ -148,10 +149,10 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
             {t('title')}
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
-            Fatura {MONTH_SHORT[invoice.referenceMonth - 1]}/{invoice.referenceYear} â€”{' '}
+            {t('invoiceHeader', { month: td(MONTH_KEYS[invoice.referenceMonth - 1]), year: invoice.referenceYear })}{' '}
             <span className="font-semibold text-foreground">{formatCurrency(invoice.totalAmount)}</span>
           </p>
-          <SheetDescription className="sr-only">Pagamento parcial da fatura</SheetDescription>
+          <SheetDescription className="sr-only">{t('srDescription')}</SheetDescription>
         </DrawerHeader>
 
         <div className="flex-1 px-6 py-4 space-y-4">
@@ -254,7 +255,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
                   >
                     <div>
                       <p className="text-sm font-semibold">
-                        {MONTH_SHORT[month - 1]}/{year}
+                        {td(MONTH_KEYS[month - 1])}/{year}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
                         {existingTotal > 0

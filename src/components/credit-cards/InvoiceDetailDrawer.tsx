@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { DateInputField } from '@/components/ui/form-field';
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
-import { MONTH_SHORT } from '@/components/painel/config';
+import { MONTH_KEYS } from '@/components/painel/config';
 import { useGetInvoice } from '@/modules/credit-cards/hooks/use-get-invoice';
 import { useUpdateInvoicePaymentDate } from '@/modules/credit-cards/hooks/use-update-invoice-payment-date';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
@@ -41,6 +41,7 @@ interface InvoiceDetailDrawerProps {
 
 export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailDrawerProps) {
   const t = useTranslations('invoiceDetail');
+  const td = useTranslations('dateNames');
   const { data: invoice, isLoading } = useGetInvoice(invoiceId ?? undefined, open);
   const updatePaymentDateMutation = useUpdateInvoicePaymentDate();
   const reopenMutation = useReopenInvoice();
@@ -105,7 +106,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     const map = new Map<string, { purchaseId: string; description: string; installments: typeof invoice.installments; total: number }>();
     for (const inst of invoice?.installments ?? []) {
       if (!map.has(inst.purchaseId)) {
-        map.set(inst.purchaseId, { purchaseId: inst.purchaseId, description: inst.purchaseDescription ?? 'Other', installments: [], total: 0 });
+        map.set(inst.purchaseId, { purchaseId: inst.purchaseId, description: inst.purchaseDescription ?? t('otherPurchase'), installments: [], total: 0 });
       }
       const g = map.get(inst.purchaseId)!;
       g.installments.push(inst);
@@ -120,7 +121,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
         <DrawerContent>
           <DrawerHeader onClose={onClose}>
             <SheetTitle className="text-xl font-bold font-display text-primary">
-              {invoice ? `Invoice ${MONTH_SHORT[invoice.referenceMonth - 1]}/${invoice.referenceYear}` : t('title')}
+              {invoice ? t('invoiceMonth', { month: td(MONTH_KEYS[invoice.referenceMonth - 1]), year: invoice.referenceYear }) : t('title')}
             </SheetTitle>
             <p className="text-base font-bold text-white">{invoice?.cardName}</p>
             <SheetDescription className="sr-only">{t('title')}</SheetDescription>
@@ -197,7 +198,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                                 onClick={() => setDeletePurchaseId(group.purchaseId)}
                                 disabled={deletePurchaseMutation.isPending}
                                 className="shrink-0 w-7 h-7 rounded-lg bg-red-500/5 text-red-500/40 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center"
-                                title="Excluir compra"
+                                title={t('deletePurchase')}
                               >
                                 {deletePurchaseMutation.isPending && deletePurchaseMutation.variables?.purchaseId === group.purchaseId
                                   ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

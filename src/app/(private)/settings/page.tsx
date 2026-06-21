@@ -179,7 +179,7 @@ export default function SettingsPage() {
       <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
         <CardHeader className="p-4 pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            🌐 Language / Idioma
+            {t('language')}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0">

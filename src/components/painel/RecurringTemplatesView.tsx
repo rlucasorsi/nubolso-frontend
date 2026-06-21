@@ -33,6 +33,7 @@ const TYPE_ORDER = ['income', 'expense', 'spending'] as const;
 
 export function RecurringTemplatesView() {
   const t = useTranslations('recurring');
+  const typeT = useTranslations('entry');
   const { data: recurringTemplates, isLoading, isError, refetch } = useGetRecurringTemplates();
   const archiveMutation = useUpdateRecurringTemplate();
   const reactivateMutation = useUpdateRecurringTemplate();
@@ -201,7 +202,7 @@ export function RecurringTemplatesView() {
                     {cfg.icon('md')}
                   </div>
                   <h4 className={cn('text-xs font-black uppercase tracking-[0.25em]', cfg.color)}>
-                    {cfg.label}
+                    {typeT(type)}
                   </h4>
                   <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent mx-2" />
                   <div className="flex items-center gap-3">

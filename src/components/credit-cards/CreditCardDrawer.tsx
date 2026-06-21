@@ -32,6 +32,7 @@ const DEFAULT_VALUES: CreditCardFormValues = {
 
 export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerProps) {
   const t = useTranslations('creditCard');
+  const tCommon = useTranslations('common');
   const [values, setValues] = useState<CreditCardFormValues>(DEFAULT_VALUES);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,7 +60,7 @@ export function CreditCardDrawer({ open, onOpenChange, card }: CreditCardDrawerP
   async function handleSave() {
     const result = creditCardFormSchema.safeParse(values);
     if (!result.success) {
-      setError(result.error.errors[0]?.message ?? 'Dados invÃ¡lidos');
+      setError(result.error.errors[0]?.message ?? tCommon('invalidData'));
       return;
     }
 

@@ -53,7 +53,7 @@ export function CreditCardsSummary({
           {t('nextDue')}
         </span>
         <span className="text-2xl font-bold font-display">
-          {nextDueDate ? formatDateLong(nextDueDate) : 'â€”'}
+          {nextDueDate ? formatDateLong(nextDueDate) : '—'}
         </span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
           <Calendar className="h-4 w-4" />

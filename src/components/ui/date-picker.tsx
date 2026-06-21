@@ -3,7 +3,6 @@
 import * as React from "react"
 import { format, parseISO } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
-import { ptBR } from "date-fns/locale"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,6 +19,9 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useTranslations } from "@/i18n/useTranslations"
+import { useLanguage } from "@/i18n/LanguageContext"
+import { getDateFnsLocale } from "@/i18n/dateFnsLocale"
 
 interface DatePickerProps {
   date?: string
@@ -29,9 +31,13 @@ interface DatePickerProps {
   minDate?: string
 }
 
-export function DatePicker({ date, onChange, placeholder = "Selecione uma data", className, minDate }: DatePickerProps) {
+export function DatePicker({ date, onChange, placeholder, className, minDate }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   const isMobile = useIsMobile()
+  const tCommon = useTranslations("common")
+  const { locale } = useLanguage()
+  const dateFnsLocale = getDateFnsLocale(locale)
+  const resolvedPlaceholder = placeholder ?? tCommon("selectDate")
   const selectedDate = date ? parseISO(date) : undefined
   const minSelectableDate = minDate ? parseISO(minDate) : undefined
 
@@ -46,9 +52,9 @@ export function DatePicker({ date, onChange, placeholder = "Selecione uma data",
     >
       <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
       {selectedDate ? (
-        format(selectedDate, "PPP", { locale: ptBR })
+        format(selectedDate, "PPP", { locale: dateFnsLocale })
       ) : (
-        <span>{placeholder}</span>
+        <span>{resolvedPlaceholder}</span>
       )}
     </Button>
   )
@@ -65,7 +71,7 @@ export function DatePicker({ date, onChange, placeholder = "Selecione uma data",
       }}
       disabled={minSelectableDate ? { before: minSelectableDate } : undefined}
       initialFocus
-      locale={ptBR}
+      locale={dateFnsLocale}
       className="bg-card"
     />
   )
@@ -77,7 +83,7 @@ export function DatePicker({ date, onChange, placeholder = "Selecione uma data",
           {trigger}
         </DrawerTrigger>
         <DrawerContent className="p-0 border-none bg-card">
-          <DrawerTitle className="sr-only">{placeholder}</DrawerTitle>
+          <DrawerTitle className="sr-only">{resolvedPlaceholder}</DrawerTitle>
           <div className="flex justify-center p-4 pb-10">
             {calendar}
           </div>

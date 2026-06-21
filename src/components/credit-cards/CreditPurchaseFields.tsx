@@ -5,6 +5,7 @@ import { TextInputField, AmountInputField, DateInputField, NumberInputField } fr
 import { PurchaseSimulationPreview } from './PurchaseSimulationPreview';
 import type { SimulatePurchaseResponse } from '@/modules/credit-cards/model/api/purchase';
 import type { PurchaseInputMode, PurchaseStrategy } from '@/modules/credit-cards/hooks/use-purchase-form';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface CreditPurchaseFieldsProps {
   description: string;
@@ -49,18 +50,20 @@ export function CreditPurchaseFields({
   simulation,
   isSimulating,
 }: CreditPurchaseFieldsProps) {
+  const t = useTranslations('creditPurchase');
+
   return (
     <>
       <TextInputField
-        label="Description"
-        placeholder="e.g., Notebook, Supermarket..."
+        label={t('descriptionLabel')}
+        placeholder={t('descriptionPlaceholder')}
         value={description}
         onChange={onDescriptionChange}
       />
 
       <div className="space-y-2">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-          Input Mode
+          {t('inputMode')}
         </label>
         <div className="flex gap-2">
           <button
@@ -73,7 +76,7 @@ export function CreditPurchaseFields({
                 : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
             )}
           >
-            Total Amount
+            {t('totalAmount')}
           </button>
           <button
             type="button"
@@ -85,13 +88,13 @@ export function CreditPurchaseFields({
                 : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
             )}
           >
-            Installment Amount
+            {t('installmentAmount')}
           </button>
         </div>
       </div>
 
       <AmountInputField
-        label={inputMode === 'total' ? 'Total Amount' : 'Installment Amount'}
+        label={inputMode === 'total' ? t('totalAmount') : t('installmentAmount')}
         required
         value={amount}
         onChange={onAmountChange}
@@ -99,7 +102,7 @@ export function CreditPurchaseFields({
       />
 
       <NumberInputField
-        label="Number of Installments"
+        label={t('numberOfInstallments')}
         value={installmentsCount}
         onChange={onInstallmentsCountChange}
         min={1}
@@ -110,7 +113,7 @@ export function CreditPurchaseFields({
       {installmentsCount > 1 && (
         <div className="space-y-2">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-            Cent difference
+            {t('centDifference')}
           </label>
           <div className="flex gap-2">
             <button
@@ -123,7 +126,7 @@ export function CreditPurchaseFields({
                   : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
               )}
             >
-              1st Installment
+              {t('firstInstallment')}
             </button>
             <button
               type="button"
@@ -135,7 +138,7 @@ export function CreditPurchaseFields({
                   : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
               )}
             >
-              Last Installment
+              {t('lastInstallment')}
             </button>
           </div>
         </div>
@@ -144,7 +147,7 @@ export function CreditPurchaseFields({
       {computedTotal !== null && (
         <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.03] border border-white/5">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Purchase Total
+            {t('purchaseTotal')}
           </span>
           <span className="text-sm font-black font-display text-white">
             R$ {computedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -153,7 +156,7 @@ export function CreditPurchaseFields({
       )}
 
       <DateInputField
-        label="Purchase Date"
+        label={t('purchaseDate')}
         value={purchaseDate}
         onChange={onPurchaseDateChange}
         minDate={minDate}

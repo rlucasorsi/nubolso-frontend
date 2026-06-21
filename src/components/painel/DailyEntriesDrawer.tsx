@@ -7,7 +7,7 @@ import { TextInputField, AmountInputField, DateInputField } from '@/components/u
 import { Plus, Pencil, Trash2, Check, ChevronDown, RotateCw, RotateCcw, Ban, X, CreditCard } from 'lucide-react';
 import { EntryFormValues } from './EntryForm';
 import { AddEntryDrawer } from './AddEntryDrawer';
-import { TYPE_CONFIG, WEEK_DAYS, MONTH_SHORT } from './config';
+import { TYPE_CONFIG, MONTH_KEYS, WEEKDAY_KEYS } from './config';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useRealizeRecurringTemplate } from '@/modules/recurring-templates/hooks/use-realize-recurring-template';
 import { useSkipRecurringTemplate } from '@/modules/recurring-templates/hooks/use-skip-recurring-template';
@@ -79,6 +79,8 @@ export function DailyEntriesDrawer({
   });
 
   const t = useTranslations('dailyEntries');
+  const typeT = useTranslations('entry');
+  const td = useTranslations('dateNames');
   const realizeMutation = useRealizeRecurringTemplate();
   const skipMutation = useSkipRecurringTemplate();
   const reopenInvoiceMutation = useReopenInvoice();
@@ -152,7 +154,7 @@ export function DailyEntriesDrawer({
     setExpandedGroups(prev => ({ ...prev, [type]: !prev[type] }));
   };
 
-  // Reverts a realized recurring transaction back to "nÃ£o efetivado": deletes
+  // Reverts a realized recurring transaction back to "não efetivado": deletes
   // the real Transaction so the projection regenerates the estimate again.
   const handleDelete = () => {
     if (deleteConfirmId) {
@@ -181,7 +183,7 @@ export function DailyEntriesDrawer({
       await reopenInvoiceMutation.mutateAsync(reopenInvoiceId);
       setReopenInvoiceId(null);
     } catch (err) {
-      setReopenError(extractErrorMessage(err, "Couldn't reopen the invoice"));
+      setReopenError(extractErrorMessage(err, t('reopenError')));
     }
   };
 
@@ -199,12 +201,12 @@ export function DailyEntriesDrawer({
                   {String(d.getDate()).padStart(2, '0')}
                 </span>
                 <span className="text-[7px] font-extrabold text-muted-foreground/40 uppercase tracking-[0.1em] mt-0.5">
-                  {MONTH_SHORT[d.getMonth()]}
+                  {td(MONTH_KEYS[d.getMonth()])}
                 </span>
               </div>
 
               <h4 className="text-xs font-bold text-white tracking-tight font-display leading-none">
-                {WEEK_DAYS[d.getDay() as keyof typeof WEEK_DAYS]}
+                {td(WEEKDAY_KEYS[d.getDay()])}
               </h4>
             </div>
 
@@ -216,7 +218,7 @@ export function DailyEntriesDrawer({
                 <p className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-widest">
                   {sheet.filter === 'all'
                     ? t('dayView')
-                    : TYPE_CONFIG[sheet.filter].label}
+                    : typeT(sheet.filter)}
                 </p>
               </div>
 
@@ -270,7 +272,7 @@ export function DailyEntriesDrawer({
                            {cfg.icon('md')}
                         </div>
                         <h4 className={`text-xs font-black uppercase tracking-[0.25em] ${cfg.color}`}>
-                           {cfg.label}
+                           {typeT(type)}
                         </h4>
                         
                         <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent/0 mx-2"></div>
@@ -428,7 +430,7 @@ export function DailyEntriesDrawer({
                                                <div className="flex items-center justify-between gap-2">
                                                   <div>
                                                      <p className="text-sm font-bold text-white tracking-tight">
-                                                        {entry.description || cfg.label}
+                                                        {entry.description || typeT(entry.type)}
                                                      </p>
                                                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                                                         {entry.category && (

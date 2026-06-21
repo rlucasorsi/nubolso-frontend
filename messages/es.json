@@ -9,7 +9,9 @@
     "logout": "Cerrar sesión",
     "openMenu": "Abrir menú",
     "hello": "Hola,",
-    "newEntry": "Nuevo movimiento"
+    "newEntry": "Nuevo movimiento",
+    "menu": "Menú",
+    "menuDescription": "Menú de navegación principal"
   },
   "auth": {
     "tagline": "Organiza tus finanzas y toma decisiones con claridad.",
@@ -122,7 +124,8 @@
     "previousDay": "día anterior",
     "previousDays": "días anteriores",
     "noPendingDays": "No hay días con pendientes en este período.",
-    "cycle": "Ciclo"
+    "cycle": "Ciclo",
+    "pageTitle": "Panel — nubolso"
   },
   "entry": {
     "addButtonLabel": "Movimiento",
@@ -236,7 +239,8 @@
     "cancel": "Cancelar",
     "archiveError": "No fue posible archivar la cuenta recurrente",
     "reactivateError": "No fue posible reactivar la cuenta recurrente",
-    "deleteError": "No fue posible eliminar la cuenta recurrente"
+    "deleteError": "No fue posible eliminar la cuenta recurrente",
+    "pageTitle": "Recurrentes — nubolso"
   },
   "settings": {
     "title": "Configuración",
@@ -252,7 +256,8 @@
     "balanceIndicatorsDescription": "Límites que definen los colores del saldo diario.",
     "greenFrom": "Verde desde (R$)",
     "yellowFrom": "Amarillo desde (R$)",
-    "belowYellow": "Por debajo del valor amarillo, el indicador se vuelve rojo."
+    "belowYellow": "Por debajo del valor amarillo, el indicador se vuelve rojo.",
+    "language": "🌐 Idioma"
   },
   "common": {
     "cancel": "Cancelar",
@@ -263,7 +268,9 @@
     "error": "Error",
     "retry": "Intentar de nuevo",
     "serverError": "Algo salió mal.",
-    "serverErrorDescription": "No pudimos cargar los datos. Verifica tu conexión e inténtalo de nuevo."
+    "serverErrorDescription": "No pudimos cargar los datos. Verifica tu conexión e inténtalo de nuevo.",
+    "invalidData": "Datos inválidos",
+    "selectDate": "Selecciona una fecha"
   },
   "languageSwitcher": {
     "label": "Idioma"
@@ -275,7 +282,8 @@
     "balance": "Saldo",
     "income": "Ingresos",
     "expense": "Gastos fijos",
-    "spending": "Gastos"
+    "spending": "Gastos",
+    "recurringPending": "Movimientos estimados recurrentes pendientes este día"
   },
   "dailyEntries": {
     "entries": "Movimientos",
@@ -308,6 +316,7 @@
     "reopening": "Reabriendo...",
     "reopen": "Reabrir",
     "reopenInvoice": "Reabrir Factura",
+    "reopenError": "No se pudo reabrir la factura",
     "realizationDate": "Fecha de aplicación",
     "dateNote": "Ajusta la fecha si el cobro ocurrió en un día diferente al planificado.",
     "cannotAdd": "No se pueden agregar movimientos antes de la fecha inicial"
@@ -334,7 +343,8 @@
     "objective": "Objetivo",
     "objectives": "Objetivos",
     "nearCompletion": "{count} meta(s) cerca de completarse ✨",
-    "focused": "Totalmente enfocado en los objetivos"
+    "focused": "Totalmente enfocado en los objetivos",
+    "pageTitle": "Metas — nubolso"
   },
   "goalDetail": {
     "title": "Detalles de la Meta",
@@ -352,7 +362,10 @@
     "cancel": "Cancelar",
     "deleting": "Eliminando...",
     "delete": "Eliminar",
-    "save": "Guardar"
+    "save": "Guardar",
+    "dateLabel": "Fecha",
+    "amountLabel": "Monto",
+    "editContribution": "Editar aporte"
   },
   "createGoal": {
     "title": "Nueva Meta Financiera",
@@ -384,7 +397,8 @@
     "noMovements": "Aún no hay movimientos.",
     "processing": "Procesando...",
     "confirmDeposit": "Confirmar Aporte",
-    "confirmWithdraw": "Confirmar Retiro"
+    "confirmWithdraw": "Confirmar Retiro",
+    "operationError": "No fue posible registrar la operación"
   },
   "creditCardsView": {
     "title": "Tarjetas de Crédito",
@@ -393,7 +407,8 @@
     "addCardTitle": "Agregar nueva tarjeta",
     "addNewCard": "Agregar nueva tarjeta",
     "card": "tarjeta registrada",
-    "cards": "tarjetas registradas"
+    "cards": "tarjetas registradas",
+    "pageTitle": "Tarjetas de Crédito — nubolso"
   },
   "creditCardsSummary": {
     "activeCards": "Tarjetas Activas",
@@ -427,14 +442,17 @@
     "removeDesc": "La tarjeta será desactivada y dejará de generar nuevas facturas. El historial de compras y facturas pagadas se conservará.",
     "removing": "Eliminando...",
     "remove": "Eliminar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "editCardTitle": "Editar tarjeta",
+    "removeError": "No fue posible eliminar la tarjeta"
   },
   "creditCardForm": {
     "cardName": "Nombre de la Tarjeta",
     "closingDay": "Día de Cierre",
     "dueDay": "Día de Vencimiento",
     "paymentDay": "Día de Pago",
-    "paymentDayNote": "Día en que la factura impacta tu saldo en el flujo de caja."
+    "paymentDayNote": "Día en que la factura impacta tu saldo en el flujo de caja.",
+    "cardNamePlaceholder": "Ej: Nubank, Inter, Itaú..."
   },
   "payInvoice": {
     "payAll": "Pagar todo",
@@ -459,10 +477,13 @@
     "processing": "Procesando...",
     "confirm": "Confirmar",
     "payError": "No fue posible registrar el pago",
-    "amountExceeds": "Debe ser menor que {amount}"
+    "amountExceeds": "Debe ser menor que {amount}",
+    "invoiceHeader": "Factura {month}/{year} —",
+    "srDescription": "Pago parcial de la factura"
   },
   "invoiceDetail": {
     "title": "Factura",
+    "invoiceMonth": "Factura {month}/{year}",
     "paidAmount": "Monto Pagado",
     "invoiceTotal": "Total de la Factura",
     "closing": "Cierre",
@@ -484,7 +505,9 @@
     "deleteDesc": "Todas las cuotas de esta compra serán eliminadas de todas las facturas. Esta acción no se puede deshacer.",
     "delete": "Eliminar",
     "reopenError": "No fue posible reabrir la factura",
-    "deleteError": "No fue posible eliminar la compra"
+    "deleteError": "No fue posible eliminar la compra",
+    "otherPurchase": "Otro",
+    "deletePurchase": "Eliminar compra"
   },
   "recurringDrawer": {
     "editTitle": "Editar Cuenta Recurrente",
@@ -539,5 +562,58 @@
   },
   "numberField": {
     "range": "Mín: {min} · Máx: {max}"
+  },
+  "dateNames": {
+    "monthJan": "ENE",
+    "monthFeb": "FEB",
+    "monthMar": "MAR",
+    "monthApr": "ABR",
+    "monthMay": "MAY",
+    "monthJun": "JUN",
+    "monthJul": "JUL",
+    "monthAug": "AGO",
+    "monthSep": "SEP",
+    "monthOct": "OCT",
+    "monthNov": "NOV",
+    "monthDec": "DIC",
+    "weekdaySun": "Domingo",
+    "weekdayMon": "Lunes",
+    "weekdayTue": "Martes",
+    "weekdayWed": "Miércoles",
+    "weekdayThu": "Jueves",
+    "weekdayFri": "Viernes",
+    "weekdaySat": "Sábado"
+  },
+  "creditCardSelect": {
+    "label": "Tarjeta",
+    "loading": "Cargando...",
+    "placeholder": "Selecciona una tarjeta"
+  },
+  "creditPurchase": {
+    "title": "Nueva Compra",
+    "description": "Registra una compra en cuotas y observa el impacto en las próximas facturas antes de confirmar.",
+    "cancel": "Cancelar",
+    "confirming": "Confirmando...",
+    "confirmPurchase": "Confirmar Compra",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Ej: Notebook, Supermercado...",
+    "inputMode": "Modo de Entrada",
+    "totalAmount": "Monto Total",
+    "installmentAmount": "Monto de la Cuota",
+    "numberOfInstallments": "Número de Cuotas",
+    "centDifference": "Diferencia de centavos",
+    "firstInstallment": "1ª Cuota",
+    "lastInstallment": "Última Cuota",
+    "purchaseTotal": "Total de la Compra",
+    "purchaseDate": "Fecha de la Compra",
+    "installments": "Cuotas",
+    "installment": "Cuota {n}/{total}",
+    "invoiceMonth": "Factura {month}/{year}",
+    "paidOn": "Pagada el {date}",
+    "impactedInvoices": "Facturas Impactadas",
+    "dueOn": "Vence el {date}",
+    "balanceWarning": "Atención: tu saldo puede quedar negativo",
+    "projectedBalance": "{date}: saldo proyectado de {amount}",
+    "noNegativeImpact": "No se prevé impacto negativo en tu saldo."
   }
 }

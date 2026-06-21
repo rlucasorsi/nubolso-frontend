@@ -54,8 +54,8 @@ export function SideMenuDrawer({ open, onClose, userName }: SideMenuDrawerProps)
         side="left"
         className="w-[280px] p-0 bg-card border-r border-white/10 flex flex-col [&>button]:hidden"
       >
-        <SheetTitle className="sr-only">Menu</SheetTitle>
-        <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
+        <SheetTitle className="sr-only">{t('menu')}</SheetTitle>
+        <SheetDescription className="sr-only">{t('menuDescription')}</SheetDescription>
 
         <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-white/5">
           <span className="text-xl font-bold font-display">

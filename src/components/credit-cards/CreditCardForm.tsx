@@ -23,7 +23,7 @@ export function CreditCardForm({ values, onChange, error }: CreditCardFormProps)
       <TextInputField
         label={t('cardName')}
         required
-        placeholder="Ex: Nubank, Inter, ItaÃº..."
+        placeholder={t('cardNamePlaceholder')}
         value={values.name}
         onChange={(name) => onChange({ ...values, name })}
         error={error}

@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { ArrowUpRight, ArrowDownLeft, CircleDollarSign, AlertTriangle, CopyCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +26,8 @@ import { useConfirmImport } from '@/modules/imports/hooks/use-confirm-import';
 import { useCancelImport } from '@/modules/imports/hooks/use-cancel-import';
 import type { ImportBatchDetail, ImportItemDecision } from '@/modules/imports/model/api/ofx-import';
 import { useTranslations } from '@/i18n/useTranslations';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
   INCOME: <ArrowUpRight className="h-4 w-4" />,
@@ -48,6 +49,9 @@ interface ImportReviewStepProps {
 
 export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: ImportReviewStepProps) {
   const t = useTranslations('importReview');
+  const typeT = useTranslations('entry');
+  const { locale } = useLanguage();
+  const dateFnsLocale = getDateFnsLocale(locale);
   const { data: batch, isLoading, isError, refetch } = useGetImportBatch(batchId);
   const confirmImport = useConfirmImport();
   const cancelImport = useCancelImport();
@@ -88,7 +92,7 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
       });
       onConfirmed(result);
     } catch {
-      // erro jÃ¡ sinalizado via estado da mutaÃ§Ã£o (confirmImport.isError)
+      // erro já sinalizado via estado da mutação (confirmImport.isError)
     }
   }
 
@@ -98,7 +102,7 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
       await cancelImport.mutateAsync(batch.id);
       onCanceled();
     } catch {
-      // erro jÃ¡ sinalizado via estado da mutaÃ§Ã£o (cancelImport.isError)
+      // erro já sinalizado via estado da mutação (cancelImport.isError)
     }
   }
 
@@ -165,9 +169,9 @@ export function ImportReviewStep({ batchId, onConfirmed, onCanceled, onBack }: I
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold truncate">{item.description || cfg.label}</p>
+                    <p className="text-sm font-semibold truncate">{item.description || typeT(item.type.toLowerCase() as 'income' | 'expense' | 'spending')}</p>
                     <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">
-                      {format(new Date(item.date.split('T')[0] + 'T12:00:00'), 'dd MMM yy', { locale: ptBR })}
+                      {format(new Date(item.date.split('T')[0] + 'T12:00:00'), 'dd MMM yy', { locale: dateFnsLocale })}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-1">

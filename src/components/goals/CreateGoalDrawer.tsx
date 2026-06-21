@@ -65,6 +65,7 @@ export function CreateGoalDrawer({
   isLoading,
 }: CreateGoalDrawerProps) {
   const t = useTranslations('createGoal');
+  const tCommon = useTranslations('common');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
@@ -90,7 +91,7 @@ export function CreateGoalDrawer({
       deadline,
     });
     if (!result.success) {
-      setFormError(result.error.errors[0]?.message ?? 'Dados invÃ¡lidos');
+      setFormError(result.error.errors[0]?.message ?? tCommon('invalidData'));
       return;
     }
 

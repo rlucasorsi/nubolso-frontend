@@ -25,6 +25,10 @@ import {
 import { AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { CircularProgress } from '@/components/ui/circular-progress';
 import { useTranslations } from '@/i18n/useTranslations';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
+import { format } from 'date-fns';
+import type { Locale } from 'date-fns';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -33,17 +37,14 @@ function formatCurrency(value: number) {
   });
 }
 
-const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const LONG_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-function formatDate(dateStr: string) {
+function formatDate(dateStr: string, dateFnsLocale: Locale) {
   const date = new Date(dateStr + 'T00:00:00');
-  return `${date.getDate().toString().padStart(2, '0')} ${SHORT_MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
+  return format(date, 'dd MMM, yyyy', { locale: dateFnsLocale });
 }
 
-function getDeadlineLabel(deadline: string) {
+function getDeadlineLabel(deadline: string, dateFnsLocale: Locale) {
   const date = new Date(deadline + 'T00:00:00');
-  return `${LONG_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+  return format(date, 'MMMM yyyy', { locale: dateFnsLocale });
 }
 
 interface GoalDetailDrawerProps {
@@ -66,6 +67,8 @@ export function GoalDetailDrawer({
   isDeleting = false,
 }: GoalDetailDrawerProps) {
   const t = useTranslations('goalDetail');
+  const { locale } = useLanguage();
+  const dateFnsLocale = getDateFnsLocale(locale);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState<string>('');
   const [editDate, setEditDate] = useState<string>('');
@@ -199,7 +202,7 @@ export function GoalDetailDrawer({
                 </span>
               </div>
               <p className="text-sm font-bold">
-                {getDeadlineLabel(goal.deadline)}
+                {getDeadlineLabel(goal.deadline, dateFnsLocale)}
               </p>
             </div>
           </div>
@@ -230,12 +233,12 @@ export function GoalDetailDrawer({
                         <p className="text-sm font-bold">{c.description}</p>
                         <div className="space-y-3">
                           <DateInputField
-                            label="Date"
+                            label={t('dateLabel')}
                             value={editDate}
                             onChange={setEditDate}
                           />
                           <AmountInputField
-                            label="Amount"
+                            label={t('amountLabel')}
                             value={editAmount}
                             onChange={setEditAmount}
                           />
@@ -270,7 +273,7 @@ export function GoalDetailDrawer({
                                 {c.description}
                               </p>
                               <p className="text-[11px] text-muted-foreground">
-                                {formatDate(c.date)}
+                                {formatDate(c.date, dateFnsLocale)}
                               </p>
                             </div>
                           </div>
@@ -282,14 +285,14 @@ export function GoalDetailDrawer({
                               <button
                                 onClick={() => startEdit(c)}
                                 className="p-1 hover:text-primary transition-colors"
-                                title="Edit"
+                                title={t('editContribution')}
                               >
                                 <Edit2 className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteEntry(c.id)}
                                 className="p-1 hover:text-destructive transition-colors"
-                                title="Delete"
+                                title={t('delete')}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>

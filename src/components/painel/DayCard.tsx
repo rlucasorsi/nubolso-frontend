@@ -3,7 +3,7 @@
 import { DayData } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
 import { Eye, RotateCw } from 'lucide-react';
-import { MONTH_SHORT, WEEK_DAYS } from './config';
+import { MONTH_KEYS, WEEKDAY_KEYS } from './config';
 import { BalanceSettings } from '@/hooks/useCashFlow';
 import { useTranslations } from '@/i18n/useTranslations';
 
@@ -42,6 +42,7 @@ export function DayCard({
   balanceSettings,
 }: DayCardProps) {
   const t = useTranslations('dayCard');
+  const td = useTranslations('dateNames');
   const d = new Date(day.date + 'T00:00:00');
   const isNegative = day.saldoAcumulado < 0;
   const isDisabled = day.isBeforeStartDate;
@@ -72,22 +73,22 @@ export function DayCard({
       }`} />
 
       <div className="p-5">
-        {/* Header row: date/weekday â€” saldo + eye button */}
+        {/* Header row: date/weekday — saldo + eye button */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center leading-none shrink-0">
               <span className="text-2xl font-black font-display text-white">{String(d.getDate()).padStart(2, '0')}</span>
-              <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-[0.1em]">{MONTH_SHORT[d.getMonth()]}</span>
+              <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-[0.1em]">{td(MONTH_KEYS[d.getMonth()])}</span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <h4 className="text-sm font-bold text-white tracking-tight font-display leading-none">
-                  {WEEK_DAYS[d.getDay()]}
+                  {td(WEEKDAY_KEYS[d.getDay()])}
                 </h4>
                 {day.hasPendingRecurring && (
                   <div
                     className="w-4 h-4 rounded flex items-center justify-center text-amber-400 shrink-0"
-                    title="Recurring estimated entries pending on this day"
+                    title={t('recurringPending')}
                   >
                     <RotateCw className="w-3 h-3" />
                   </div>
@@ -108,7 +109,7 @@ export function DayCard({
             <div className={cn("flex items-baseline gap-1.5 text-right", saldoBorderClass(saldoStatus))}>
               <span className="text-[8px] font-black uppercase tracking-wide text-white">{t('balance')}</span>
               {isDisabled ? (
-                <span className="text-sm font-black font-display text-white/30">â€”</span>
+                <span className="text-sm font-black font-display text-white/30">—</span>
               ) : (
                 <span className={cn("text-sm font-black font-display", saldoValueClass(saldoStatus))}>
                   <span className="text-[9px] opacity-60 mr-0.5">R$</span>

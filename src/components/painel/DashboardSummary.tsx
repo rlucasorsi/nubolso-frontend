@@ -193,7 +193,7 @@ export function DashboardSummary({
           </div>
         </Card>
 
-        {/* PrevisÃ£o Final */}
+        {/* Previsão Final */}
         <Card className="bg-[#1c1a24] border-none rounded-[2rem] overflow-hidden relative p-8 py-6">
           <div className="flex justify-between items-start">
             <div className="space-y-3">

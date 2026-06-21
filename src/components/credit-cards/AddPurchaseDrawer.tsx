@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { usePurchaseForm } from '@/modules/credit-cards/hooks/use-purchase-form';
 import { CreditPurchaseFields } from './CreditPurchaseFields';
+import { useTranslations } from '@/i18n/useTranslations';
 
 interface AddPurchaseDrawerProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface AddPurchaseDrawerProps {
 }
 
 export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerProps) {
+  const t = useTranslations('creditPurchase');
   const form = usePurchaseForm({ isOpen: open, cardId });
 
   return (
@@ -25,10 +27,10 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
       <DrawerContent>
         <DrawerHeader onClose={onClose}>
           <SheetTitle className="text-2xl font-bold font-display text-primary">
-            New Purchase
+            {t('title')}
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
-            Register an installment purchase and see the impact on upcoming invoices before confirming.
+            {t('description')}
           </p>
         </DrawerHeader>
 
@@ -61,7 +63,7 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5"
             onClick={onClose}
           >
-            Cancel
+            {t('cancel')}
           </Button>
 
           <Button
@@ -69,7 +71,7 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             onClick={() => form.handleConfirm(onClose)}
             disabled={!form.isValid || form.isConfirming}
           >
-            {form.isConfirming ? 'Confirming...' : 'Confirm Purchase'}
+            {form.isConfirming ? t('confirming') : t('confirmPurchase')}
           </Button>
         </DrawerFooter>
       </DrawerContent>

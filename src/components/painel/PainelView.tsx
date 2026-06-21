@@ -63,7 +63,7 @@ export function PainelView({
   }, [periods]);
 
   // Show the floating "new entry" button once the user scrolls past the
-  // header/summary, giving quick access while browsing "Dias do perÃ­odo".
+  // header/summary, giving quick access while browsing "Dias do período".
   // Depends on `mounted` because the root element (and its ref) only exists
   // once the component renders past the hydration guard below.
   useEffect(() => {

@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
-import { MONTH_SHORT, TYPE_CONFIG } from '@/components/painel/config';
+import { MONTH_KEYS, TYPE_CONFIG } from '@/components/painel/config';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
 import { useDeleteCreditCard } from '@/modules/credit-cards/hooks/use-delete-credit-card';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
@@ -44,6 +44,7 @@ export function CreditCardDetailDrawer({
   onSelectInvoice,
 }: CreditCardDetailDrawerProps) {
   const t = useTranslations('creditCardDetail');
+  const td = useTranslations('dateNames');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const { data: invoices, isLoading } = useGetCardInvoices(card?.id, open);
@@ -77,7 +78,7 @@ export function CreditCardDetailDrawer({
       setConfirmDelete(false);
       onClose();
     } catch (err) {
-      setDeleteError(extractErrorMessage(err, "Couldn't remove the card"));
+      setDeleteError(extractErrorMessage(err, t('removeError')));
     }
   };
 
@@ -111,7 +112,7 @@ export function CreditCardDetailDrawer({
           <div className={cn('p-2 rounded-xl shrink-0', cfg.bg)}>{cfg.icon('sm')}</div>
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate">
-              {t('invoiceMonth', { month: MONTH_SHORT[invoice.referenceMonth - 1], year: invoice.referenceYear })}
+              {t('invoiceMonth', { month: td(MONTH_KEYS[invoice.referenceMonth - 1]), year: invoice.referenceYear })}
             </p>
             <p className="text-xs text-muted-foreground">
               {invoice.isPaid ? t('paidOn') : t('dueOn')} {formatDateLong(invoice.paymentDate)}
@@ -136,14 +137,14 @@ export function CreditCardDetailDrawer({
         <DrawerHeader
           onClose={onClose}
           actions={
-            <Button variant="ghost" size="icon-sm" onClick={() => onEdit(card)} title="Edit card">
+            <Button variant="ghost" size="icon-sm" onClick={() => onEdit(card)} title={t('editCardTitle')}>
               <Pencil className="h-4 w-4" />
             </Button>
           }
         >
           <SheetTitle className="text-xl font-bold font-display text-primary">{card.name}</SheetTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            {t('closingDay', { day: card.closingDay })} Â· {t('dueDay', { day: card.dueDay })} Â· {t('paymentDay', { day: card.paymentDay })}
+            {t('closingDay', { day: card.closingDay })} · {t('dueDay', { day: card.dueDay })} · {t('paymentDay', { day: card.paymentDay })}
           </p>
           <SheetDescription className="sr-only">{card.name}</SheetDescription>
         </DrawerHeader>

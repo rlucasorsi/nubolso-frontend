@@ -27,14 +27,19 @@ import {
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 import { useTranslations } from '@/i18n/useTranslations';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
 
 export function EntriesView() {
   const t = useTranslations('entries');
+  const typeT = useTranslations('entry');
+  const dailyT = useTranslations('dailyEntries');
+  const { locale } = useLanguage();
+  const dateFnsLocale = getDateFnsLocale(locale);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -173,7 +178,7 @@ export function EntriesView() {
                 selected={dateRange}
                 onSelect={setDateRange}
                 numberOfMonths={1}
-                locale={ptBR}
+                locale={dateFnsLocale}
               />
               <div className="p-3 border-t border-white/5 flex justify-end">
                 <Button
@@ -230,10 +235,10 @@ export function EntriesView() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
-                      {entry.description || cfg.label}
+                      {entry.description || typeT(entry.type)}
                     </p>
                     <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap bg-white/5 px-2 py-0.5 rounded-full">
-                      {format(new Date(entry.date.split('T')[0] + 'T12:00:00'), 'dd MMM yy', { locale: ptBR })}
+                      {format(new Date(entry.date.split('T')[0] + 'T12:00:00'), 'dd MMM yy', { locale: dateFnsLocale })}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-1">
@@ -244,20 +249,20 @@ export function EntriesView() {
                       {entry.templateId && (
                         <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]">
                           <RotateCw className="h-2.5 w-2.5" />
-                          Recurring
+                          {dailyT('recurring')}
                         </Badge>
                       )}
                       {entry.isVirtual ? (
                         <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10">
-                          Estimated
+                          {dailyT('estimated')}
                         </Badge>
                       ) : entry.templateId ? (
                         <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10">
-                          Confirmed
+                          {dailyT('confirmed')}
                         </Badge>
                       ) : null}
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-bold">
-                        {cfg.label}
+                        {typeT(entry.type)}
                       </span>
                     </div>
                   </div>

@@ -37,6 +37,7 @@ const DEFAULT_VALUES: RecurringTemplateFormValues = {
 
 export function RecurringTemplateDrawer({ open, onOpenChange, template }: RecurringTemplateDrawerProps) {
   const t = useTranslations('recurringDrawer');
+  const tCommon = useTranslations('common');
   const [values, setValues] = useState<RecurringTemplateFormValues>(DEFAULT_VALUES);
   const [errors, setErrors] = useState<{ estimatedAmount?: string; endDate?: string; totalOccurrences?: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -80,7 +81,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
       }
       setErrors(fieldErrors);
       if (Object.keys(fieldErrors).length === 0) {
-        setSubmitError(result.error.errors[0]?.message ?? 'Dados invÃ¡lidos');
+        setSubmitError(result.error.errors[0]?.message ?? tCommon('invalidData'));
       }
       return;
     }

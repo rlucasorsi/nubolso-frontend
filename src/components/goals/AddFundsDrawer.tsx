@@ -18,6 +18,7 @@ import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { ArrowDownLeft, ArrowUpRight, Check, CheckCircle2, Loader2, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
+import { MONTH_KEYS } from '@/components/painel/config';
 
 type OperationType = 'deposit' | 'withdrawal';
 
@@ -44,11 +45,9 @@ function formatCurrency(value: number) {
   });
 }
 
-const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-function formatDate(dateStr: string) {
+function formatDate(dateStr: string, td: (key: string) => string) {
   const date = new Date(dateStr + 'T00:00:00');
-  return `${date.getDate().toString().padStart(2, '0')} ${SHORT_MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
+  return `${date.getDate().toString().padStart(2, '0')} ${td(MONTH_KEYS[date.getMonth()])}, ${date.getFullYear()}`;
 }
 
 export function AddFundsDrawer({
@@ -59,6 +58,8 @@ export function AddFundsDrawer({
   isLoading,
 }: AddFundsDrawerProps) {
   const t = useTranslations('addFunds');
+  const tCommon = useTranslations('common');
+  const td = useTranslations('dateNames');
   const [operationType, setOperationType] = useState<OperationType>('deposit');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getTodayDateString());
@@ -104,7 +105,7 @@ export function AddFundsDrawer({
 
     const result = addFundsSchema.safeParse({ amount, date });
     if (!result.success) {
-      setError(result.error.errors[0]?.message ?? 'Dados invÃ¡lidos');
+      setError(result.error.errors[0]?.message ?? tCommon('invalidData'));
       return;
     }
 
@@ -122,7 +123,7 @@ export function AddFundsDrawer({
         onClose();
       }, 1500);
     } catch (err) {
-      setError(extractErrorMessage(err, "Couldn't register the operation"));
+      setError(extractErrorMessage(err, t('operationError')));
     }
   };
 
@@ -257,7 +258,7 @@ export function AddFundsDrawer({
                               </div>
                               <div className="min-w-0">
                                 <p className="text-sm font-bold truncate">{c.description}</p>
-                                <p className="text-[11px] text-muted-foreground">{formatDate(c.date)}</p>
+                                <p className="text-[11px] text-muted-foreground">{formatDate(c.date, td)}</p>
                               </div>
                             </div>
                             <p className={cn(

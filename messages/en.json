@@ -9,7 +9,9 @@
     "logout": "Sign out",
     "openMenu": "Open menu",
     "hello": "Hello,",
-    "newEntry": "New entry"
+    "newEntry": "New entry",
+    "menu": "Menu",
+    "menuDescription": "Main navigation menu"
   },
   "auth": {
     "tagline": "Organize your finances and have clarity to make better decisions.",
@@ -122,7 +124,8 @@
     "previousDay": "previous day",
     "previousDays": "previous days",
     "noPendingDays": "No days with pending items in this period.",
-    "cycle": "Cycle"
+    "cycle": "Cycle",
+    "pageTitle": "Dashboard — nubolso"
   },
   "entry": {
     "addButtonLabel": "Entry",
@@ -236,7 +239,8 @@
     "cancel": "Cancel",
     "archiveError": "Couldn’t archive the recurring account",
     "reactivateError": "Couldn’t reactivate the recurring account",
-    "deleteError": "Couldn’t delete the recurring account"
+    "deleteError": "Couldn’t delete the recurring account",
+    "pageTitle": "Recurring — nubolso"
   },
   "settings": {
     "title": "Settings",
@@ -252,7 +256,8 @@
     "balanceIndicatorsDescription": "Thresholds that define daily balance colors.",
     "greenFrom": "Green from (R$)",
     "yellowFrom": "Yellow from (R$)",
-    "belowYellow": "Below the yellow value, the indicator turns red."
+    "belowYellow": "Below the yellow value, the indicator turns red.",
+    "language": "🌐 Language"
   },
   "common": {
     "cancel": "Cancel",
@@ -263,7 +268,9 @@
     "error": "Error",
     "retry": "Try again",
     "serverError": "Something went wrong.",
-    "serverErrorDescription": "We couldn’t load this data. Check your connection and try again."
+    "serverErrorDescription": "We couldn’t load this data. Check your connection and try again.",
+    "invalidData": "Invalid data",
+    "selectDate": "Select a date"
   },
   "languageSwitcher": {
     "label": "Language"
@@ -275,7 +282,8 @@
     "balance": "Balance",
     "income": "Income",
     "expense": "Expense",
-    "spending": "Spending"
+    "spending": "Spending",
+    "recurringPending": "Recurring estimated entries pending on this day"
   },
   "dailyEntries": {
     "entries": "Entries",
@@ -308,6 +316,7 @@
     "reopening": "Reopening...",
     "reopen": "Reopen",
     "reopenInvoice": "Reopen Invoice",
+    "reopenError": "Couldn't reopen the invoice",
     "realizationDate": "Realization date",
     "dateNote": "Adjust the date if the receipt occurred on a different day than planned.",
     "cannotAdd": "Cannot add entries before the initial date"
@@ -334,7 +343,8 @@
     "objective": "Goal",
     "objectives": "Goals",
     "nearCompletion": "{count} goal(s) near completion ✨",
-    "focused": "Fully focused on goals"
+    "focused": "Fully focused on goals",
+    "pageTitle": "Goals — nubolso"
   },
   "goalDetail": {
     "title": "Goal Details",
@@ -352,7 +362,10 @@
     "cancel": "Cancel",
     "deleting": "Deleting...",
     "delete": "Delete",
-    "save": "Save"
+    "save": "Save",
+    "dateLabel": "Date",
+    "amountLabel": "Amount",
+    "editContribution": "Edit contribution"
   },
   "createGoal": {
     "title": "New Financial Goal",
@@ -384,7 +397,8 @@
     "noMovements": "No movements yet.",
     "processing": "Processing...",
     "confirmDeposit": "Confirm Contribution",
-    "confirmWithdraw": "Confirm Withdrawal"
+    "confirmWithdraw": "Confirm Withdrawal",
+    "operationError": "Couldn't register the operation"
   },
   "creditCardsView": {
     "title": "Credit Cards",
@@ -393,7 +407,8 @@
     "addCardTitle": "Add new card",
     "addNewCard": "Add new card",
     "card": "card registered",
-    "cards": "cards registered"
+    "cards": "cards registered",
+    "pageTitle": "Credit Cards — nubolso"
   },
   "creditCardsSummary": {
     "activeCards": "Active Cards",
@@ -427,14 +442,17 @@
     "removeDesc": "The card will be deactivated and will no longer generate new invoices. The purchase and invoice history will be preserved.",
     "removing": "Removing...",
     "remove": "Remove",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "editCardTitle": "Edit card",
+    "removeError": "Couldn't remove the card"
   },
   "creditCardForm": {
     "cardName": "Card Name",
     "closingDay": "Closing Day",
     "dueDay": "Due Day",
     "paymentDay": "Payment Day",
-    "paymentDayNote": "Day when the invoice impacts your balance in the cash flow."
+    "paymentDayNote": "Day when the invoice impacts your balance in the cash flow.",
+    "cardNamePlaceholder": "e.g., Nubank, Inter, Itaú..."
   },
   "payInvoice": {
     "payAll": "Pay all",
@@ -459,10 +477,13 @@
     "processing": "Processing...",
     "confirm": "Confirm",
     "payError": "Couldn't register the payment",
-    "amountExceeds": "Must be less than {amount}"
+    "amountExceeds": "Must be less than {amount}",
+    "invoiceHeader": "Invoice {month}/{year} —",
+    "srDescription": "Partial payment of the invoice"
   },
   "invoiceDetail": {
     "title": "Invoice",
+    "invoiceMonth": "Invoice {month}/{year}",
     "paidAmount": "Amount Paid",
     "invoiceTotal": "Invoice Total",
     "closing": "Closing",
@@ -484,7 +505,9 @@
     "deleteDesc": "All installments of this purchase will be removed from all invoices. This action cannot be undone.",
     "delete": "Delete",
     "reopenError": "Couldn't reopen the invoice",
-    "deleteError": "Couldn't delete the purchase"
+    "deleteError": "Couldn't delete the purchase",
+    "otherPurchase": "Other",
+    "deletePurchase": "Delete purchase"
   },
   "recurringDrawer": {
     "editTitle": "Edit Recurring Account",
@@ -539,5 +562,58 @@
   },
   "numberField": {
     "range": "Min: {min} · Max: {max}"
+  },
+  "dateNames": {
+    "monthJan": "JAN",
+    "monthFeb": "FEB",
+    "monthMar": "MAR",
+    "monthApr": "APR",
+    "monthMay": "MAY",
+    "monthJun": "JUN",
+    "monthJul": "JUL",
+    "monthAug": "AUG",
+    "monthSep": "SEP",
+    "monthOct": "OCT",
+    "monthNov": "NOV",
+    "monthDec": "DEC",
+    "weekdaySun": "Sunday",
+    "weekdayMon": "Monday",
+    "weekdayTue": "Tuesday",
+    "weekdayWed": "Wednesday",
+    "weekdayThu": "Thursday",
+    "weekdayFri": "Friday",
+    "weekdaySat": "Saturday"
+  },
+  "creditCardSelect": {
+    "label": "Card",
+    "loading": "Loading...",
+    "placeholder": "Select a card"
+  },
+  "creditPurchase": {
+    "title": "New Purchase",
+    "description": "Register an installment purchase and see the impact on upcoming invoices before confirming.",
+    "cancel": "Cancel",
+    "confirming": "Confirming...",
+    "confirmPurchase": "Confirm Purchase",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "e.g., Notebook, Supermarket...",
+    "inputMode": "Input Mode",
+    "totalAmount": "Total Amount",
+    "installmentAmount": "Installment Amount",
+    "numberOfInstallments": "Number of Installments",
+    "centDifference": "Cent difference",
+    "firstInstallment": "1st Installment",
+    "lastInstallment": "Last Installment",
+    "purchaseTotal": "Purchase Total",
+    "purchaseDate": "Purchase Date",
+    "installments": "Installments",
+    "installment": "Installment {n}/{total}",
+    "invoiceMonth": "Invoice {month}/{year}",
+    "paidOn": "Paid on {date}",
+    "impactedInvoices": "Impacted Invoices",
+    "dueOn": "Due on {date}",
+    "balanceWarning": "Warning: your balance may go negative",
+    "projectedBalance": "{date}: projected balance of {amount}",
+    "noNegativeImpact": "No negative impact predicted on your balance."
   }
 }
