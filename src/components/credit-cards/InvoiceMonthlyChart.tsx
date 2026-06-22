@@ -207,7 +207,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                       )}
                       <div
                         className={cn(
-                          'w-8 rounded-t-[1.5px] transition-all',
+                          'w-8 rounded-t-[2px] transition-all',
                           bucket.isCurrentMonth
                             ? 'bg-[#7b5cff]'
                             : hasInvoice
