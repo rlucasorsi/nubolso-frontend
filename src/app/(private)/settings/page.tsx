@@ -98,7 +98,7 @@ export default function SettingsPage() {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const data = await HttpClient.get<unknown>('/users/me/export');
+      const data = await HttpClient.get<unknown, undefined>('/users/me/export');
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
