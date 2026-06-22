@@ -279,7 +279,10 @@
     "deleteConfirmMessage": "This action is irreversible. All your data — transactions, cards, goals and history — will be permanently deleted.",
     "deleteConfirmButton": "Yes, delete my account",
     "deleting": "Deleting...",
-    "deleteError": "Couldn't delete your account. Please try again."
+    "deleteError": "Couldn't delete your account. Please try again.",
+    "tabSystem": "System",
+    "tabAccount": "Account",
+    "tabFaq": "FAQ"
   },
   "common": {
     "cancel": "Cancel",

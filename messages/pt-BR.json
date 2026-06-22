@@ -279,7 +279,10 @@
     "deleteConfirmMessage": "Esta ação é irreversível. Todos os seus dados — transações, cartões, metas e histórico — serão excluídos permanentemente.",
     "deleteConfirmButton": "Sim, excluir minha conta",
     "deleting": "Excluindo...",
-    "deleteError": "Não foi possível excluir sua conta. Tente novamente."
+    "deleteError": "Não foi possível excluir sua conta. Tente novamente.",
+    "tabSystem": "Sistema",
+    "tabAccount": "Conta",
+    "tabFaq": "FAQ"
   },
   "common": {
     "cancel": "Cancelar",
