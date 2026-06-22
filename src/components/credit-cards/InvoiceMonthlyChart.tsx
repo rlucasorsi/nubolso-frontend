@@ -207,15 +207,22 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                       )}
                       <div
                         className={cn(
-                          'w-7 rounded-t-md transition-all',
-                          bucket.isCurrentMonth ? 'bg-primary shadow-glow' : hasInvoice ? 'bg-primary/40' : 'bg-white/10',
+                          'w-8 rounded-md transition-all',
+                          bucket.isCurrentMonth
+                            ? 'bg-[#7b5cff]'
+                            : hasInvoice
+                              ? 'bg-[#7b5cff]/40'
+                              : 'bg-white/10',
                         )}
-                        style={{ height: barHeight }}
+                        style={{
+                          height: barHeight,
+                          boxShadow: bucket.isCurrentMonth ? '0 0 16px rgba(123,92,255,0.45)' : undefined,
+                        }}
                       />
                       <span
                         className={cn(
                           'text-[9px] font-bold leading-none',
-                          bucket.isCurrentMonth ? 'text-primary' : 'text-muted-foreground/60',
+                          bucket.isCurrentMonth ? 'text-[#7b5cff]' : 'text-muted-foreground/60',
                         )}
                       >
                         {td(MONTH_KEYS[bucket.month - 1])}
