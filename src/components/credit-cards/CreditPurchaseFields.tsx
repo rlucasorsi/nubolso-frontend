@@ -76,7 +76,7 @@ export function CreditPurchaseFields({
             className={cn(
               'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
               inputMode === 'total'
-                ? 'bg-primary text-white shadow-glow'
+                ? 'bg-primary text-white'
                 : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
             )}
           >
@@ -88,7 +88,7 @@ export function CreditPurchaseFields({
             className={cn(
               'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
               inputMode === 'installment'
-                ? 'bg-primary text-white shadow-glow'
+                ? 'bg-primary text-white'
                 : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
             )}
           >
@@ -134,7 +134,7 @@ export function CreditPurchaseFields({
                 className={cn(
                   'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
                   strategy === 'FIRST'
-                    ? 'bg-primary text-white shadow-glow'
+                    ? 'bg-primary text-white'
                     : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
                 )}
               >
@@ -146,7 +146,7 @@ export function CreditPurchaseFields({
                 className={cn(
                   'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
                   strategy === 'LAST'
-                    ? 'bg-primary text-white shadow-glow'
+                    ? 'bg-primary text-white'
                     : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
                 )}
               >

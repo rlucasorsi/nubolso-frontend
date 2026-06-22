@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/app-drawer';
-import { Loader2, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { Loader2, Plus, RotateCcw, Trash2, FastForward, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -28,9 +28,11 @@ import { useGetInvoice } from '@/modules/credit-cards/hooks/use-get-invoice';
 import { useUpdateInvoicePaymentDate } from '@/modules/credit-cards/hooks/use-update-invoice-payment-date';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
 import { useDeletePurchase } from '@/modules/credit-cards/hooks/use-delete-purchase';
+import { useRevertAdvance } from '@/modules/credit-cards/hooks/use-revert-advance';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { PayInvoiceForm } from './PayInvoiceForm';
 import { AddPurchaseDrawer } from './AddPurchaseDrawer';
+import { AnticipateInstallmentsDrawer } from './AnticipateInstallmentsDrawer';
 import { useTranslations } from '@/i18n/useTranslations';
 
 interface InvoiceDetailDrawerProps {
@@ -46,12 +48,15 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
   const updatePaymentDateMutation = useUpdateInvoicePaymentDate();
   const reopenMutation = useReopenInvoice();
   const deletePurchaseMutation = useDeletePurchase();
+  const revertAdvanceMutation = useRevertAdvance();
   const [paymentDate, setPaymentDate] = useState('');
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
   const [reopenError, setReopenError] = useState<string | null>(null);
   const [deletePurchaseId, setDeletePurchaseId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [addPurchaseOpen, setAddPurchaseOpen] = useState(false);
+  const [anticipateTarget, setAnticipateTarget] = useState<{ purchaseId: string; description: string } | null>(null);
+  const [revertError, setRevertError] = useState<string | null>(null);
 
   useEffect(() => {
     if (invoice) setPaymentDate(invoice.paymentDate);
@@ -61,6 +66,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     if (open) {
       setReopenError(null);
       setDeleteError(null);
+      setRevertError(null);
     }
   }, [open]);
 
@@ -102,18 +108,57 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     }
   };
 
-  const groups = useMemo(() => {
-    const map = new Map<string, { purchaseId: string; description: string; installments: typeof invoice.installments; total: number }>();
+  type InstallmentGroup = {
+    purchaseId: string;
+    description: string;
+    installments: NonNullable<typeof invoice>['installments'];
+    total: number;
+    isCredit: boolean;
+  };
+
+  const { activeGroups, anticipatedGroups } = useMemo(() => {
+    const activeMap = new Map<string, InstallmentGroup>();
+    const anticipatedMap = new Map<string, InstallmentGroup>();
+
     for (const inst of invoice?.installments ?? []) {
-      if (!map.has(inst.purchaseId)) {
-        map.set(inst.purchaseId, { purchaseId: inst.purchaseId, description: inst.purchaseDescription ?? t('otherPurchase'), installments: [], total: 0 });
+      const targetMap = inst.isAnticipated ? anticipatedMap : activeMap;
+      if (!targetMap.has(inst.purchaseId)) {
+        targetMap.set(inst.purchaseId, {
+          purchaseId: inst.purchaseId,
+          description: inst.purchaseDescription ?? t('otherPurchase'),
+          installments: [],
+          total: 0,
+          isCredit: inst.isCredit,
+        });
       }
-      const g = map.get(inst.purchaseId)!;
+      const g = targetMap.get(inst.purchaseId)!;
       g.installments.push(inst);
       g.total += inst.amount;
     }
-    return [...map.values()];
+
+    return {
+      activeGroups: [...activeMap.values()],
+      anticipatedGroups: [...anticipatedMap.values()],
+    };
   }, [invoice, t]);
+
+  const hasFutureInstallments = (group: InstallmentGroup) => {
+    const maxNumber = Math.max(...group.installments.map((i) => i.number));
+    const totalCount = group.installments[0]?.totalCount ?? 0;
+    return maxNumber < totalCount;
+  };
+
+  const isCurrentInvoice = (() => {
+    if (!invoice) return false;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const closing = new Date(invoice.closingDate + 'T00:00:00');
+    const prevClosing = new Date(closing);
+    prevClosing.setMonth(prevClosing.getMonth() - 1);
+    // A fatura vigente é a primeira cujo fechamento ainda não ocorreu,
+    // ou seja, o fechamento do ciclo anterior já passou.
+    return closing >= now && prevClosing < now;
+  })();
 
   return (
     <>
@@ -183,16 +228,26 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                   {deleteError && (
                     <p className="text-xs text-destructive font-medium">{deleteError}</p>
                   )}
+                  {revertError && (
+                    <p className="text-xs text-destructive font-medium">{revertError}</p>
+                  )}
                   <div className="space-y-2">
-                    {groups.length === 0 ? (
+                    {activeGroups.length === 0 ? (
                       <div className="glass-card rounded-2xl p-8 text-center">
                         <p className="text-sm text-muted-foreground">{t('noItems')}</p>
                       </div>
                     ) : (
-                      groups.map((group) => (
+                      activeGroups.map((group) => (
                         <div key={group.purchaseId} className="glass-card rounded-2xl p-4 space-y-2">
                           <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-bold truncate">{group.description}</p>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <p className="text-sm font-bold truncate">{group.description}</p>
+                              {group.isCredit && (
+                                <span className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/15 text-green-400">
+                                  {t('creditBadge')}
+                                </span>
+                              )}
+                            </div>
                             {!invoice.isPaid && (
                               <button
                                 onClick={() => setDeletePurchaseId(group.purchaseId)}
@@ -209,13 +264,95 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                           {group.installments.map((item) => (
                             <div key={item.id} className="flex items-center justify-between text-xs text-muted-foreground">
                               <span>{t('installment', { n: item.number, total: item.totalCount })}</span>
-                              <span className="font-bold text-foreground">{formatCurrency(item.amount)}</span>
+                              <span className={`font-bold ${group.isCredit ? 'text-green-400' : 'text-foreground'}`}>
+                                {group.isCredit ? '+' : ''}{formatCurrency(Math.abs(item.amount))}
+                              </span>
                             </div>
                           ))}
+                          {!invoice.isPaid && hasFutureInstallments(group) && isCurrentInvoice && (
+                            <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                              <button
+                                type="button"
+                                onClick={() => setAnticipateTarget({ purchaseId: group.purchaseId, description: group.description })}
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 text-amber-400 text-xs font-bold hover:bg-amber-500/20 transition-colors"
+                              >
+                                <FastForward className="h-3 w-3" />
+                                {t('anticipate')}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}
                   </div>
+
+                  {anticipatedGroups.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        {t('anticipatedSection')}
+                      </h4>
+                      {anticipatedGroups.map((group) => (
+                        <div key={group.purchaseId} className="glass-card rounded-2xl p-4 space-y-2 opacity-60">
+                          <p className="text-sm font-bold truncate line-through text-muted-foreground">{group.description}</p>
+                          {group.installments.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between text-xs text-muted-foreground">
+                              <span className="line-through">{t('installment', { n: item.number, total: item.totalCount })}</span>
+                              <span className="font-bold line-through">{formatCurrency(item.amount)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {invoice.advances && invoice.advances.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        {t('advancesSection')}
+                      </h4>
+                      {invoice.advances.map((adv) => (
+                        <div key={adv.id} className="glass-card rounded-2xl p-4 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-bold">
+                              {t('advanceSummary', { n: adv.installmentsCount, desc: adv.purchaseDescription ?? '' })}
+                            </p>
+                            {!invoice.isPaid && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  setRevertError(null);
+                                  try {
+                                    await revertAdvanceMutation.mutateAsync({
+                                      advanceId: adv.id,
+                                      invoiceId: invoice.id,
+                                      cardId: invoice.cardId,
+                                    });
+                                  } catch (err) {
+                                    setRevertError(extractErrorMessage(err, t('revertError')));
+                                  }
+                                }}
+                                disabled={revertAdvanceMutation.isPending}
+                                className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 text-muted-foreground text-xs font-bold hover:bg-white/10 hover:text-white transition-colors"
+                                title={t('revertAdvance')}
+                              >
+                                {revertAdvanceMutation.isPending && revertAdvanceMutation.variables?.advanceId === adv.id
+                                  ? <Loader2 className="h-3 w-3 animate-spin" />
+                                  : <Undo2 className="h-3 w-3" />}
+                                {revertAdvanceMutation.isPending && revertAdvanceMutation.variables?.advanceId === adv.id
+                                  ? t('reverting')
+                                  : t('revertAdvance')}
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                            <span>{t('advanceOriginal')}: <span className="font-bold text-foreground">{formatCurrency(adv.originalAmount)}</span></span>
+                            <span>{t('advanceSavings')}: <span className="font-bold text-green-400">{formatCurrency(adv.discount)}</span></span>
+                            <span>{t('advancePaid')}: <span className="font-bold text-foreground">{formatCurrency(adv.paidAmount)}</span></span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -277,6 +414,18 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
         onClose={() => setAddPurchaseOpen(false)}
         cardId={invoice?.cardId ?? null}
       />
+
+      {invoice && anticipateTarget && (
+        <AnticipateInstallmentsDrawer
+          open={!!anticipateTarget}
+          onClose={() => setAnticipateTarget(null)}
+          cardId={invoice.cardId}
+          invoiceId={invoice.id}
+          invoicePaymentDate={invoice.paymentDate}
+          purchaseId={anticipateTarget.purchaseId}
+          purchaseDescription={anticipateTarget.description}
+        />
+      )}
 
       <AlertDialog open={reopenDialogOpen} onOpenChange={setReopenDialogOpen}>
         <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">

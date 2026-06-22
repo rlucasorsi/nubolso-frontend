@@ -243,7 +243,7 @@ export function CreditCardDetailDrawer({
               <Button
                 onClick={() => onAddPurchase(card.id)}
                 disabled={!card.isActive}
-                className="w-full h-11 bg-gradient-primary text-primary-foreground font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <Plus className="h-5 w-5" />
                 {t('addPurchase')}

@@ -159,7 +159,7 @@ export function RecurringTemplatesView() {
                 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
                 typeFilter === type
                   ? type === 'all'
-                    ? 'bg-primary text-white shadow-glow'
+                    ? 'bg-primary text-white'
                     : cn(
                         type === 'income' && 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
                         type === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',

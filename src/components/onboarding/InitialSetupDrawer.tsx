@@ -72,7 +72,7 @@ export function InitialSetupDrawer({ open }: InitialSetupDrawerProps) {
           <Button
             onClick={handleSubmit}
             disabled={!isFormValid || updateMeMutation.isPending}
-            className="w-full h-11 bg-gradient-primary text-white font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all group"
+            className="w-full h-11 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all group"
           >
             {updateMeMutation.isPending ? t('saving') : t('start')}
             {!updateMeMutation.isPending && (

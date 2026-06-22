@@ -511,7 +511,21 @@
     "reopenError": "No fue posible reabrir la factura",
     "deleteError": "No fue posible eliminar la compra",
     "otherPurchase": "Otro",
-    "deletePurchase": "Eliminar compra"
+    "deletePurchase": "Eliminar compra",
+    "creditBadge": "Devolución",
+    "anticipatedSection": "Cuotas Anticipadas",
+    "advancesSection": "Anticipaciones Realizadas",
+    "moveHere": "Mover a esta factura",
+    "anticipate": "Anticipar",
+    "moving": "Moviendo...",
+    "moveError": "No fue posible mover las cuotas",
+    "advanceSummary": "Anticipación {n}x — {desc}",
+    "advanceOriginal": "Original",
+    "advanceSavings": "Ahorro",
+    "advancePaid": "Pagado",
+    "revertAdvance": "Revertir",
+    "reverting": "Revirtiendo...",
+    "revertError": "No fue posible revertir la anticipación"
   },
   "recurringDrawer": {
     "editTitle": "Editar Cuenta Recurrente",
@@ -619,7 +633,28 @@
     "dueOn": "Vence el {date}",
     "balanceWarning": "Atención: tu saldo puede quedar negativo",
     "projectedBalance": "{date}: saldo proyectado de {amount}",
-    "noNegativeImpact": "No se prevé impacto negativo en tu saldo."
+    "noNegativeImpact": "No se prevé impacto negativo en tu saldo.",
+    "creditTitle": "Crédito / Devolución",
+    "creditDescription": "Registra una devolución o crédito recibido en la tarjeta.",
+    "confirmCredit": "Confirmar Crédito",
+    "modePurchase": "Compra",
+    "modeCredit": "Devolución"
+  },
+  "anticipateDrawer": {
+    "title": "Anticipar Cuotas",
+    "noEligible": "No hay cuotas futuras elegibles para anticipar.",
+    "selectCount": "¿Cuántas cuotas anticipar?",
+    "option": "{n} cuotas",
+    "originalAmount": "Monto original",
+    "paidAmountLabel": "Monto a pagar",
+    "paidAmountPlaceholder": "0,00",
+    "discount": "Descuento",
+    "savings": "Ahorras",
+    "cancel": "Cancelar",
+    "confirming": "Anticipando...",
+    "confirm": "Anticipar",
+    "errorInvalid": "No fue posible anticipar las cuotas",
+    "paidExceedsOriginal": "El monto no puede superar el monto original"
   },
   "creditCardChart": {
     "title": "Facturas por tarjeta",

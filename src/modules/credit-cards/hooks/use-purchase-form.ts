@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSimulatePurchase } from './use-simulate-purchase';
 import { useCreatePurchase } from './use-create-purchase';
+import { useCreateCredit } from './use-create-credit';
 import { generateInstallments } from '@/shared/utils/installments';
 import { purchaseFormSchema } from '@/lib/schemas/credit-cards';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
@@ -24,9 +25,11 @@ interface UsePurchaseFormParams {
   defaultDate?: string;
   /** Set to false to pause the simulation (e.g. when another tab is active). */
   enabled?: boolean;
+  /** When true, submits as a credit/refund instead of a purchase. Simulation is skipped. */
+  isCredit?: boolean;
 }
 
-export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true }: UsePurchaseFormParams) {
+export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true, isCredit = false }: UsePurchaseFormParams) {
   const getInitialDate = () => defaultDate ?? getTodayDateString();
 
   const [description, setDescription] = useState('');
@@ -40,6 +43,7 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true }:
 
   const simulateMutation = useSimulatePurchase();
   const createMutation = useCreatePurchase();
+  const createCreditMutation = useCreateCredit();
 
   const numericAmount = parseFloat(amount.replace(',', '.'));
   const totalAmount =
@@ -69,7 +73,7 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true }:
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || !enabled || !isValid || !cardId) return;
+    if (!isOpen || !enabled || !isValid || !cardId || isCredit) return;
 
     const timeout = setTimeout(() => {
       simulateMutation.mutate({ cardId, description, totalAmount, installmentsCount, purchaseDate });
@@ -77,7 +81,7 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true }:
 
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, enabled, cardId, description, totalAmount, installmentsCount, purchaseDate, isValid]);
+  }, [isOpen, enabled, cardId, description, totalAmount, installmentsCount, purchaseDate, isValid, isCredit]);
 
   const adjustedSimulation = useMemo(() => {
     const data = simulateMutation.data;
@@ -119,10 +123,14 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true }:
     setApiError(null);
 
     try {
-      await createMutation.mutateAsync({ cardId, description, totalAmount, installmentsCount, purchaseDate, strategy });
+      if (isCredit) {
+        await createCreditMutation.mutateAsync({ cardId, description, totalAmount, installmentsCount, purchaseDate, strategy });
+      } else {
+        await createMutation.mutateAsync({ cardId, description, totalAmount, installmentsCount, purchaseDate, strategy });
+      }
       onSuccess();
     } catch (err) {
-      setApiError(extractErrorMessage(err, 'Não foi possível registrar a compra'));
+      setApiError(extractErrorMessage(err, isCredit ? 'Não foi possível registrar o crédito' : 'Não foi possível registrar a compra'));
     }
   }
 
@@ -137,7 +145,7 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true }:
     computedTotal,
     adjustedSimulation,
     isSimulating: simulateMutation.isPending,
-    isConfirming: createMutation.isPending,
+    isConfirming: createMutation.isPending || createCreditMutation.isPending,
     errors,
     apiError,
     handleConfirm,

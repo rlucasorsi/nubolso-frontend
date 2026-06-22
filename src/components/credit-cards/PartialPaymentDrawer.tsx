@@ -190,7 +190,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
                   className={cn(
                     'flex-1 py-2 text-[11px] font-bold rounded-xl transition-all duration-200 border',
                     interestMode === mode
-                      ? 'bg-primary/20 text-primary border-primary/50 shadow-glow'
+                      ? 'bg-primary/20 text-primary border-primary/50'
                       : 'border-white/5 bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground',
                   )}
                 >
@@ -287,7 +287,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
           <Button
             onClick={handleConfirm}
             disabled={!isFormValid || payMutation.isPending}
-            className="flex-1 h-11 bg-gradient-primary text-primary-foreground font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="flex-1 h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             {payMutation.isPending ? t('processing') : t('confirm')}
           </Button>

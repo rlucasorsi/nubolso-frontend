@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-gradient-primary shadow-glow text-white hover:scale-[1.02] active:scale-[0.99] disabled:hover:scale-100",
+        default: "bg-primary text-white hover:scale-[1.02] active:scale-[0.99] disabled:hover:scale-100",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:scale-[1.02] active:scale-[0.99]",
         outline: "glass-input text-foreground hover:bg-white/10 hover:scale-[1.02] active:scale-[0.99]",
         secondary: "glass-input text-foreground hover:bg-white/10 hover:scale-[1.02] active:scale-[0.99]",

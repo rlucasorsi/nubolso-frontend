@@ -51,7 +51,7 @@ export function GoalsSummary({
         </span>
         <div className="w-full bg-white/5 h-2 rounded-full mt-4 overflow-hidden border border-white/5">
           <div
-            className="h-full bg-gradient-to-r from-primary to-primary-variant rounded-full transition-all duration-1000 ease-out shadow-[0_4px_15px_rgba(123,92,255,0.3)]"
+            className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
             style={{ width: `${progressPercent}%` }}
           />
         </div>

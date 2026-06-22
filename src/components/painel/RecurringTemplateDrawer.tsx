@@ -142,7 +142,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
           </Button>
 
           <Button
-            className="flex-1 h-11 rounded-xl bg-gradient-primary text-white font-bold shadow-glow hover:scale-[1.02] transition-all"
+            className="flex-1 h-11 rounded-xl bg-primary text-white font-bold hover:scale-[1.02] transition-all"
             onClick={handleSave}
             disabled={isSaving}
           >

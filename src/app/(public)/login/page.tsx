@@ -57,26 +57,11 @@ export default function LoginPage() {
   return (
     <main className="relative flex h-dvh items-center justify-center px-4 overflow-hidden">
       <AuthLanguageSwitcher />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 -left-40 h-[28rem] w-[28rem] rounded-full opacity-40 blur-3xl"
-        style={{ background: 'var(--gradient-primary)' }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-40 -right-32 h-[26rem] w-[26rem] rounded-full opacity-30 blur-3xl"
-        style={{ background: 'radial-gradient(circle, oklch(0.72 0.2 310) 0%, transparent 70%)' }}
-      />
 
       <section className="relative w-full max-w-md">
         <div className="glass-card shadow-card-elegant rounded-3xl px-7 py-6 sm:px-10 sm:py-8">
           <div className="flex flex-col items-center text-center">
             <div className="relative mb-2">
-              <div
-                aria-hidden
-                className="absolute inset-0 -z-10 animate-pulse rounded-full blur-3xl opacity-50"
-                style={{ background: 'radial-gradient(circle, rgba(157,124,255,0.55) 0%, transparent 70%)', transform: 'scale(2)' }}
-              />
               <img
                 src="/logo.svg"
                 alt="NuBolso"
@@ -144,7 +129,7 @@ export default function LoginPage() {
               >
                 <span
                   className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
-                    remember ? 'border-transparent bg-gradient-primary shadow-glow' : 'border-white/20 bg-white/5'
+                    remember ? 'border-transparent bg-primary' : 'border-white/20 bg-white/5'
                   }`}
                 >
                   {remember && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
@@ -162,7 +147,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-gradient-primary shadow-glow mt-2 h-12 w-full rounded-xl text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
+              className="bg-primary mt-2 h-12 w-full rounded-xl text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
             >
               {loading ? t('signingIn') : t('signIn')}
             </button>

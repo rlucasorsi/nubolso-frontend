@@ -144,7 +144,7 @@ export function AddEntryDrawer({
                   className={cn(
                     'flex-1 flex items-center justify-center gap-2 py-2 h-12 text-xs font-bold rounded-xl transition-all duration-300 border',
                     mode === 'debit'
-                      ? 'bg-primary/20 text-primary border-primary/50 shadow-glow'
+                      ? 'bg-primary/20 text-primary border-primary/50'
                       : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
                   )}
                 >
@@ -157,7 +157,7 @@ export function AddEntryDrawer({
                   className={cn(
                     'flex-1 flex items-center justify-center gap-2 py-2 h-12 text-xs font-bold rounded-xl transition-all duration-300 border',
                     mode === 'credit'
-                      ? 'bg-primary/20 text-primary border-primary/50 shadow-glow'
+                      ? 'bg-primary/20 text-primary border-primary/50'
                       : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
                   )}
                 >
@@ -181,7 +181,7 @@ export function AddEntryDrawer({
                 <Button
                   type="button"
                   onClick={() => setAddCardOpen(true)}
-                  className="mt-1 h-10 px-5 rounded-xl bg-gradient-primary text-white text-sm font-bold shadow-glow hover:scale-[1.02] transition-all"
+                  className="mt-1 h-10 px-5 rounded-xl bg-primary text-white text-sm font-bold hover:scale-[1.02] transition-all"
                 >
                   {t('registerCardButton')}
                 </Button>
@@ -232,14 +232,14 @@ export function AddEntryDrawer({
 
             {mode === 'debit' ? (
               <Button
-                className="flex-1 h-11 rounded-xl bg-gradient-primary text-white font-bold shadow-glow hover:scale-[1.02] transition-all"
+                className="flex-1 h-11 rounded-xl bg-primary text-white font-bold hover:scale-[1.02] transition-all"
                 onClick={handleSave}
               >
                 {t('save')}
               </Button>
             ) : (
               <Button
-                className="flex-1 h-11 rounded-xl bg-gradient-primary text-white font-bold shadow-glow hover:scale-[1.02] transition-all"
+                className="flex-1 h-11 rounded-xl bg-primary text-white font-bold hover:scale-[1.02] transition-all"
                 onClick={() => purchaseForm.handleConfirm(onCancel)}
                 disabled={!purchaseForm.isValid || purchaseForm.isConfirming}
               >

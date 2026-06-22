@@ -511,7 +511,21 @@
     "reopenError": "Não foi possível reabrir a fatura",
     "deleteError": "Não foi possível excluir a compra",
     "otherPurchase": "Outro",
-    "deletePurchase": "Excluir compra"
+    "deletePurchase": "Excluir compra",
+    "creditBadge": "Estorno",
+    "anticipatedSection": "Parcelas Antecipadas",
+    "advancesSection": "Antecipações Realizadas",
+    "moveHere": "Mover para esta fatura",
+    "anticipate": "Antecipar",
+    "moving": "Movendo...",
+    "moveError": "Não foi possível mover as parcelas",
+    "advanceSummary": "Antecipação {n}x — {desc}",
+    "advanceOriginal": "Original",
+    "advanceSavings": "Economia",
+    "advancePaid": "Pago",
+    "revertAdvance": "Reverter",
+    "reverting": "Revertendo...",
+    "revertError": "Não foi possível reverter a antecipação"
   },
   "recurringDrawer": {
     "editTitle": "Editar Conta Recorrente",
@@ -619,7 +633,28 @@
     "dueOn": "Vence em {date}",
     "balanceWarning": "Atenção: seu saldo pode ficar negativo",
     "projectedBalance": "{date}: saldo projetado de {amount}",
-    "noNegativeImpact": "Nenhum impacto negativo previsto no seu saldo."
+    "noNegativeImpact": "Nenhum impacto negativo previsto no seu saldo.",
+    "creditTitle": "Crédito / Estorno",
+    "creditDescription": "Registre um estorno ou crédito recebido no cartão.",
+    "confirmCredit": "Confirmar Crédito",
+    "modePurchase": "Compra",
+    "modeCredit": "Estorno"
+  },
+  "anticipateDrawer": {
+    "title": "Antecipar Parcelas",
+    "noEligible": "Nenhuma parcela futura elegível para antecipar.",
+    "selectCount": "Quantas parcelas antecipar?",
+    "option": "{n} parcelas",
+    "originalAmount": "Valor original",
+    "paidAmountLabel": "Valor a pagar",
+    "paidAmountPlaceholder": "0,00",
+    "discount": "Desconto",
+    "savings": "Você economiza",
+    "cancel": "Cancelar",
+    "confirming": "Antecipando...",
+    "confirm": "Antecipar",
+    "errorInvalid": "Não foi possível antecipar as parcelas",
+    "paidExceedsOriginal": "O valor não pode ser maior que o valor original"
   },
   "creditCardChart": {
     "title": "Faturas por cartão",

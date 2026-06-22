@@ -233,7 +233,7 @@ export function DailyEntriesDrawer({
                 className={cn(
                   "px-4 h-10 text-xs font-bold rounded-xl active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 tracking-tight shrink-0",
                   canAdd
-                    ? "bg-gradient-primary text-white hover:brightness-110 shadow-glow"
+                    ? "bg-primary text-white hover:brightness-110"
                     : "bg-white/5 text-muted-foreground/30 cursor-not-allowed",
                 )}
               >

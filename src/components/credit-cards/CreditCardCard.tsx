@@ -32,8 +32,6 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
         !card.isActive && 'opacity-50',
       )}
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/20 transition-colors" />
-
       <div className="flex items-start justify-between mb-8">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">

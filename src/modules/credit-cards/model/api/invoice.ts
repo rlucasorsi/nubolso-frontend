@@ -1,4 +1,5 @@
 import type { CreditCardInstallmentLite } from './purchase';
+import type { InstallmentAdvance } from './advance';
 
 export interface CreditCardInvoice {
   id: string;
@@ -16,6 +17,7 @@ export interface CreditCardInvoice {
   totalAmount: number;
   transactionId?: string;
   installments: CreditCardInstallmentLite[];
+  advances: InstallmentAdvance[];
 }
 
 export type GetCardInvoicesResponse = CreditCardInvoice[];

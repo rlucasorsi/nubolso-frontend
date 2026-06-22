@@ -292,7 +292,7 @@ export function AddFundsDrawer({
                   "w-full h-11 text-white font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2",
                   isWithdrawal
                     ? "bg-destructive hover:bg-red-600 shadow-lg shadow-destructive/20"
-                    : "bg-gradient-primary shadow-glow"
+                    : "bg-primary"
                 )}
               >
                 {isWithdrawal

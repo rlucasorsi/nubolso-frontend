@@ -58,8 +58,7 @@ export default function ForgotPasswordPage() {
         <div className="glass-card shadow-card-elegant rounded-3xl px-7 py-6 sm:px-10 sm:py-8">
           <div className="flex flex-col items-center text-center">
             <div
-              className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl shadow-glow"
-              style={{ background: 'var(--gradient-primary)' }}
+              className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary"
             >
               <Mail className="h-8 w-8 text-white" strokeWidth={2.5} />
             </div>
@@ -85,7 +84,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-gradient-primary shadow-glow mt-2 h-12 w-full rounded-xl text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
+              className="bg-primary mt-2 h-12 w-full rounded-xl text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
             >
               {loading ? t('sending') : t('sendCode')}
             </button>

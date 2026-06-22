@@ -35,7 +35,7 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
           <Button
             onClick={handleFullPayment}
             disabled={payMutation.isPending}
-            className="flex-1 h-11 rounded-xl bg-gradient-primary text-primary-foreground font-bold shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             {payMutation.isPending ? t('processing') : t('payAll')}
           </Button>

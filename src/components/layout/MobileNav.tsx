@@ -39,7 +39,7 @@ export function MobileNav() {
         aria-label={t('newEntry')}
         className="relative flex flex-col items-center group transition-all duration-300 py-1.5 text-muted-foreground/60"
       >
-        <div className="p-1.5 rounded-lg bg-gradient-primary text-white shadow-glow transition-transform group-active:scale-95">
+        <div className="p-1.5 rounded-lg bg-primary text-white transition-transform group-active:scale-95">
           <Plus className="h-6 w-6" />
         </div>
       </button>

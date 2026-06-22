@@ -177,7 +177,7 @@ export function CreateGoalDrawer({
                     className={cn(
                       'flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all active:scale-90',
                       isActive
-                        ? 'bg-gradient-primary text-white shadow-glow ring-1 ring-white/10'
+                        ? 'bg-primary text-white ring-1 ring-white/10'
                         : 'glass-card text-muted-foreground hover:bg-white/5 border-border/20'
                     )}
                   >
@@ -197,7 +197,7 @@ export function CreateGoalDrawer({
           <Button
             onClick={handleSubmit}
             disabled={!isFormValid || isLoading}
-            className="w-full h-11 bg-gradient-primary text-white font-bold rounded-xl shadow-glow hover:scale-[1.02] active:scale-[0.98] transition-all group"
+            className="w-full h-11 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all group"
           >
             {isLoading ? t('creating') : t('createBtn')}
             {!isLoading && (

@@ -511,7 +511,21 @@
     "reopenError": "Couldn't reopen the invoice",
     "deleteError": "Couldn't delete the purchase",
     "otherPurchase": "Other",
-    "deletePurchase": "Delete purchase"
+    "deletePurchase": "Delete purchase",
+    "creditBadge": "Refund",
+    "anticipatedSection": "Anticipated Installments",
+    "advancesSection": "Completed Anticipations",
+    "moveHere": "Move to this invoice",
+    "anticipate": "Anticipate",
+    "moving": "Moving...",
+    "moveError": "Couldn't move the installments",
+    "advanceSummary": "Anticipation {n}x — {desc}",
+    "advanceOriginal": "Original",
+    "advanceSavings": "Savings",
+    "advancePaid": "Paid",
+    "revertAdvance": "Revert",
+    "reverting": "Reverting...",
+    "revertError": "Couldn't revert the anticipation"
   },
   "recurringDrawer": {
     "editTitle": "Edit Recurring Account",
@@ -619,7 +633,28 @@
     "dueOn": "Due on {date}",
     "balanceWarning": "Warning: your balance may go negative",
     "projectedBalance": "{date}: projected balance of {amount}",
-    "noNegativeImpact": "No negative impact predicted on your balance."
+    "noNegativeImpact": "No negative impact predicted on your balance.",
+    "creditTitle": "Credit / Refund",
+    "creditDescription": "Register a refund or credit received on the card.",
+    "confirmCredit": "Confirm Credit",
+    "modePurchase": "Purchase",
+    "modeCredit": "Refund"
+  },
+  "anticipateDrawer": {
+    "title": "Anticipate Installments",
+    "noEligible": "No eligible future installments to anticipate.",
+    "selectCount": "How many installments to anticipate?",
+    "option": "{n} installments",
+    "originalAmount": "Original amount",
+    "paidAmountLabel": "Amount to pay",
+    "paidAmountPlaceholder": "0.00",
+    "discount": "Discount",
+    "savings": "You save",
+    "cancel": "Cancel",
+    "confirming": "Anticipating...",
+    "confirm": "Anticipate",
+    "errorInvalid": "Couldn't anticipate the installments",
+    "paidExceedsOriginal": "The amount cannot exceed the original amount"
   },
   "creditCardChart": {
     "title": "Invoices by card",

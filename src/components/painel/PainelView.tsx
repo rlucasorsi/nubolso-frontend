@@ -178,13 +178,13 @@ export function PainelView({
           <TabsList className="bg-white/5 rounded-xl p-1 h-auto">
             <TabsTrigger
               value="days"
-              className="rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-glow"
+              className="rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-none"
             >
               {t('periodDays')}
             </TabsTrigger>
             <TabsTrigger
               value="overview"
-              className="rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-glow"
+              className="rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-none"
             >
               {t('overview')}
             </TabsTrigger>
@@ -223,7 +223,7 @@ export function PainelView({
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-semibold transition-colors",
                 showPendingOnly
-                  ? "bg-primary/20 text-primary border-primary/50 shadow-glow"
+                  ? "bg-primary/20 text-primary border-primary/50"
                   : "bg-card border-white/10 text-muted-foreground hover:bg-white/5 hover:text-foreground",
               )}
             >
@@ -295,7 +295,7 @@ export function PainelView({
         <button
           onClick={() => setIsAddingInHeader(true)}
           aria-label={t('loadingCashflow')}
-          className="hidden sm:flex fixed z-[60] bottom-8 right-8 w-12 h-12 rounded-full bg-gradient-primary text-white shadow-glow items-center justify-center hover:scale-105 active:scale-95 transition-all animate-fade-in"
+          className="hidden sm:flex fixed z-[60] bottom-8 right-8 w-12 h-12 rounded-full bg-primary text-white items-center justify-center hover:scale-105 active:scale-95 transition-all animate-fade-in"
         >
           <Plus className="w-6 h-6" />
         </button>

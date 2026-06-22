@@ -216,7 +216,7 @@ export function DashboardSummary({
                   className={cn(
                     'px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all',
                     chartView === v
-                      ? 'bg-primary text-white shadow-glow'
+                      ? 'bg-primary text-white'
                       : 'text-muted-foreground hover:text-white',
                   )}
                 >

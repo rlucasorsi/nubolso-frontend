@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Sheet,
   DrawerContent,
@@ -12,6 +13,8 @@ import { usePurchaseForm } from '@/modules/credit-cards/hooks/use-purchase-form'
 import { CreditPurchaseFields } from './CreditPurchaseFields';
 import { useTranslations } from '@/i18n/useTranslations';
 
+type DrawerMode = 'purchase' | 'credit';
+
 interface AddPurchaseDrawerProps {
   open: boolean;
   onClose: () => void;
@@ -20,21 +23,54 @@ interface AddPurchaseDrawerProps {
 
 export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerProps) {
   const t = useTranslations('creditPurchase');
-  const form = usePurchaseForm({ isOpen: open, cardId });
+  const [mode, setMode] = useState<DrawerMode>('purchase');
+
+  const isCredit = mode === 'credit';
+  const form = usePurchaseForm({ isOpen: open, cardId, isCredit });
+
+  const handleClose = () => {
+    setMode('purchase');
+    onClose();
+  };
 
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Sheet open={open} onOpenChange={(o) => { if (!o) handleClose(); }}>
       <DrawerContent>
-        <DrawerHeader onClose={onClose}>
+        <DrawerHeader onClose={handleClose}>
           <SheetTitle className="text-2xl font-bold font-display text-primary">
-            {t('title')}
+            {isCredit ? t('creditTitle') : t('title')}
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
-            {t('description')}
+            {isCredit ? t('creditDescription') : t('description')}
           </p>
         </DrawerHeader>
 
         <div className="flex-1 px-6 py-4 space-y-4">
+          <div className="flex rounded-xl overflow-hidden border border-white/10">
+            <button
+              type="button"
+              onClick={() => setMode('purchase')}
+              className={`flex-1 py-2 text-sm font-bold transition-colors ${
+                mode === 'purchase'
+                  ? 'bg-primary text-white'
+                  : 'bg-transparent text-muted-foreground hover:bg-white/5'
+              }`}
+            >
+              {t('modePurchase')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('credit')}
+              className={`flex-1 py-2 text-sm font-bold transition-colors ${
+                mode === 'credit'
+                  ? 'bg-primary text-white'
+                  : 'bg-transparent text-muted-foreground hover:bg-white/5'
+              }`}
+            >
+              {t('modeCredit')}
+            </button>
+          </div>
+
           <CreditPurchaseFields
             description={form.description}
             onDescriptionChange={form.setDescription}
@@ -52,8 +88,8 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             onPurchaseDateChange={form.setPurchaseDate}
             purchaseDateError={form.errors.purchaseDate}
             apiError={form.apiError}
-            simulation={form.adjustedSimulation}
-            isSimulating={form.isSimulating}
+            simulation={isCredit ? undefined : form.adjustedSimulation}
+            isSimulating={isCredit ? false : form.isSimulating}
           />
         </div>
 
@@ -61,17 +97,17 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
           <Button
             variant="outline"
             className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5"
-            onClick={onClose}
+            onClick={handleClose}
           >
             {t('cancel')}
           </Button>
 
           <Button
-            className="flex-1 h-11 rounded-xl bg-gradient-primary text-white font-bold shadow-glow hover:scale-[1.02] transition-all"
-            onClick={() => form.handleConfirm(onClose)}
+            className="flex-1 h-11 rounded-xl bg-primary text-white font-bold hover:scale-[1.02] transition-all"
+            onClick={() => form.handleConfirm(handleClose)}
             disabled={!form.isValid || form.isConfirming}
           >
-            {form.isConfirming ? t('confirming') : t('confirmPurchase')}
+            {form.isConfirming ? t('confirming') : isCredit ? t('confirmCredit') : t('confirmPurchase')}
           </Button>
         </DrawerFooter>
       </DrawerContent>

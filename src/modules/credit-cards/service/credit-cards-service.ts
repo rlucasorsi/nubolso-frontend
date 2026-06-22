@@ -28,6 +28,12 @@ import type {
   PayInvoiceResponse,
   ReopenInvoiceResponse,
 } from '../model/api/invoice';
+import type {
+  InstallmentAdvance,
+  AdvanceInstallmentsRequest,
+  AnticipateInstallmentsRequest,
+  AnticipateInstallmentsResponse,
+} from '../model/api/advance';
 
 interface CreditCardApi {
   id: string;
@@ -48,6 +54,7 @@ interface CreditCardPurchaseApi {
   cardId: string;
   originInvoiceId: string | null;
   installments?: CreditCardInstallmentApi[];
+  isCredit?: boolean;
 }
 
 interface CreditCardInstallmentApi {
@@ -59,6 +66,19 @@ interface CreditCardInstallmentApi {
   invoiceId: string;
   purchase?: CreditCardPurchaseApi;
   invoice?: CreditCardInvoiceApi;
+  isAnticipated?: boolean;
+}
+
+interface CreditCardAdvanceApi {
+  id: string;
+  purchaseId: string;
+  invoiceId: string;
+  installmentsCount: number;
+  originalAmount: number;
+  paidAmount: number;
+  discount: number;
+  anticipatedAt: string;
+  purchase?: { description: string };
 }
 
 interface CreditCardInvoiceApi {
@@ -77,6 +97,7 @@ interface CreditCardInvoiceApi {
   installments?: CreditCardInstallmentApi[];
   card?: CreditCardApi;
   remainderPurchases?: CreditCardPurchaseApi[];
+  advances?: CreditCardAdvanceApi[];
 }
 
 function mapCreditCard(card: CreditCardApi): CreditCard {
@@ -108,6 +129,8 @@ function mapInstallment(
     paymentDate: invoice?.paymentDate ? invoice.paymentDate.split('T')[0] : '',
     purchaseId: installment.purchaseId,
     purchaseDescription: installment.purchase?.description,
+    isAnticipated: installment.isAnticipated ?? false,
+    isCredit: installment.purchase?.isCredit ?? false,
   };
 }
 
@@ -121,6 +144,21 @@ function mapPurchase(purchase: CreditCardPurchaseApi): CreditCardPurchase {
     cardId: purchase.cardId,
     originInvoiceId: purchase.originInvoiceId ?? undefined,
     installments: (purchase.installments ?? []).map((installment) => mapInstallment(installment)),
+    isCredit: purchase.isCredit ?? false,
+  };
+}
+
+function mapAdvance(advance: CreditCardAdvanceApi): InstallmentAdvance {
+  return {
+    id: advance.id,
+    purchaseId: advance.purchaseId,
+    invoiceId: advance.invoiceId,
+    installmentsCount: advance.installmentsCount,
+    originalAmount: advance.originalAmount,
+    paidAmount: advance.paidAmount,
+    discount: advance.discount,
+    anticipatedAt: advance.anticipatedAt,
+    purchaseDescription: advance.purchase?.description,
   };
 }
 
@@ -147,6 +185,7 @@ function mapInvoice(invoice: CreditCardInvoiceApi): CreditCardInvoice {
     totalAmount: invoice.totalAmount ?? 0,
     transactionId: invoice.transactionId ?? undefined,
     installments: (invoice.installments ?? []).map((installment) => mapInstallment(installment, invoiceContext)),
+    advances: (invoice.advances ?? []).map(mapAdvance),
   };
 }
 
@@ -215,5 +254,26 @@ export const creditCardsService = {
   reopenInvoice: async (id: string) => {
     const data = await HttpClient.post<CreditCardInvoiceApi, undefined>(`/credit-cards/invoices/${id}/reopen`, undefined);
     return mapInvoice(data) as ReopenInvoiceResponse;
+  },
+
+  createCredit: async (params: CreatePurchaseRequest) => {
+    const data = await HttpClient.post<CreditCardPurchaseApi, CreatePurchaseRequest>('/credit-cards/purchases/credit', params);
+    return mapPurchase(data) as CreatePurchaseResponse;
+  },
+
+  advanceInstallments: async (params: AdvanceInstallmentsRequest) => {
+    const { purchaseId, ...rest } = params;
+    return HttpClient.post<unknown, typeof rest>(`/credit-cards/purchases/${purchaseId}/advance-installments`, rest);
+  },
+
+  anticipateInstallments: async (cardId: string, params: AnticipateInstallmentsRequest) => {
+    return HttpClient.post<AnticipateInstallmentsResponse, AnticipateInstallmentsRequest>(
+      `/credit-cards/${cardId}/invoices/current/anticipate`,
+      params,
+    );
+  },
+
+  revertAdvance: async (advanceId: string) => {
+    return HttpClient.delete(`/credit-cards/advances/${advanceId}`);
   },
 };

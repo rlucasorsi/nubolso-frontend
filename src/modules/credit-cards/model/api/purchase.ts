@@ -9,6 +9,8 @@ export interface CreditCardInstallmentLite {
   referenceYear: number;
   paymentDate: string;
   purchaseDescription?: string;
+  isAnticipated: boolean;
+  isCredit: boolean;
 }
 
 export interface CreditCardPurchase {
@@ -20,6 +22,7 @@ export interface CreditCardPurchase {
   cardId: string;
   originInvoiceId?: string;
   installments: CreditCardInstallmentLite[];
+  isCredit: boolean;
 }
 
 export interface CreatePurchaseRequest {

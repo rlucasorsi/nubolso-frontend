@@ -113,8 +113,6 @@ export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
       onClick={onClick}
       className="bg-surface-container border border-white/5 rounded-base shadow-lg hover:shadow-xl p-6 transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col h-full"
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/20 transition-colors" />
-
       <div className="flex items-start justify-between mb-8">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
@@ -149,7 +147,7 @@ export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
 
           <div className="h-2.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
             <div
-              className="h-full bg-gradient-to-r from-primary to-primary-variant rounded-full transition-all duration-1000 ease-out shadow-[0_4px_15px_rgba(123,92,255,0.3)]"
+              className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
               style={{ width: `${Math.min(percent, 100)}%` }}
             />
           </div>
@@ -157,7 +155,7 @@ export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
 
         <Button
           onClick={(e) => { e.stopPropagation(); onAddFunds(); }}
-          className="w-full h-12 bg-gradient-to-r from-primary to-primary-variant text-white font-bold transition-all duration-300 rounded-base shadow-[0_4px_15px_rgba(123,92,255,0.3)] hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full h-12 bg-primary text-white font-bold transition-all duration-300 rounded-base hover:scale-[1.02] active:scale-[0.98]"
         >
           {t('addFunds')}
         </Button>

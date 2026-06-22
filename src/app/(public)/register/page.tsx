@@ -188,7 +188,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-gradient-primary shadow-glow mt-2 h-12 w-full rounded-xl text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
+              className="bg-primary mt-2 h-12 w-full rounded-xl text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.99] disabled:opacity-70 disabled:hover:scale-100"
             >
               {loading ? t('creatingAccount') : t('createAccountBtn')}
             </button>

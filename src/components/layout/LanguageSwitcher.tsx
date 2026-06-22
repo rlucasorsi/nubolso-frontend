@@ -21,7 +21,7 @@ export function LanguageSwitcher() {
           onClick={() => setLocale(loc)}
           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
             locale === loc
-              ? 'bg-primary/20 text-primary border-primary/50 shadow-glow'
+              ? 'bg-primary/20 text-primary border-primary/50'
               : 'border-white/10 text-muted-foreground hover:bg-white/5 hover:text-foreground'
           }`}
         >
