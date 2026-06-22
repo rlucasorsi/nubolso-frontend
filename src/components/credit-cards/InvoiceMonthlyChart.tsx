@@ -27,7 +27,7 @@ type CardFilter = 'all' | string[];
 const PAST_MONTHS = 6;
 const FUTURE_MONTHS = 6;
 const ITEM_WIDTH = 56;
-const MAX_BAR_HEIGHT = 84;
+const MAX_BAR_HEIGHT = 104;
 const MIN_BAR_HEIGHT = 6;
 
 function monthKey(year: number, month: number) {
