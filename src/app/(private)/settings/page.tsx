@@ -17,20 +17,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ChevronLeft, CalendarDays, Palette, Wallet, Save, Loader2, Download, Shield, Trash2 } from 'lucide-react';
+import { ChevronLeft, CalendarDays, Palette, Wallet, Save, Loader2, Download, Shield, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from '@/i18n/useTranslations';
 import { getPeriodForDate } from '@/lib/cashflow';
 import { useEffect, useMemo, useState } from 'react';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { SupportDrawer } from '@/components/support/SupportDrawer';
+import { useGetMe } from '@/modules/users/hooks/use-get-me';
 import { HttpClient } from '@/network/http-client';
 import { useLogout } from '@/hooks/useLogout';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
+  const tn = useTranslations('nav');
   const tc = useTranslations('common');
   const logout = useLogout();
+  const { data: me } = useGetMe();
+  const [supportOpen, setSupportOpen] = useState(false);
   const { startDay, updateStartDay, balanceSettings, updateBalanceSettings, saldoInicial, updateSaldoInicial, isSavingBalance } = useCashFlow();
 
   const savedBalanceValue = saldoInicial.value.toFixed(2).replace('.', ',');
@@ -237,6 +242,35 @@ export default function SettingsPage() {
 
       <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
         <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <HelpCircle className="h-4 w-4 text-primary" />
+            {tn('faq')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 space-y-2">
+          <Link
+            href="/faq"
+            className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 hover:bg-white/10 transition-colors"
+          >
+            <p className="text-sm font-medium">{tn('faq')}</p>
+            <span className="text-xs text-muted-foreground">→</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setSupportOpen(true)}
+            className="w-full flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 hover:bg-white/10 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm font-medium">{tn('support')}</p>
+            </div>
+            <span className="text-xs text-muted-foreground">→</span>
+          </button>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
+        <CardHeader className="p-4 pb-2">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-primary" />
             <CardTitle className="text-base">{t('lgpdTitle')}</CardTitle>
@@ -307,6 +341,12 @@ export default function SettingsPage() {
           </p>
         </CardContent>
       </Card>
+      <SupportDrawer
+        open={supportOpen}
+        onClose={() => setSupportOpen(false)}
+        defaultName={me?.name}
+        defaultEmail={me?.email}
+      />
     </div>
   );
 }

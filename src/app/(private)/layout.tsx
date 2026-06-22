@@ -41,6 +41,7 @@ export default function PrivateLayout({
         open={sideMenuOpen}
         onClose={() => setSideMenuOpen(false)}
         userName={me?.name}
+        userEmail={me?.email}
       />
 
       <header className="flex h-16 items-center justify-between border-b border-white/5 px-4 lg:px-8 bg-card/60 backdrop-blur-xl sticky top-0 z-50">
