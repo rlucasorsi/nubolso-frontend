@@ -80,7 +80,11 @@
     "emailConfirmed": "Email confirmed!",
     "googleError": "Couldn't continue with Google.",
     "welcome": "Welcome!",
-    "googleLoginError": "Error continuing with Google."
+    "googleLoginError": "Error continuing with Google.",
+    "termsConsent": "By creating your account, you agree to our",
+    "and": "and",
+    "termsLink": "Terms of Use",
+    "privacyLink": "Privacy Policy"
   },
   "notFound": {
     "title": "Page not found.",
@@ -261,7 +265,19 @@
     "greenFrom": "Green from (R$)",
     "yellowFrom": "Yellow from (R$)",
     "belowYellow": "Below the yellow value, the indicator turns red.",
-    "language": "🌐 Language"
+    "language": "🌐 Language",
+    "lgpdTitle": "My Data",
+    "lgpdDescription": "Manage your personal data in accordance with privacy regulations.",
+    "exportData": "Export my data",
+    "exportDataDescription": "Download a JSON file with all your registered data.",
+    "exporting": "Exporting...",
+    "deleteAccount": "Delete account",
+    "deleteAccountDescription": "Permanently removes your account and all associated data.",
+    "deleteConfirmTitle": "Delete your account?",
+    "deleteConfirmMessage": "This action is irreversible. All your data — transactions, cards, goals and history — will be permanently deleted.",
+    "deleteConfirmButton": "Yes, delete my account",
+    "deleting": "Deleting...",
+    "deleteError": "Couldn't delete your account. Please try again."
   },
   "common": {
     "cancel": "Cancel",
@@ -664,5 +680,10 @@
     "chooseInvoice": "Choose the invoice",
     "previousMonths": "Previous months",
     "nextMonths": "Next months"
+  },
+  "cookieConsent": {
+    "message": "We use essential cookies to keep your session active. By continuing, you agree to our",
+    "privacyPolicy": "Privacy Policy",
+    "accept": "Got it"
   }
 }

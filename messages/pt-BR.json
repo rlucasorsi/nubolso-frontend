@@ -80,7 +80,11 @@
     "emailConfirmed": "E-mail confirmado!",
     "googleError": "Não foi possível continuar com o Google.",
     "welcome": "Bem-vindo!",
-    "googleLoginError": "Erro ao continuar com o Google."
+    "googleLoginError": "Erro ao continuar com o Google.",
+    "termsConsent": "Ao criar sua conta, você concorda com os nossos",
+    "and": "e",
+    "termsLink": "Termos de Uso",
+    "privacyLink": "Política de Privacidade"
   },
   "notFound": {
     "title": "Página não encontrada.",
@@ -261,7 +265,19 @@
     "greenFrom": "Verde a partir de (R$)",
     "yellowFrom": "Amarelo a partir de (R$)",
     "belowYellow": "Abaixo do valor amarelo, o indicador fica vermelho.",
-    "language": "🌐 Idioma"
+    "language": "🌐 Idioma",
+    "lgpdTitle": "Meus Dados",
+    "lgpdDescription": "Gerencie seus dados pessoais de acordo com a LGPD.",
+    "exportData": "Exportar meus dados",
+    "exportDataDescription": "Baixe um arquivo JSON com todos os seus dados cadastrados.",
+    "exporting": "Exportando...",
+    "deleteAccount": "Excluir conta",
+    "deleteAccountDescription": "Remove permanentemente sua conta e todos os dados associados.",
+    "deleteConfirmTitle": "Excluir sua conta?",
+    "deleteConfirmMessage": "Esta ação é irreversível. Todos os seus dados — transações, cartões, metas e histórico — serão excluídos permanentemente.",
+    "deleteConfirmButton": "Sim, excluir minha conta",
+    "deleting": "Excluindo...",
+    "deleteError": "Não foi possível excluir sua conta. Tente novamente."
   },
   "common": {
     "cancel": "Cancelar",
@@ -656,6 +672,11 @@
     "confirm": "Antecipar",
     "errorInvalid": "Não foi possível antecipar as parcelas",
     "paidExceedsOriginal": "O valor não pode ser maior que o valor original"
+  },
+  "cookieConsent": {
+    "message": "Usamos cookies essenciais para manter sua sessão. Ao continuar, você concorda com nossa",
+    "privacyPolicy": "Política de Privacidade",
+    "accept": "Entendi"
   },
   "creditCardChart": {
     "title": "Faturas por cartão",

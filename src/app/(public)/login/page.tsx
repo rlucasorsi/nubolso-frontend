@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, Check, Apple } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Check } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
@@ -161,13 +161,6 @@ export default function LoginPage() {
 
           <div className="space-y-2">
             <GoogleSignInButton />
-            <button
-              type="button"
-              className="glass-input flex h-12 w-full items-center justify-center gap-3 rounded-xl text-sm font-medium text-foreground transition-all hover:bg-white/10"
-            >
-              <Apple className="h-5 w-5 fill-current" />
-              {t('continueWithApple')}
-            </button>
           </div>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">

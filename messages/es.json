@@ -80,7 +80,11 @@
     "emailConfirmed": "¡Correo confirmado!",
     "googleError": "No fue posible continuar con Google.",
     "welcome": "¡Bienvenido!",
-    "googleLoginError": "Error al continuar con Google."
+    "googleLoginError": "Error al continuar con Google.",
+    "termsConsent": "Al crear tu cuenta, aceptas nuestros",
+    "and": "y",
+    "termsLink": "Términos de Uso",
+    "privacyLink": "Política de Privacidad"
   },
   "notFound": {
     "title": "Página no encontrada.",
@@ -261,7 +265,19 @@
     "greenFrom": "Verde desde (R$)",
     "yellowFrom": "Amarillo desde (R$)",
     "belowYellow": "Por debajo del valor amarillo, el indicador se vuelve rojo.",
-    "language": "🌐 Idioma"
+    "language": "🌐 Idioma",
+    "lgpdTitle": "Mis Datos",
+    "lgpdDescription": "Gestiona tus datos personales de acuerdo con la normativa de privacidad.",
+    "exportData": "Exportar mis datos",
+    "exportDataDescription": "Descarga un archivo JSON con todos tus datos registrados.",
+    "exporting": "Exportando...",
+    "deleteAccount": "Eliminar cuenta",
+    "deleteAccountDescription": "Elimina permanentemente tu cuenta y todos los datos asociados.",
+    "deleteConfirmTitle": "¿Eliminar tu cuenta?",
+    "deleteConfirmMessage": "Esta acción es irreversible. Todos tus datos — transacciones, tarjetas, metas e historial — serán eliminados permanentemente.",
+    "deleteConfirmButton": "Sí, eliminar mi cuenta",
+    "deleting": "Eliminando...",
+    "deleteError": "No fue posible eliminar tu cuenta. Inténtalo de nuevo."
   },
   "common": {
     "cancel": "Cancelar",
@@ -664,5 +680,10 @@
     "chooseInvoice": "Elige la factura",
     "previousMonths": "Meses anteriores",
     "nextMonths": "Meses siguientes"
+  },
+  "cookieConsent": {
+    "message": "Usamos cookies esenciales para mantener tu sesión activa. Al continuar, aceptas nuestra",
+    "privacyPolicy": "Política de Privacidad",
+    "accept": "Entendido"
   }
 }

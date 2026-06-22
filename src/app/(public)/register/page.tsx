@@ -185,6 +185,18 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            <p className="text-xs text-muted-foreground/70 text-center leading-relaxed">
+              {t('termsConsent')}{' '}
+              <Link href="/terms" className="text-primary underline underline-offset-2 hover:opacity-80">
+                {t('termsLink')}
+              </Link>{' '}
+              {t('and')}{' '}
+              <Link href="/privacy" className="text-primary underline underline-offset-2 hover:opacity-80">
+                {t('privacyLink')}
+              </Link>
+              .
+            </p>
+
             <button
               type="submit"
               disabled={loading}

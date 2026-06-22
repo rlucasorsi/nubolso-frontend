@@ -2,10 +2,14 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { COOKIE_KEYS } from '@/shared/constants/cookie-keys.constant';
 
-const PUBLIC_PATHS = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
+// Requires no auth — redirects logged-in users to dashboard
+const AUTH_PATHS = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
 
-function isPublicPath(pathname: string) {
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+// Accessible by anyone regardless of auth state (legal pages, etc.)
+const OPEN_PATHS = ['/privacy', '/terms'];
+
+function matches(pathname: string, paths: string[]) {
+  return paths.some((p) => pathname === p || pathname.startsWith(p + '/'));
 }
 
 export function proxy(request: NextRequest) {
@@ -16,13 +20,15 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(token ? '/dashboard' : '/login', request.url));
   }
 
-  const pub = isPublicPath(pathname);
+  if (matches(pathname, OPEN_PATHS)) {
+    return NextResponse.next();
+  }
 
-  if (!token && !pub) {
+  if (!token && !matches(pathname, AUTH_PATHS)) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  if (token && pub) {
+  if (token && matches(pathname, AUTH_PATHS)) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
