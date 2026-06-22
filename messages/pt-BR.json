@@ -440,7 +440,7 @@
     "closingDay": "Fecha dia {day}",
     "dueDay": "Vence dia {day}",
     "paymentDay": "Paga dia {day}",
-    "addPurchase": "Adicionar Compra",
+    "addPurchase": "Novo Lançamento",
     "removeCard": "Remover Cartão",
     "removeConfirm": "Remover este cartão?",
     "removeDesc": "O cartão será desativado e deixará de gerar novas faturas. O histórico de compras e faturas pagas será preservado.",
@@ -638,7 +638,8 @@
     "creditDescription": "Registre um estorno ou crédito recebido no cartão.",
     "confirmCredit": "Confirmar Crédito",
     "modePurchase": "Compra",
-    "modeCredit": "Estorno"
+    "modeCredit": "Estorno",
+    "subtypeLabel": "Modalidade"
   },
   "anticipateDrawer": {
     "title": "Antecipar Parcelas",

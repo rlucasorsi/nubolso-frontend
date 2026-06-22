@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { usePurchaseForm } from '@/modules/credit-cards/hooks/use-purchase-form';
 import { CreditPurchaseFields } from './CreditPurchaseFields';
 import { useTranslations } from '@/i18n/useTranslations';
+import { cn } from '@/lib/utils';
 
 type DrawerMode = 'purchase' | 'credit';
 
@@ -46,26 +47,28 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
         </DrawerHeader>
 
         <div className="flex-1 px-6 py-4 space-y-4">
-          <div className="flex rounded-xl overflow-hidden border border-white/10">
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setMode('purchase')}
-              className={`flex-1 py-2 text-sm font-bold transition-colors ${
+              className={cn(
+                'flex-1 flex items-center justify-center py-2 h-12 text-xs font-bold rounded-xl transition-all duration-300 border',
                 mode === 'purchase'
-                  ? 'bg-primary text-white'
-                  : 'bg-transparent text-muted-foreground hover:bg-white/5'
-              }`}
+                  ? 'bg-primary/20 text-primary border-primary/50'
+                  : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
+              )}
             >
               {t('modePurchase')}
             </button>
             <button
               type="button"
               onClick={() => setMode('credit')}
-              className={`flex-1 py-2 text-sm font-bold transition-colors ${
+              className={cn(
+                'flex-1 flex items-center justify-center py-2 h-12 text-xs font-bold rounded-xl transition-all duration-300 border',
                 mode === 'credit'
-                  ? 'bg-primary text-white'
-                  : 'bg-transparent text-muted-foreground hover:bg-white/5'
-              }`}
+                  ? 'bg-primary/20 text-primary border-primary/50'
+                  : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
+              )}
             >
               {t('modeCredit')}
             </button>

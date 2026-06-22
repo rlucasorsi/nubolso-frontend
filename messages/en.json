@@ -440,7 +440,7 @@
     "closingDay": "Closes on day {day}",
     "dueDay": "Due on day {day}",
     "paymentDay": "Pays on day {day}",
-    "addPurchase": "Add Purchase",
+    "addPurchase": "New Entry",
     "removeCard": "Remove Card",
     "removeConfirm": "Remove this card?",
     "removeDesc": "The card will be deactivated and will no longer generate new invoices. The purchase and invoice history will be preserved.",
@@ -638,7 +638,8 @@
     "creditDescription": "Register a refund or credit received on the card.",
     "confirmCredit": "Confirm Credit",
     "modePurchase": "Purchase",
-    "modeCredit": "Refund"
+    "modeCredit": "Refund",
+    "subtypeLabel": "Mode"
   },
   "anticipateDrawer": {
     "title": "Anticipate Installments",

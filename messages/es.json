@@ -440,7 +440,7 @@
     "closingDay": "Cierra el día {day}",
     "dueDay": "Vence el día {day}",
     "paymentDay": "Paga el día {day}",
-    "addPurchase": "Agregar Compra",
+    "addPurchase": "Nuevo Registro",
     "removeCard": "Eliminar Tarjeta",
     "removeConfirm": "¿Eliminar esta tarjeta?",
     "removeDesc": "La tarjeta será desactivada y dejará de generar nuevas facturas. El historial de compras y facturas pagadas se conservará.",
@@ -638,7 +638,8 @@
     "creditDescription": "Registra una devolución o crédito recibido en la tarjeta.",
     "confirmCredit": "Confirmar Crédito",
     "modePurchase": "Compra",
-    "modeCredit": "Devolución"
+    "modeCredit": "Devolución",
+    "subtypeLabel": "Modalidad"
   },
   "anticipateDrawer": {
     "title": "Anticipar Cuotas",

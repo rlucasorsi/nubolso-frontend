@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { EntryForm, EntryFormValues } from './EntryForm';
 import { entryFormSchema } from '@/lib/schemas/transactions';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-c
 import { usePurchaseForm } from '@/modules/credit-cards/hooks/use-purchase-form';
 
 type EntryMode = 'debit' | 'credit';
+type PurchaseMode = 'purchase' | 'credit';
 
 interface AddEntryDrawerProps {
   isOpen: boolean;
@@ -42,9 +43,11 @@ export function AddEntryDrawer({
   minDate,
 }: AddEntryDrawerProps) {
   const t = useTranslations('entry');
+  const tc = useTranslations('creditPurchase');
   const getInitialDate = () => defaultDate || new Date().toISOString().split('T')[0];
 
   const [mode, setMode] = useState<EntryMode>('debit');
+  const [purchaseMode, setPurchaseMode] = useState<PurchaseMode>('purchase');
   const [addCardOpen, setAddCardOpen] = useState(false);
 
   const [values, setValues] = useState<EntryFormValues>({
@@ -59,16 +62,20 @@ export function AddEntryDrawer({
   const activeCards = useMemo(() => (cardsQuery.data ?? []).filter((c) => c.isActive), [cardsQuery.data]);
   const [purchaseCardId, setPurchaseCardId] = useState<string | undefined>(undefined);
 
+  const isCredit = purchaseMode === 'credit';
+
   const purchaseForm = usePurchaseForm({
     isOpen,
     cardId: purchaseCardId,
     defaultDate,
     enabled: mode === 'credit',
+    isCredit,
   });
 
   useEffect(() => {
     if (!isOpen) return;
     setMode('debit');
+    setPurchaseMode('purchase');
     setValues({
       date: getInitialDate(),
       amount: '',
@@ -195,6 +202,38 @@ export function AddEntryDrawer({
                   isLoading={cardsQuery.isLoading}
                 />
 
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+                    {tc('subtypeLabel')}
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPurchaseMode('purchase')}
+                      className={cn(
+                        'flex-1 flex items-center justify-center py-2 h-12 text-xs font-bold rounded-xl transition-all duration-300 border',
+                        purchaseMode === 'purchase'
+                          ? 'bg-primary/20 text-primary border-primary/50'
+                          : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                      )}
+                    >
+                      {tc('modePurchase')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPurchaseMode('credit')}
+                      className={cn(
+                        'flex-1 flex items-center justify-center py-2 h-12 text-xs font-bold rounded-xl transition-all duration-300 border',
+                        purchaseMode === 'credit'
+                          ? 'bg-primary/20 text-primary border-primary/50'
+                          : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                      )}
+                    >
+                      {tc('modeCredit')}
+                    </button>
+                  </div>
+                </div>
+
                 <CreditPurchaseFields
                   description={purchaseForm.description}
                   onDescriptionChange={purchaseForm.setDescription}
@@ -213,8 +252,8 @@ export function AddEntryDrawer({
                   purchaseDateError={purchaseForm.errors.purchaseDate}
                   minDate={minDate}
                   apiError={purchaseForm.apiError}
-                  simulation={purchaseForm.adjustedSimulation}
-                  isSimulating={purchaseForm.isSimulating}
+                  simulation={isCredit ? undefined : purchaseForm.adjustedSimulation}
+                  isSimulating={isCredit ? false : purchaseForm.isSimulating}
                 />
               </div>
             )}
@@ -243,7 +282,7 @@ export function AddEntryDrawer({
                 onClick={() => purchaseForm.handleConfirm(onCancel)}
                 disabled={!purchaseForm.isValid || purchaseForm.isConfirming}
               >
-                {purchaseForm.isConfirming ? t('confirming') : t('confirmPurchase')}
+                {purchaseForm.isConfirming ? t('confirming') : t('save')}
               </Button>
             )}
           </DrawerFooter>
@@ -254,4 +293,3 @@ export function AddEntryDrawer({
     </>
   );
 }
-
