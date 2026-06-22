@@ -26,7 +26,7 @@ type CardFilter = 'all' | string[];
 
 const PAST_MONTHS = 6;
 const FUTURE_MONTHS = 6;
-const ITEM_WIDTH = 64;
+const ITEM_WIDTH = 56;
 const MAX_BAR_HEIGHT = 84;
 const MIN_BAR_HEIGHT = 6;
 
@@ -195,7 +195,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                       onClick={() => handleBarClick(bucket)}
                       disabled={!hasInvoice}
                       className={cn(
-                        'shrink-0 w-16 flex flex-col items-center justify-end gap-2 pt-2 pb-1',
+                        'shrink-0 w-14 flex flex-col items-center justify-end gap-2 pt-2 pb-1',
                         hasInvoice ? 'cursor-pointer' : 'cursor-default opacity-50',
                       )}
                       style={{ height: MAX_BAR_HEIGHT + 36 }}
@@ -207,7 +207,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                       )}
                       <div
                         className={cn(
-                          'w-8 rounded-md transition-all',
+                          'w-8 rounded-[3px] transition-all',
                           bucket.isCurrentMonth
                             ? 'bg-[#7b5cff]'
                             : hasInvoice
