@@ -1,7 +1,8 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { STORAGE_KEYS } from '@/shared/constants/storage-keys.constant';
 import Link from 'next/link';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,27 +15,23 @@ import { resetPasswordSchema } from '@/lib/schemas/auth';
 import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
 
 export default function ResetPasswordPage() {
-  return (
-    <Suspense fallback={null}>
-      <ResetPasswordContent />
-    </Suspense>
-  );
-}
-
-function ResetPasswordContent() {
   const t = useTranslations('auth');
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
 
   useEffect(() => {
-    setEmail(sessionStorage.getItem('auth_pending_email') ?? '');
+    setEmail(sessionStorage.getItem(STORAGE_KEYS.AUTH_PENDING_EMAIL) ?? '');
   }, []);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ code?: string; password?: string; confirmPassword?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    code?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const cooldown = useCooldown(60);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +40,11 @@ function ResetPasswordContent() {
     const result = resetPasswordSchema.safeParse({ code, password, confirmPassword });
     if (!result.success) {
       const errs = result.error.flatten().fieldErrors;
-      setFieldErrors({ code: errs.code?.[0], password: errs.password?.[0], confirmPassword: errs.confirmPassword?.[0] });
+      setFieldErrors({
+        code: errs.code?.[0],
+        password: errs.password?.[0],
+        confirmPassword: errs.confirmPassword?.[0],
+      });
       return;
     }
     setFieldErrors({});
@@ -51,6 +52,7 @@ function ResetPasswordContent() {
 
     try {
       await authService.resetPassword({ email, code, newPassword: password });
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_PENDING_EMAIL);
       toast.success(t('passwordReset'));
       router.push('/login');
     } catch (error) {
@@ -89,9 +91,7 @@ function ResetPasswordContent() {
       <section className="relative w-full max-w-md">
         <div className="glass-card shadow-card-elegant rounded-3xl px-7 py-6 sm:px-10 sm:py-8">
           <div className="flex flex-col items-center text-center">
-            <div
-              className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary"
-            >
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
               <Lock className="h-8 w-8 text-white" strokeWidth={2.5} />
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{t('resetTitle')}</h1>
@@ -111,7 +111,10 @@ function ResetPasswordContent() {
           {!email ? (
             <p className="mt-6 text-center text-sm text-muted-foreground">
               {t('noEmailFound')}{' '}
-              <Link href="/forgot-password" className="font-semibold text-brand-gradient hover:opacity-80">
+              <Link
+                href="/forgot-password"
+                className="font-semibold text-brand-gradient hover:opacity-80"
+              >
                 {t('requestNewCode')}
               </Link>
             </p>
@@ -131,7 +134,9 @@ function ResetPasswordContent() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                {fieldErrors.code && <p className="text-xs text-destructive text-center">{fieldErrors.code}</p>}
+                {fieldErrors.code && (
+                  <p className="text-xs text-destructive text-center">{fieldErrors.code}</p>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -153,7 +158,9 @@ function ResetPasswordContent() {
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                {fieldErrors.password && <p className="text-xs text-destructive px-1">{fieldErrors.password}</p>}
+                {fieldErrors.password && (
+                  <p className="text-xs text-destructive px-1">{fieldErrors.password}</p>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -167,7 +174,9 @@ function ResetPasswordContent() {
                     className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
                   />
                 </div>
-                {fieldErrors.confirmPassword && <p className="text-xs text-destructive px-1">{fieldErrors.confirmPassword}</p>}
+                {fieldErrors.confirmPassword && (
+                  <p className="text-xs text-destructive px-1">{fieldErrors.confirmPassword}</p>
+                )}
               </div>
 
               <button
@@ -184,7 +193,9 @@ function ResetPasswordContent() {
                 disabled={cooldown.isActive}
                 className="w-full text-center text-sm font-medium text-brand-gradient transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {cooldown.isActive ? t('resendCodeCooldown', { seconds: cooldown.remaining }) : t('resendCode')}
+                {cooldown.isActive
+                  ? t('resendCodeCooldown', { seconds: cooldown.remaining })
+                  : t('resendCode')}
               </button>
             </form>
           )}

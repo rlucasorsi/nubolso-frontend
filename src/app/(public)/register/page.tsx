@@ -11,6 +11,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
 import { toast } from 'sonner';
 import { registerSchema } from '@/lib/schemas/auth';
+import { STORAGE_KEYS } from '@/shared/constants/storage-keys.constant';
 
 function mapRegisterError(error: unknown, t: (key: string) => string): string {
   const raw = extractErrorMessage(error, '');
@@ -87,7 +88,7 @@ export default function RegisterPage() {
     try {
       await authService.register({ name, email, password });
       toast.success(t('accountCreated'));
-      sessionStorage.setItem('auth_pending_email', email);
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_PENDING_EMAIL, email);
       router.push('/verify-email');
     } catch (error) {
       toast.error(mapRegisterError(error, t));

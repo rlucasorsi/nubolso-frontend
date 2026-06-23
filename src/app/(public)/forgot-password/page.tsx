@@ -10,6 +10,7 @@ import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { forgotPasswordSchema } from '@/lib/schemas/auth';
 import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
+import { STORAGE_KEYS } from '@/shared/constants/storage-keys.constant';
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth');
@@ -32,7 +33,7 @@ export default function ForgotPasswordPage() {
     try {
       await authService.forgotPassword({ email });
       toast.success(t('forgotSuccess'));
-      sessionStorage.setItem('auth_pending_email', email);
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_PENDING_EMAIL, email);
       router.push('/reset-password');
     } catch (error) {
       toast.error(extractErrorMessage(error, t('forgotError')));
@@ -58,13 +59,13 @@ export default function ForgotPasswordPage() {
       <section className="relative w-full max-w-md">
         <div className="glass-card shadow-card-elegant rounded-3xl px-7 py-6 sm:px-10 sm:py-8">
           <div className="flex flex-col items-center text-center">
-            <div
-              className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary"
-            >
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
               <Mail className="h-8 w-8 text-white" strokeWidth={2.5} />
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{t('forgotTitle')}</h1>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t('forgotDescription')}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              {t('forgotDescription')}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-3">

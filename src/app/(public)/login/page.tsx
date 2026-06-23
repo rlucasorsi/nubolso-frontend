@@ -11,6 +11,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
 import { toast } from 'sonner';
 import { loginSchema } from '@/lib/schemas/auth';
+import { STORAGE_KEYS } from '@/shared/constants/storage-keys.constant';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
@@ -44,7 +45,7 @@ export default function LoginPage() {
       if (err?.data?.errorCode === 'EMAIL_NOT_VERIFIED') {
         await authService.resendCode({ email });
         toast.info(t('confirmEmail'));
-        sessionStorage.setItem('auth_pending_email', email);
+        sessionStorage.setItem(STORAGE_KEYS.AUTH_PENDING_EMAIL, email);
         router.push('/verify-email');
         return;
       }

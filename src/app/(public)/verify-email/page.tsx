@@ -1,7 +1,8 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { STORAGE_KEYS } from '@/shared/constants/storage-keys.constant';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import { toast } from 'sonner';
@@ -12,21 +13,13 @@ import { useCooldown } from '@/hooks/useCooldown';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
 export default function VerifyEmailPage() {
-  return (
-    <Suspense fallback={null}>
-      <VerifyEmailContent />
-    </Suspense>
-  );
-}
-
-function VerifyEmailContent() {
   const t = useTranslations('auth');
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
 
   useEffect(() => {
-    setEmail(sessionStorage.getItem('auth_pending_email') ?? '');
+    setEmail(sessionStorage.getItem(STORAGE_KEYS.AUTH_PENDING_EMAIL) ?? '');
   }, []);
   const [loading, setLoading] = useState(false);
   const cooldown = useCooldown(60);
@@ -37,6 +30,7 @@ function VerifyEmailContent() {
 
     try {
       await authService.verifyEmail({ email, code });
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_PENDING_EMAIL);
       toast.success(t('emailConfirmed'));
       router.push('/dashboard');
     } catch (error) {
@@ -82,9 +76,7 @@ function VerifyEmailContent() {
       <section className="relative w-full max-w-md">
         <div className="glass-card shadow-card-elegant rounded-3xl px-7 py-6 sm:px-10 sm:py-8">
           <div className="flex flex-col items-center text-center">
-            <div
-              className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary"
-            >
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
               <Mail className="h-8 w-8 text-white" strokeWidth={2.5} />
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{t('verifyTitle')}</h1>
@@ -109,7 +101,10 @@ function VerifyEmailContent() {
             </p>
           ) : (
             <form
-              onSubmit={(e) => { e.preventDefault(); handleVerify(); }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleVerify();
+              }}
               className="mt-6 space-y-4"
             >
               <div className="flex justify-center">
@@ -140,12 +135,17 @@ function VerifyEmailContent() {
                 disabled={cooldown.isActive}
                 className="w-full text-center text-sm font-medium text-brand-gradient transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {cooldown.isActive ? t('resendCodeCooldown', { seconds: cooldown.remaining }) : t('resendCode')}
+                {cooldown.isActive
+                  ? t('resendCodeCooldown', { seconds: cooldown.remaining })
+                  : t('resendCode')}
               </button>
 
               <p className="text-center text-sm text-muted-foreground">
                 {t('wrongEmail')}{' '}
-                <Link href="/register" className="font-semibold text-brand-gradient hover:opacity-80">
+                <Link
+                  href="/register"
+                  className="font-semibold text-brand-gradient hover:opacity-80"
+                >
                   {t('changeEmail')}
                 </Link>
               </p>
