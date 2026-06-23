@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings, CircleDollarSign, Target, LayoutDashboard, RotateCw, CreditCard, Menu } from 'lucide-react';
+import {
+  LogOut,
+  Settings,
+  CircleDollarSign,
+  Target,
+  LayoutDashboard,
+  RotateCw,
+  CreditCard,
+  Menu,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage, type Locale } from '@/i18n/LanguageContext';
@@ -14,13 +23,13 @@ import { useLogout } from '@/hooks/useLogout';
 import { InitialSetupDrawer } from '@/components/onboarding/InitialSetupDrawer';
 
 const LOCALES: Locale[] = ['en', 'pt-BR', 'es'];
-const FLAGS: Record<Locale, string> = { en: '🇺🇸', 'pt-BR': '🇧🇷', es: '🇪🇸' };
+const FLAGS: Record<Locale, { src: string; alt: string }> = {
+  en: { src: 'https://flagcdn.com/w20/us.png', alt: 'US' },
+  'pt-BR': { src: 'https://flagcdn.com/w20/br.png', alt: 'BR' },
+  es: { src: 'https://flagcdn.com/w20/es.png', alt: 'ES' },
+};
 
-export default function PrivateLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('nav');
   const { locale, setLocale } = useLanguage();
 
@@ -70,56 +79,95 @@ export default function PrivateLayout({
             type="button"
             onClick={cycleLocale}
             title={locale}
-            className="h-9 w-9 flex items-center justify-center rounded-xl text-lg hover:bg-white/5 transition-colors"
+            className="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors"
           >
-            {FLAGS[locale]}
+            <img
+              src={FLAGS[locale].src}
+              alt={FLAGS[locale].alt}
+              width={20}
+              height={14}
+              className="rounded-[2px]"
+            />
           </button>
-          <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
+          >
             <Link href="/dashboard">
               <LayoutDashboard className="h-4 w-4" />
               <span>{t('dashboard')}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
+          >
             <Link href="/entries">
               <CircleDollarSign className="h-4 w-4" />
               <span>{t('entries')}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
+          >
             <Link href="/cards">
               <CreditCard className="h-4 w-4" />
               <span>{t('cards')}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
+          >
             <Link href="/recurring">
               <RotateCw className="h-4 w-4" />
               <span>{t('recurring')}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
+          >
             <Link href="/goals">
               <Target className="h-4 w-4" />
               <span>{t('goals')}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
+          >
             <Link href="/settings">
               <Settings className="h-4 w-4" />
               <span>{t('settings')}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
+          >
             <LogOut className="h-4 w-4" />
             <span>{t('logout')}</span>
           </Button>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-14 sm:pb-0">
-        {children}
-      </main>
+      <main className="flex-1 overflow-y-auto pb-14 sm:pb-0">{children}</main>
       <MobileNav />
     </div>
   );
