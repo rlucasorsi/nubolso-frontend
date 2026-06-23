@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "commit": "cz",
     "prepare": "husky"
   },
