@@ -1,6 +1,5 @@
 import { HttpClient } from '@/network/http-client';
-import { COOKIE_KEYS } from '@/shared/constants/cookie-keys.constant';
-import { setCookie, deleteCookie } from '@/shared/utils/cookies';
+import { setSessionTokenAction, clearSessionTokenAction } from '@/modules/auth/actions/session';
 
 export interface AuthUser {
   id: string;
@@ -56,17 +55,16 @@ export interface GoogleLoginPayload {
   idToken: string;
 }
 
-const THIRTY_DAYS = 30 * 24 * 60 * 60;
-
 export const authService = {
-  async login(credentials: LoginCredentials, options?: { remember?: boolean }): Promise<AuthResponse> {
+  async login(
+    credentials: LoginCredentials,
+    options?: { remember?: boolean },
+  ): Promise<AuthResponse> {
     const data = await HttpClient.post<AuthResponse, LoginCredentials>('/auth/login', credentials, {
       includeToken: false,
     });
 
-    await setCookie(COOKIE_KEYS.ACCESS_TOKEN, data.accessToken, {
-      maxAge: options?.remember ? THIRTY_DAYS : undefined,
-    });
+    await setSessionTokenAction(data.accessToken, { remember: options?.remember });
 
     return data;
   },
@@ -78,11 +76,15 @@ export const authService = {
   },
 
   async verifyEmail(payload: VerifyEmailPayload): Promise<AuthResponse> {
-    const data = await HttpClient.post<AuthResponse, VerifyEmailPayload>('/auth/verify-email', payload, {
-      includeToken: false,
-    });
+    const data = await HttpClient.post<AuthResponse, VerifyEmailPayload>(
+      '/auth/verify-email',
+      payload,
+      {
+        includeToken: false,
+      },
+    );
 
-    await setCookie(COOKIE_KEYS.ACCESS_TOKEN, data.accessToken);
+    await setSessionTokenAction(data.accessToken);
 
     return data;
   },
@@ -94,9 +96,13 @@ export const authService = {
   },
 
   async forgotPassword(payload: ForgotPasswordPayload): Promise<MessageResponse> {
-    return HttpClient.post<MessageResponse, ForgotPasswordPayload>('/auth/forgot-password', payload, {
-      includeToken: false,
-    });
+    return HttpClient.post<MessageResponse, ForgotPasswordPayload>(
+      '/auth/forgot-password',
+      payload,
+      {
+        includeToken: false,
+      },
+    );
   },
 
   async resetPassword(payload: ResetPasswordPayload): Promise<MessageResponse> {
@@ -110,12 +116,12 @@ export const authService = {
       includeToken: false,
     });
 
-    await setCookie(COOKIE_KEYS.ACCESS_TOKEN, data.accessToken);
+    await setSessionTokenAction(data.accessToken);
 
     return data;
   },
 
   async logout(): Promise<void> {
-    await deleteCookie(COOKIE_KEYS.ACCESS_TOKEN);
+    await clearSessionTokenAction();
   },
 };
