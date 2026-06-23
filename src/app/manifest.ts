@@ -1,0 +1,21 @@
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'NuBolso',
+    short_name: 'NuBolso',
+    description: 'Controle financeiro pessoal',
+    start_url: '/dashboard',
+    display: 'standalone',
+    background_color: '#14121b',
+    theme_color: '#14121b',
+    orientation: 'portrait',
+    icons: [
+      {
+        src: '/logo.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+      },
+    ],
+  };
+}

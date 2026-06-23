@@ -12,7 +12,6 @@ export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
-  manifest: '/manifest.json',
   icons: { icon: '/logo.svg', apple: '/logo.svg' },
   openGraph: {
     title: APP_NAME,
