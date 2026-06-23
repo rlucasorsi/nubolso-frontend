@@ -70,6 +70,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
               alt="NuBolso"
               className="h-8 w-auto"
               style={{ filter: 'drop-shadow(0 0 4px rgba(157,124,255,0.5))' }}
+              fetchPriority="high"
             />
           </Link>
         </div>
@@ -87,6 +88,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
               width={20}
               height={14}
               className="rounded-[2px]"
+              fetchPriority="high"
             />
           </button>
           <Button
