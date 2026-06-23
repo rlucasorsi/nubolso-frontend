@@ -79,7 +79,8 @@ export default function RegisterPage() {
     try {
       await authService.register({ name, email, password });
       toast.success(t('accountCreated'));
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      sessionStorage.setItem('auth_pending_email', email);
+      router.push('/verify-email');
     } catch (error) {
       toast.error(mapRegisterError(error, t));
     } finally {

@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,9 +24,12 @@ export default function ResetPasswordPage() {
 function ResetPasswordContent() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email') ?? '';
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+
+  useEffect(() => {
+    setEmail(sessionStorage.getItem('auth_pending_email') ?? '');
+  }, []);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);

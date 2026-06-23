@@ -282,7 +282,12 @@
     "deleteError": "Não foi possível excluir sua conta. Tente novamente.",
     "tabSystem": "Sistema",
     "tabAccount": "Conta",
-    "tabFaq": "FAQ"
+    "tabFaq": "FAQ",
+    "profileTitle": "Perfil",
+    "profileName": "Nome",
+    "profileEmail": "Email (não pode ser alterado)",
+    "profileSaved": "Nome atualizado!",
+    "profileError": "Erro ao atualizar nome. Tente novamente."
   },
   "common": {
     "cancel": "Cancelar",

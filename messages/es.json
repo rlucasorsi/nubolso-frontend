@@ -282,7 +282,12 @@
     "deleteError": "No fue posible eliminar tu cuenta. Inténtalo de nuevo.",
     "tabSystem": "Sistema",
     "tabAccount": "Cuenta",
-    "tabFaq": "FAQ"
+    "tabFaq": "FAQ",
+    "profileTitle": "Perfil",
+    "profileName": "Nombre",
+    "profileEmail": "Email (no se puede cambiar)",
+    "profileSaved": "¡Nombre actualizado!",
+    "profileError": "Error al actualizar nombre. Inténtalo de nuevo."
   },
   "common": {
     "cancel": "Cancelar",

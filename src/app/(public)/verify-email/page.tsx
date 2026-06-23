@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,9 +22,12 @@ export default function VerifyEmailPage() {
 function VerifyEmailContent() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email') ?? '';
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+
+  useEffect(() => {
+    setEmail(sessionStorage.getItem('auth_pending_email') ?? '');
+  }, []);
   const [loading, setLoading] = useState(false);
   const cooldown = useCooldown(60);
 

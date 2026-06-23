@@ -39,30 +39,27 @@ export async function getCookie(name: string): Promise<CookieValueTypes> {
  * @param name - The name of the cookie to set.
  * @param value - The value of the cookie. If `null`, no cookie is set.
  */
-export async function setCookie(name: string, value: string | null, options?: { encode?: boolean }): Promise<void> {
+export async function setCookie(name: string, value: string | null, options?: { encode?: boolean; maxAge?: number }): Promise<void> {
   if (!value) {
     return;
   }
 
   const encodedValue = !options?.encode ? value : encodeURIComponent(value);
+  const cookieOptions = {
+    path: '/',
+    sameSite: 'strict' as const,
+    secure: process.env.NODE_ENV === 'production',
+    ...(options?.maxAge !== undefined && { maxAge: options.maxAge }),
+  };
 
   if (typeof window === 'undefined') {
     const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
-    cookieStore.set(name, encodedValue, {
-      path: '/',
-      sameSite: 'strict',
-      secure: process.env.NODE_ENV === 'production',
-    });
-
+    cookieStore.set(name, encodedValue, cookieOptions);
     return;
   }
 
-  setCookieClient(name, encodedValue, {
-    path: '/',
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production',
-  });
+  setCookieClient(name, encodedValue, cookieOptions);
 }
 
 /**

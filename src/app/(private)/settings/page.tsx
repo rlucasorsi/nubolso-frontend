@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ChevronLeft, CalendarDays, Palette, Wallet, Save, Loader2, Download, Shield, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
+import { ChevronLeft, CalendarDays, Palette, Wallet, Save, Loader2, Download, Shield, Trash2, HelpCircle, MessageSquare, User } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from '@/i18n/useTranslations';
 import { getPeriodForDate } from '@/lib/cashflow';
@@ -26,6 +26,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { SupportDrawer } from '@/components/support/SupportDrawer';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
+import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
 import { HttpClient } from '@/network/http-client';
 import { useLogout } from '@/hooks/useLogout';
 import { toast } from 'sonner';
@@ -90,6 +91,23 @@ export default function SettingsPage() {
       greenThreshold: parseFloat(greenValue.replace(',', '.')) || 0,
       yellowThreshold: parseFloat(yellowValue.replace(',', '.')) || 0,
     });
+  };
+
+  const { mutateAsync: updateMe, isPending: isUpdatingProfile } = useUpdateMe();
+  const [profileName, setProfileName] = useState('');
+  useEffect(() => {
+    if (me?.name) setProfileName(me.name);
+  }, [me?.name]);
+  const hasProfileChanges = profileName.trim() !== '' && profileName !== me?.name;
+
+  const handleSaveProfile = async () => {
+    if (!hasProfileChanges) return;
+    try {
+      await updateMe({ name: profileName.trim() });
+      toast.success(t('profileSaved'));
+    } catch {
+      toast.error(t('profileError'));
+    }
   };
 
   const [isExporting, setIsExporting] = useState(false);
@@ -264,6 +282,43 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="account" className="space-y-4 mt-4">
+          <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 p-4 pb-2">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">{t('profileTitle')}</CardTitle>
+              </div>
+              <Button
+                size="icon"
+                onClick={handleSaveProfile}
+                disabled={!hasProfileChanges || isUpdatingProfile}
+              >
+                {isUpdatingProfile ? <Loader2 className="animate-spin" /> : <Save />}
+              </Button>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 space-y-3">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+                  {t('profileName')}
+                </label>
+                <input
+                  type="text"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 h-10 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/40 transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+                  {t('profileEmail')}
+                </label>
+                <div className="w-full rounded-xl border border-white/5 bg-white/[0.02] px-3 h-10 flex items-center text-sm text-muted-foreground select-none">
+                  {me?.email ?? '—'}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-base flex items-center gap-2">

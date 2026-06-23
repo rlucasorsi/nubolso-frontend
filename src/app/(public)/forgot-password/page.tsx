@@ -32,7 +32,8 @@ export default function ForgotPasswordPage() {
     try {
       await authService.forgotPassword({ email });
       toast.success(t('forgotSuccess'));
-      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+      sessionStorage.setItem('auth_pending_email', email);
+      router.push('/reset-password');
     } catch (error) {
       toast.error(extractErrorMessage(error, t('forgotError')));
     } finally {

@@ -35,7 +35,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await authService.login({ email, password });
+      await authService.login({ email, password }, { remember });
       toast.success(t('welcomeBack'));
       router.push('/dashboard');
     } catch (error) {
@@ -44,7 +44,8 @@ export default function LoginPage() {
       if (err?.data?.errorCode === 'EMAIL_NOT_VERIFIED') {
         await authService.resendCode({ email });
         toast.info(t('confirmEmail'));
-        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        sessionStorage.setItem('auth_pending_email', email);
+        router.push('/verify-email');
         return;
       }
 

@@ -56,13 +56,17 @@ export interface GoogleLoginPayload {
   idToken: string;
 }
 
+const THIRTY_DAYS = 30 * 24 * 60 * 60;
+
 export const authService = {
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+  async login(credentials: LoginCredentials, options?: { remember?: boolean }): Promise<AuthResponse> {
     const data = await HttpClient.post<AuthResponse, LoginCredentials>('/auth/login', credentials, {
       includeToken: false,
     });
 
-    await setCookie(COOKIE_KEYS.ACCESS_TOKEN, data.accessToken);
+    await setCookie(COOKIE_KEYS.ACCESS_TOKEN, data.accessToken, {
+      maxAge: options?.remember ? THIRTY_DAYS : undefined,
+    });
 
     return data;
   },

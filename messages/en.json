@@ -282,7 +282,12 @@
     "deleteError": "Couldn't delete your account. Please try again.",
     "tabSystem": "System",
     "tabAccount": "Account",
-    "tabFaq": "FAQ"
+    "tabFaq": "FAQ",
+    "profileTitle": "Profile",
+    "profileName": "Name",
+    "profileEmail": "Email (cannot be changed)",
+    "profileSaved": "Name updated!",
+    "profileError": "Error updating name. Try again."
   },
   "common": {
     "cancel": "Cancel",
