@@ -12,4 +12,10 @@ export interface TransactionFromApi {
   };
 }
 
-export type GetAllEntriesResponse = TransactionFromApi[];
+export interface GetAllEntriesResponse {
+  data: TransactionFromApi[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}

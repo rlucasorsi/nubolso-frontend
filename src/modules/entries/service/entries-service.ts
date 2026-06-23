@@ -25,6 +25,14 @@ export interface GetEntriesFilters {
   isPaid?: boolean;
 }
 
+interface PaginatedTransactionsResponse {
+  data: Transaction[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
 export const entriesService = {
   getAll: async (filters?: GetEntriesFilters) => {
     const { type, ...rest } = filters ?? {};
@@ -34,11 +42,12 @@ export const entriesService = {
       type: type?.toUpperCase(),
     };
 
-    // Busca as transações do backend, filtrando pelo período/tipo informados
-    const data = await HttpClient.get<Transaction[], typeof params>('/transactions', { params });
+    const response = await HttpClient.get<PaginatedTransactionsResponse, typeof params>(
+      '/transactions',
+      { params },
+    );
 
-    // Mapeia para o formato que o frontend espera (lowercase types)
-    return data.map((t) => ({
+    return response.data.map((t) => ({
       ...t,
       type: t.type.toLowerCase() as 'income' | 'expense' | 'spending',
     }));
