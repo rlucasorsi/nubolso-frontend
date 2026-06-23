@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
-  icons: { icon: '/logo.svg', apple: '/logo.svg' },
+  icons: { icon: '/logo.svg' },
   openGraph: {
     title: APP_NAME,
     description: APP_DESCRIPTION,
