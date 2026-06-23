@@ -58,7 +58,9 @@ export function AnticipateInstallmentsDrawer({
   const options = useMemo(() => {
     return futureInstallments.map((_, i) => ({
       count: i + 1,
-      originalAmount: futureInstallments.slice(0, i + 1).reduce((sum, inst) => sum + inst.amount, 0),
+      originalAmount: futureInstallments
+        .slice(0, i + 1)
+        .reduce((sum, inst) => sum + inst.amount, 0),
     }));
   }, [futureInstallments]);
 
@@ -73,10 +75,20 @@ export function AnticipateInstallmentsDrawer({
     paidAmount <= (selectedOption?.originalAmount ?? 0) + 0.005;
 
   const handleConfirm = async () => {
-    if (!isValid || selectedCount === null) return;
+    if (selectedCount === null) return;
+    if (!isValid) {
+      setError(t('errorInvalid'));
+      return;
+    }
     setError(null);
     try {
-      await anticipateMutation.mutateAsync({ cardId, invoiceId, purchaseId, installmentsCount: selectedCount, paidAmount });
+      await anticipateMutation.mutateAsync({
+        cardId,
+        invoiceId,
+        purchaseId,
+        installmentsCount: selectedCount,
+        paidAmount,
+      });
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errorInvalid'));
@@ -93,13 +105,20 @@ export function AnticipateInstallmentsDrawer({
   const reversedOptions = [...options].reverse();
 
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) handleClose(); }}>
+    <Sheet
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) handleClose();
+      }}
+    >
       <DrawerContent>
         <DrawerHeader onClose={handleClose}>
           <SheetTitle className="text-xl font-bold font-display text-primary">
-            {t('title')} — {purchaseDescription}
+            {t('title')}
           </SheetTitle>
-          <SheetDescription className="sr-only">{t('title')}</SheetDescription>
+          <SheetDescription className="text-sm font-medium text-white/80 mt-0.5">
+            {purchaseDescription}
+          </SheetDescription>
         </DrawerHeader>
 
         <div className="flex-1 px-6 py-4 space-y-4 overflow-y-auto">
@@ -126,60 +145,71 @@ export function AnticipateInstallmentsDrawer({
                       setPaidAmountStr('');
                       setError(null);
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all text-sm font-bold ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-sm font-bold ${
                       selectedCount === opt.count
                         ? 'border-primary bg-primary/10 text-primary'
                         : 'border-white/10 bg-white/5 text-foreground hover:bg-white/10'
                     }`}
                   >
-                    <span>{t('option', { n: opt.count })}</span>
+                    <div
+                      className={`flex-shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        selectedCount === opt.count ? 'border-primary' : 'border-white/40'
+                      }`}
+                    >
+                      {selectedCount === opt.count && (
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                      )}
+                    </div>
+                    <span className="flex-1 text-left">{t('option', { n: opt.count })}</span>
                     <span>{formatCurrency(opt.originalAmount)}</span>
                   </button>
                 ))}
               </div>
-
-              {selectedCount !== null && selectedOption && (
-                <div className="glass-card rounded-2xl p-4 space-y-3 mt-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{t('originalAmount')}</span>
-                    <span className="font-bold">{formatCurrency(selectedOption.originalAmount)}</span>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      {t('paidAmountLabel')}
-                    </label>
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      value={paidAmountStr}
-                      onChange={(e) => {
-                        setPaidAmountStr(e.target.value);
-                        setError(null);
-                      }}
-                      placeholder={t('paidAmountPlaceholder')}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-primary transition-colors"
-                    />
-                    {!Number.isNaN(paidAmount) && paidAmount > (selectedOption.originalAmount + 0.005) && (
-                      <p className="text-xs text-destructive font-medium">{t('paidExceedsOriginal')}</p>
-                    )}
-                  </div>
-
-                  {!Number.isNaN(paidAmount) && paidAmount > 0 && paidAmount <= selectedOption.originalAmount + 0.005 && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{t('savings')}</span>
-                      <span className="font-bold text-green-400">{formatCurrency(Math.max(0, discount))}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {error && (
-                <p className="text-xs text-destructive font-medium">{error}</p>
-              )}
             </>
           )}
         </div>
+
+        {selectedCount !== null && selectedOption && (
+          <div className="px-6 py-4 border-t border-white/10 space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{t('originalAmount')}</span>
+              <span className="font-bold">{formatCurrency(selectedOption.originalAmount)}</span>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {t('paidAmountLabel')}
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={paidAmountStr}
+                onChange={(e) => {
+                  setPaidAmountStr(e.target.value);
+                  setError(null);
+                }}
+                placeholder={t('paidAmountPlaceholder')}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-primary transition-colors"
+              />
+              {!Number.isNaN(paidAmount) && paidAmount > selectedOption.originalAmount + 0.005 && (
+                <p className="text-xs text-destructive font-medium">{t('paidExceedsOriginal')}</p>
+              )}
+            </div>
+
+            {!Number.isNaN(paidAmount) &&
+              paidAmount > 0 &&
+              paidAmount <= selectedOption.originalAmount + 0.005 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('savings')}</span>
+                  <span className="font-bold text-green-400">
+                    {formatCurrency(Math.max(0, discount))}
+                  </span>
+                </div>
+              )}
+
+            {error && <p className="text-xs text-destructive font-medium">{error}</p>}
+          </div>
+        )}
 
         <DrawerFooter>
           <Button
@@ -192,7 +222,7 @@ export function AnticipateInstallmentsDrawer({
           <Button
             className="flex-1 h-11 rounded-xl bg-primary text-white font-bold hover:scale-[1.02] transition-all"
             onClick={handleConfirm}
-            disabled={!isValid || anticipateMutation.isPending}
+            disabled={selectedCount === null || anticipateMutation.isPending}
           >
             {anticipateMutation.isPending ? t('confirming') : t('confirm')}
           </Button>
