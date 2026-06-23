@@ -110,7 +110,7 @@ export function DashboardSummary({
 
   const chartConfig = {
     saldoPast: { label: t('realized'), color: '#7b5cff' },
-    saldoFuture: { label: t('future'), color: '#FEF08A' },
+    saldoFuture: { label: t('future'), color: '#7b5cff' },
   };
 
   const xTickInterval = Math.max(Math.ceil(activeChartDays.length / 6) - 1, 0);
@@ -288,10 +288,11 @@ export function DashboardSummary({
                   type="monotone"
                   dataKey="saldoFuture"
                   name="Saldo projetado"
-                  stroke="#FEF08A"
+                  stroke="#7b5cff"
                   strokeWidth={2}
                   strokeLinecap="round"
                   strokeDasharray="5 5"
+                  strokeOpacity={0.6}
                   fill="transparent"
                   dot={false}
                 />
@@ -313,7 +314,7 @@ export function DashboardSummary({
               <span>{t('realized')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-[2px] border-t-2 border-dashed" style={{ borderColor: '#FEF08A' }} />
+              <div className="w-3 h-[2px] border-t-2 border-dashed border-primary opacity-60" />
               <span>{t('future')}</span>
             </div>
             <div className="flex items-center gap-2">

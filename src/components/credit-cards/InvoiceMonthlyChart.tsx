@@ -214,10 +214,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                               ? 'bg-[#7b5cff]/40'
                               : 'bg-white/10',
                         )}
-                        style={{
-                          height: barHeight,
-                          boxShadow: bucket.isCurrentMonth ? '0 0 16px rgba(123,92,255,0.45)' : undefined,
-                        }}
+                        style={{ height: barHeight }}
                       />
                       <span
                         className={cn(
