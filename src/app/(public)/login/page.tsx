@@ -68,6 +68,7 @@ export default function LoginPage() {
                 alt="NuBolso"
                 className="h-12 w-auto transition-transform duration-500 hover:scale-105"
                 style={{ filter: 'drop-shadow(0 0 6px rgba(157,124,255,0.5))' }}
+                fetchPriority="high"
               />
             </div>
             <h1

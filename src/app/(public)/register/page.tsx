@@ -56,7 +56,11 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; password?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+  }>({});
 
   const PASSWORD_REQUIREMENTS = [
     { label: t('minChars'), test: (p: string) => p.length >= 8 },
@@ -70,7 +74,11 @@ export default function RegisterPage() {
     const result = registerSchema.safeParse({ name, email, password });
     if (!result.success) {
       const errs = result.error.flatten().fieldErrors;
-      setFieldErrors({ name: errs.name?.[0], email: errs.email?.[0], password: errs.password?.[0] });
+      setFieldErrors({
+        name: errs.name?.[0],
+        email: errs.email?.[0],
+        password: errs.password?.[0],
+      });
       return;
     }
     setFieldErrors({});
@@ -109,13 +117,17 @@ export default function RegisterPage() {
               <div
                 aria-hidden
                 className="absolute inset-0 -z-10 animate-pulse rounded-full blur-3xl opacity-50"
-                style={{ background: 'radial-gradient(circle, rgba(157,124,255,0.55) 0%, transparent 70%)', transform: 'scale(2)' }}
+                style={{
+                  background: 'radial-gradient(circle, rgba(157,124,255,0.55) 0%, transparent 70%)',
+                  transform: 'scale(2)',
+                }}
               />
               <img
                 src="/logo.svg"
                 alt="NuBolso"
                 className="h-12 w-auto transition-transform duration-500 hover:scale-105"
                 style={{ filter: 'drop-shadow(0 0 6px rgba(157,124,255,0.5))' }}
+                fetchPriority="high"
               />
             </div>
             <h1 className="text-3xl font-bold tracking-tight">{t('createAccount')}</h1>
@@ -134,7 +146,9 @@ export default function RegisterPage() {
                   className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
                 />
               </div>
-              {fieldErrors.name && <p className="text-xs text-destructive px-1">{fieldErrors.name}</p>}
+              {fieldErrors.name && (
+                <p className="text-xs text-destructive px-1">{fieldErrors.name}</p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -148,7 +162,9 @@ export default function RegisterPage() {
                   className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
                 />
               </div>
-              {fieldErrors.email && <p className="text-xs text-destructive px-1">{fieldErrors.email}</p>}
+              {fieldErrors.email && (
+                <p className="text-xs text-destructive px-1">{fieldErrors.email}</p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -169,7 +185,9 @@ export default function RegisterPage() {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {fieldErrors.password && <p className="text-xs text-destructive px-1">{fieldErrors.password}</p>}
+              {fieldErrors.password && (
+                <p className="text-xs text-destructive px-1">{fieldErrors.password}</p>
+              )}
               <div className="mt-1 space-y-1 px-1">
                 {PASSWORD_REQUIREMENTS.map((req) => {
                   const met = password.length > 0 && req.test(password);
@@ -178,7 +196,11 @@ export default function RegisterPage() {
                       key={req.label}
                       className={`flex items-center gap-1.5 text-xs transition-colors ${met ? 'text-green-400' : 'text-muted-foreground/60'}`}
                     >
-                      {met ? <Check className="h-3 w-3 shrink-0" /> : <div className="h-3 w-3 shrink-0 rounded-full border border-current" />}
+                      {met ? (
+                        <Check className="h-3 w-3 shrink-0" />
+                      ) : (
+                        <div className="h-3 w-3 shrink-0 rounded-full border border-current" />
+                      )}
                       <span>{req.label}</span>
                     </div>
                   );
@@ -188,11 +210,17 @@ export default function RegisterPage() {
 
             <p className="text-xs text-muted-foreground/70 text-center leading-relaxed">
               {t('termsConsent')}{' '}
-              <Link href="/terms" className="text-primary underline underline-offset-2 hover:opacity-80">
+              <Link
+                href="/terms"
+                className="text-primary underline underline-offset-2 hover:opacity-80"
+              >
                 {t('termsLink')}
               </Link>{' '}
               {t('and')}{' '}
-              <Link href="/privacy" className="text-primary underline underline-offset-2 hover:opacity-80">
+              <Link
+                href="/privacy"
+                className="text-primary underline underline-offset-2 hover:opacity-80"
+              >
                 {t('privacyLink')}
               </Link>
               .
