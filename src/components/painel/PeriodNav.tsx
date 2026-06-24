@@ -1,3 +1,5 @@
+'use client';
+
 import { Period } from '@/lib/cashflow';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -24,59 +26,73 @@ export function PeriodNav({
   const { locale } = useLanguage();
   const period = periods[periodIdx];
 
-  const formatCycleDate = (dateStr: string) => {
+  const parts = period.label.split(' / ');
+  const year = period.startDate.split('-')[0];
+  const isStandardMonth = /^\d{4}$/.test(parts[1] ?? '');
+
+  const canPrev = periodIdx > 0;
+  const canNext = periodIdx < periods.length - 1;
+
+  const fmtShort = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
-    return date.toLocaleDateString(locale, { day: 'numeric', month: 'long' });
+    return new Date(y, m - 1, d).toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'short',
+    });
   };
 
-  const cycleText = t('cycle', { start: formatCycleDate(period.startDate), end: formatCycleDate(period.endDate) });
-
   return (
-    <div className="flex flex-col gap-1.5 py-0.5 w-full">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={onPrev}
-            disabled={periodIdx === 0}
-            className="p-1 rounded-lg text-muted-foreground/40 disabled:opacity-0 hover:bg-white/5 transition-colors"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          
-          <span className="text-sm font-bold text-muted-foreground tracking-widest font-display leading-none min-w-[140px]">
-            {period.label.toUpperCase().split(' / ')[0]} {period.label.includes('/') ? `/ ${period.label.split(' / ')[1].toUpperCase()}` : ''}
-          </span>
+    <div className="flex items-center gap-1 w-full">
+      <button
+        onClick={onPrev}
+        disabled={!canPrev}
+        className="h-8 w-8 shrink-0 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors disabled:opacity-0 disabled:pointer-events-none"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
 
-          <button
-            onClick={onNext}
-            disabled={periodIdx === periods.length - 1}
-            className="p-1 rounded-lg text-muted-foreground/40 disabled:opacity-0 hover:bg-white/5 transition-colors"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onToday && !isCurrentPeriod && (
-            <button
-              onClick={onToday}
-              className="px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-primary/40 text-primary hover:border-primary hover:bg-primary/5 transition-colors"
-            >
-              {t('today')}
-            </button>
+      <div className="flex-1 flex flex-col items-center gap-0.5 min-w-0">
+        <div className="flex items-baseline gap-1.5 leading-none">
+          {isStandardMonth ? (
+            <>
+              <span className="text-base font-bold font-display text-foreground">{parts[0]}</span>
+              <span className="text-sm font-medium text-muted-foreground">{year}</span>
+            </>
+          ) : (
+            <>
+              <span className="text-base font-bold font-display text-foreground">
+                {parts[0].slice(0, 3)}
+                <span className="mx-1 text-muted-foreground font-normal">→</span>
+                {parts[1].slice(0, 3)}
+              </span>
+              <span className="text-sm font-medium text-muted-foreground">{year}</span>
+            </>
           )}
-          <span className="text-sm font-bold text-muted-foreground tracking-widest font-display leading-none">
-            {period.startDate.split('-')[0]}
-          </span>
         </div>
+
+        {!isStandardMonth && (
+          <span className="text-[10px] text-muted-foreground/50 leading-none">
+            {fmtShort(period.startDate)} – {fmtShort(period.endDate)}
+          </span>
+        )}
       </div>
 
-      <div className="pl-8">
-        <span className="text-[9px] font-medium text-muted-foreground/40 leading-none tracking-wide">
-          {cycleText}
-        </span>
-      </div>
+      <button
+        onClick={onNext}
+        disabled={!canNext}
+        className="h-8 w-8 shrink-0 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors disabled:opacity-0 disabled:pointer-events-none"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+
+      {onToday && !isCurrentPeriod && (
+        <button
+          onClick={onToday}
+          className="shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60 transition-colors"
+        >
+          {t('today')}
+        </button>
+      )}
     </div>
   );
 }
