@@ -6,6 +6,7 @@ export interface UserProfile {
   balanceStartDate: string | null;
   greenThreshold: number;
   yellowThreshold: number;
+  plan: 'FREE' | 'PRO';
 }
 
 export type GetMeResponse = UserProfile;
