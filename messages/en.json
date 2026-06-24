@@ -13,7 +13,8 @@
     "hello": "Hello,",
     "newEntry": "New entry",
     "menu": "Menu",
-    "menuDescription": "Main navigation menu"
+    "menuDescription": "Main navigation menu",
+    "language": "Language"
   },
   "auth": {
     "tagline": "Organize your finances and have clarity to make better decisions.",

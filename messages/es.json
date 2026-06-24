@@ -13,7 +13,8 @@
     "hello": "Hola,",
     "newEntry": "Nuevo movimiento",
     "menu": "Menú",
-    "menuDescription": "Menú de navegación principal"
+    "menuDescription": "Menú de navegación principal",
+    "language": "Idioma"
   },
   "auth": {
     "tagline": "Organiza tus finanzas y toma decisiones con claridad.",

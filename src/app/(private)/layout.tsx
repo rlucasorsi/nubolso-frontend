@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  LogOut,
-  Settings,
   CircleDollarSign,
   Target,
   LayoutDashboard,
@@ -14,29 +12,16 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from '@/i18n/useTranslations';
-import { useLanguage, type Locale } from '@/i18n/LanguageContext';
 
 import { MobileNav } from '@/components/layout/MobileNav';
 import { SideMenuDrawer } from '@/components/layout/SideMenuDrawer';
+import { UserMenu } from '@/components/layout/UserMenu';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
 import { useLogout } from '@/hooks/useLogout';
 import { InitialSetupDrawer } from '@/components/onboarding/InitialSetupDrawer';
 
-const LOCALES: Locale[] = ['en', 'pt-BR', 'es'];
-const FLAGS: Record<Locale, { src: string; alt: string }> = {
-  en: { src: 'https://flagcdn.com/w20/us.png', alt: 'US' },
-  'pt-BR': { src: 'https://flagcdn.com/w20/br.png', alt: 'BR' },
-  es: { src: 'https://flagcdn.com/w20/es.png', alt: 'ES' },
-};
-
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('nav');
-  const { locale, setLocale } = useLanguage();
-
-  const cycleLocale = () => {
-    const next = LOCALES[(LOCALES.indexOf(locale) + 1) % LOCALES.length];
-    setLocale(next);
-  };
   const { data: me } = useGetMe();
   const needsOnboarding = Boolean(me && !me.balanceStartDate);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
@@ -76,21 +61,6 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={cycleLocale}
-            title={locale}
-            className="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors"
-          >
-            <img
-              src={FLAGS[locale].src}
-              alt={FLAGS[locale].alt}
-              width={20}
-              height={14}
-              className="rounded-[2px]"
-              fetchPriority="high"
-            />
-          </button>
           <Button
             variant="ghost"
             size="sm"
@@ -146,26 +116,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
               <span>{t('goals')}</span>
             </Link>
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/settings">
-              <Settings className="h-4 w-4" />
-              <span>{t('settings')}</span>
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>{t('logout')}</span>
-          </Button>
+          <UserMenu name={me?.name} email={me?.email} onLogout={handleLogout} />
         </div>
       </header>
 
