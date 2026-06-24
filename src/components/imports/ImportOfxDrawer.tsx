@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { FileSpreadsheet, CheckCircle2, Upload, ChevronLeft } from 'lucide-react';
+import { FileSpreadsheet, CheckCircle2, Upload, ChevronLeft, Lock } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import {
@@ -20,14 +20,22 @@ import { ImportReviewStep } from './ImportReviewStep';
 import { useGetImportBatches } from '@/modules/imports/hooks/use-get-import-batches';
 import { useUploadOfx } from '@/modules/imports/hooks/use-upload-ofx';
 import { useRollbackImport } from '@/modules/imports/hooks/use-rollback-import';
-import type { ImportBatch, ImportBatchDetail, ImportBatchStatus } from '@/modules/imports/model/api/ofx-import';
+import type {
+  ImportBatch,
+  ImportBatchDetail,
+  ImportBatchStatus,
+} from '@/modules/imports/model/api/ofx-import';
+import { usePlan } from '@/modules/billing/hooks/use-plan';
+import { UpgradeDrawer } from '@/components/billing/UpgradeDrawer';
 
 type Step = 'list' | 'upload' | 'review' | 'success';
 
 export function ImportOfxDrawer() {
   const t = useTranslations('import');
   const { locale } = useLanguage();
+  const { isFree } = usePlan();
   const [isOpen, setIsOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [step, setStep] = useState<Step>('list');
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -39,10 +47,22 @@ export function ImportOfxDrawer() {
   const rollbackImport = useRollbackImport();
 
   const STATUS_LABEL: Record<ImportBatchStatus, { label: string; className: string }> = {
-    PENDING_REVIEW: { label: t('statusPendingReview'), className: 'border-amber-400/30 text-amber-400 bg-amber-400/10' },
-    CONFIRMED: { label: t('statusConfirmed'), className: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10' },
-    CANCELED: { label: t('statusCanceled'), className: 'border-white/10 text-muted-foreground bg-white/[0.02]' },
-    ROLLED_BACK: { label: t('statusRolledBack'), className: 'border-white/10 text-muted-foreground bg-white/[0.02]' },
+    PENDING_REVIEW: {
+      label: t('statusPendingReview'),
+      className: 'border-amber-400/30 text-amber-400 bg-amber-400/10',
+    },
+    CONFIRMED: {
+      label: t('statusConfirmed'),
+      className: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10',
+    },
+    CANCELED: {
+      label: t('statusCanceled'),
+      className: 'border-white/10 text-muted-foreground bg-white/[0.02]',
+    },
+    ROLLED_BACK: {
+      label: t('statusRolledBack'),
+      className: 'border-white/10 text-muted-foreground bg-white/[0.02]',
+    },
   };
 
   function reset() {
@@ -61,6 +81,10 @@ export function ImportOfxDrawer() {
   }
 
   function handleOpen() {
+    if (isFree) {
+      setUpgradeOpen(true);
+      return;
+    }
     setIsOpen(true);
     reset();
   }
@@ -103,9 +127,15 @@ export function ImportOfxDrawer() {
         className="h-9 gap-2 rounded-xl border-white/10 hover:bg-white/5"
         onClick={handleOpen}
       >
-        <Upload className="h-3.5 w-3.5" />
+        {isFree ? <Lock className="h-3.5 w-3.5" /> : <Upload className="h-3.5 w-3.5" />}
         <span className="hidden sm:inline">{t('button')}</span>
       </Button>
+
+      <UpgradeDrawer
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        featureKey="featureOfx"
+      />
 
       <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
         <DrawerContent>
@@ -124,7 +154,11 @@ export function ImportOfxDrawer() {
             }
           >
             <SheetTitle className="text-2xl font-bold font-display text-primary">
-              {step === 'review' ? t('reviewTitle') : step === 'success' ? t('successTitle') : t('listTitle')}
+              {step === 'review'
+                ? t('reviewTitle')
+                : step === 'success'
+                  ? t('successTitle')
+                  : t('listTitle')}
             </SheetTitle>
             <p className="text-sm text-muted-foreground">
               {step === 'list' && t('listDescription')}
@@ -139,7 +173,10 @@ export function ImportOfxDrawer() {
               <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
                 {batchesQuery.isLoading ? (
                   Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-20 w-full bg-card/50 animate-pulse rounded-2xl border border-white/5" />
+                    <div
+                      key={i}
+                      className="h-20 w-full bg-card/50 animate-pulse rounded-2xl border border-white/5"
+                    />
                   ))
                 ) : batchesQuery.isError ? (
                   <ServerErrorState onRetry={batchesQuery.refetch} />
@@ -168,7 +205,10 @@ export function ImportOfxDrawer() {
                             <span className="text-[10px] text-muted-foreground">
                               {format(new Date(batch.createdAt), 'dd MMM yy, HH:mm')}
                             </span>
-                            <Badge variant="outline" className={`h-5 px-1.5 text-[9px] font-bold ${statusCfg.className}`}>
+                            <Badge
+                              variant="outline"
+                              className={`h-5 px-1.5 text-[9px] font-bold ${statusCfg.className}`}
+                            >
                               {statusCfg.label}
                             </Badge>
                           </div>
@@ -178,7 +218,10 @@ export function ImportOfxDrawer() {
                             size="sm"
                             variant="outline"
                             className="h-8 rounded-lg border-white/10 hover:bg-white/5 shrink-0"
-                            onClick={() => { setSelectedBatchId(batch.id); setStep('review'); }}
+                            onClick={() => {
+                              setSelectedBatchId(batch.id);
+                              setStep('review');
+                            }}
                           >
                             {t('review')}
                           </Button>
@@ -216,9 +259,14 @@ export function ImportOfxDrawer() {
               <div className="flex-1 px-6 py-4 space-y-4">
                 <OfxFileDropzone
                   file={file}
-                  onChange={(value) => { setFile(value); setFileError(null); }}
+                  onChange={(value) => {
+                    setFile(value);
+                    setFileError(null);
+                  }}
                   onValidationError={setFileError}
-                  error={fileError ?? (uploadOfx.isError ? (uploadOfx.error as Error)?.message : null)}
+                  error={
+                    fileError ?? (uploadOfx.isError ? (uploadOfx.error as Error)?.message : null)
+                  }
                 />
               </div>
 
@@ -245,7 +293,10 @@ export function ImportOfxDrawer() {
           {step === 'review' && selectedBatchId && (
             <ImportReviewStep
               batchId={selectedBatchId}
-              onConfirmed={(batch) => { setSuccessBatch(batch); setStep('success'); }}
+              onConfirmed={(batch) => {
+                setSuccessBatch(batch);
+                setStep('success');
+              }}
               onCanceled={() => setStep('list')}
               onBack={() => setStep('list')}
             />

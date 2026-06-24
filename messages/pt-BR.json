@@ -716,5 +716,28 @@
     "chooseInvoice": "Escolha a fatura",
     "previousMonths": "Meses anteriores",
     "nextMonths": "Próximos meses"
+  },
+  "billing": {
+    "upgradeTitle": "Recurso PRO",
+    "upgradeSubtitle": "Faça upgrade para o PRO e desbloqueie todos os recursos.",
+    "featureCreditCards": "Limite de cartões atingido",
+    "featureGoals": "Limite de metas atingido",
+    "featureRecurring": "Limite de recorrentes atingido",
+    "featureOfx": "Importação OFX",
+    "benefitsTitle": "Com o PRO você tem:",
+    "benefit1": "Cartões de crédito ilimitados",
+    "benefit2": "Metas ilimitadas",
+    "benefit3": "Recorrentes ilimitados",
+    "benefit4": "Importação de extratos OFX",
+    "subscribePro": "Assinar PRO",
+    "managePlan": "Gerenciar assinatura",
+    "currentPlan": "Plano atual",
+    "planFree": "Grátis",
+    "planPro": "PRO",
+    "proActive": "PRO ativo",
+    "limitCards": "{count}/{max} cartões",
+    "limitGoals": "{count}/{max} metas",
+    "limitRecurring": "{count}/{max} recorrentes",
+    "close": "Fechar"
   }
 }

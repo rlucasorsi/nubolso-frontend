@@ -14,7 +14,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { RotateCw, Pencil, Trash2, Archive, Loader2, Search, ChevronDown, CalendarClock, Hash } from 'lucide-react';
+import {
+  RotateCw,
+  Pencil,
+  Trash2,
+  Archive,
+  Loader2,
+  Search,
+  ChevronDown,
+  CalendarClock,
+  Hash,
+} from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useTranslations } from '@/i18n/useTranslations';
 import { ServerErrorState } from '@/components/ui/server-error-state';
@@ -26,6 +36,8 @@ import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/us
 import { useDeleteRecurringTemplate } from '@/modules/recurring-templates/hooks/use-delete-recurring-template';
 import { useUpdateRecurringTemplate } from '@/modules/recurring-templates/hooks/use-update-recurring-template';
 import { RecurringTemplate } from '@/modules/recurring-templates/service/recurring-templates-service';
+import { usePlan } from '@/modules/billing/hooks/use-plan';
+import { UpgradeDrawer } from '@/components/billing/UpgradeDrawer';
 
 type TypeFilter = 'all' | 'income' | 'expense' | 'spending';
 
@@ -38,8 +50,10 @@ export function RecurringTemplatesView() {
   const archiveMutation = useUpdateRecurringTemplate();
   const reactivateMutation = useUpdateRecurringTemplate();
   const deleteMutation = useDeleteRecurringTemplate();
+  const { isFree, limits } = usePlan();
 
   const [templateDrawerOpen, setTemplateDrawerOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<RecurringTemplate | undefined>(undefined);
   const [archiveTemplateId, setArchiveTemplateId] = useState<string | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
@@ -59,7 +73,13 @@ export function RecurringTemplatesView() {
     spending: t('filterSpending'),
   };
 
+  const activeTemplatesCount = recurringTemplates?.filter((t) => t.isActive).length ?? 0;
+
   const handleNewTemplate = () => {
+    if (isFree && activeTemplatesCount >= limits.recurringTemplates) {
+      setUpgradeOpen(true);
+      return;
+    }
     setEditingTemplate(undefined);
     setTemplateDrawerOpen(true);
   };
@@ -136,7 +156,14 @@ export function RecurringTemplatesView() {
           </div>
           <p className="text-sm text-muted-foreground">{t('description')}</p>
         </div>
-        <AddButton onClick={handleNewTemplate} title={t('add')} label={t('add')} />
+        <div className="flex flex-col items-end gap-1">
+          {isFree && (
+            <p className="text-xs text-muted-foreground">
+              {activeTemplatesCount}/{limits.recurringTemplates} recorrentes
+            </p>
+          )}
+          <AddButton onClick={handleNewTemplate} title={t('add')} label={t('add')} />
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -161,9 +188,11 @@ export function RecurringTemplatesView() {
                   ? type === 'all'
                     ? 'bg-primary text-white'
                     : cn(
-                        type === 'income' && 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
+                        type === 'income' &&
+                          'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
                         type === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',
-                        type === 'spending' && 'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
+                        type === 'spending' &&
+                          'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
                       )
                   : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
               )}
@@ -181,7 +210,10 @@ export function RecurringTemplatesView() {
           <ServerErrorState onRetry={refetch} />
         ) : isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-[68px] w-full bg-card/50 animate-pulse rounded-2xl border border-white/5" />
+            <div
+              key={i}
+              className="h-[68px] w-full bg-card/50 animate-pulse rounded-2xl border border-white/5"
+            />
           ))
         ) : !recurringTemplates || recurringTemplates.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t('noTemplates')}</p>
@@ -198,7 +230,12 @@ export function RecurringTemplatesView() {
                   onClick={() => toggleGroup(type)}
                   className="w-full flex items-center gap-4 group/header"
                 >
-                  <div className={cn('w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/header:scale-110', cfg.bg)}>
+                  <div
+                    className={cn(
+                      'w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/header:scale-110',
+                      cfg.bg,
+                    )}
+                  >
                     {cfg.icon('md')}
                   </div>
                   <h4 className={cn('text-xs font-black uppercase tracking-[0.25em]', cfg.color)}>
@@ -206,17 +243,28 @@ export function RecurringTemplatesView() {
                   </h4>
                   <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent mx-2" />
                   <div className="flex items-center gap-3">
-                    <p className="text-sm font-black text-white font-display">{formatCurrency(total)}</p>
-                    <ChevronDown className={cn('w-4 h-4 text-muted-foreground/30 transition-transform duration-300', isExpanded ? 'rotate-180' : '')} />
+                    <p className="text-sm font-black text-white font-display">
+                      {formatCurrency(total)}
+                    </p>
+                    <ChevronDown
+                      className={cn(
+                        'w-4 h-4 text-muted-foreground/30 transition-transform duration-300',
+                        isExpanded ? 'rotate-180' : '',
+                      )}
+                    />
                   </div>
                 </button>
 
                 {isExpanded && (
                   <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                     {templates.map((template) => {
-                      const isArchiving = archiveMutation.isPending && archiveMutation.variables?.id === template.id;
-                      const isReactivating = reactivateMutation.isPending && reactivateMutation.variables?.id === template.id;
-                      const isDeleting = deleteMutation.isPending && deleteMutation.variables?.id === template.id;
+                      const isArchiving =
+                        archiveMutation.isPending && archiveMutation.variables?.id === template.id;
+                      const isReactivating =
+                        reactivateMutation.isPending &&
+                        reactivateMutation.variables?.id === template.id;
+                      const isDeleting =
+                        deleteMutation.isPending && deleteMutation.variables?.id === template.id;
 
                       return (
                         <div
@@ -226,33 +274,42 @@ export function RecurringTemplatesView() {
                             !template.isActive && 'opacity-50',
                           )}
                         >
-                          <div className={cn('absolute left-0 top-4 bottom-4 w-1 rounded-r-full', cfg.bar)} />
+                          <div
+                            className={cn(
+                              'absolute left-0 top-4 bottom-4 w-1 rounded-r-full',
+                              cfg.bar,
+                            )}
+                          />
 
                           <div className="flex items-center gap-3 min-w-0 pl-2">
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold truncate">{template.description}</p>
+                              <p className="text-sm font-semibold truncate">
+                                {template.description}
+                              </p>
                               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                 {template.category && (
                                   <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1">
-                                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: template.category.color }} />
+                                    <span
+                                      className="h-1.5 w-1.5 rounded-full"
+                                      style={{ backgroundColor: template.category.color }}
+                                    />
                                     {template.category.name}
                                   </p>
                                 )}
                                 <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
-                                  {t('day', { day: template.dayOfMonth })} · {formatCurrency(template.estimatedAmount)}
+                                  {t('day', { day: template.dayOfMonth })} ·{' '}
+                                  {formatCurrency(template.estimatedAmount)}
                                   {template.endDate && (
                                     <>
                                       {' · '}
-                                      <CalendarClock className="h-3 w-3 inline" />
-                                      {' '}
+                                      <CalendarClock className="h-3 w-3 inline" />{' '}
                                       {format(parseISO(template.endDate), 'MMM/yyyy')}
                                     </>
                                   )}
                                   {template.totalOccurrences && (
                                     <>
                                       {' · '}
-                                      <Hash className="h-3 w-3 inline" />
-                                      {' '}
+                                      <Hash className="h-3 w-3 inline" />{' '}
                                       {template.occurrenceCount ?? 0}/{template.totalOccurrences}x
                                     </>
                                   )}
@@ -263,7 +320,11 @@ export function RecurringTemplatesView() {
                           </div>
 
                           <div className="flex items-center gap-1 shrink-0">
-                            <Button variant="ghost" size="icon" onClick={() => handleEditTemplate(template)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditTemplate(template)}
+                            >
                               <Pencil className="h-4 w-4" />
                             </Button>
 
@@ -274,9 +335,11 @@ export function RecurringTemplatesView() {
                                 onClick={() => setArchiveTemplateId(template.id)}
                                 disabled={isArchiving}
                               >
-                                {isArchiving
-                                  ? <Loader2 className="h-4 w-4 text-amber-500/60 animate-spin" />
-                                  : <Archive className="h-4 w-4 text-amber-500/60" />}
+                                {isArchiving ? (
+                                  <Loader2 className="h-4 w-4 text-amber-500/60 animate-spin" />
+                                ) : (
+                                  <Archive className="h-4 w-4 text-amber-500/60" />
+                                )}
                               </Button>
                             ) : (
                               <Button
@@ -285,9 +348,11 @@ export function RecurringTemplatesView() {
                                 onClick={() => handleReactivateTemplate(template.id)}
                                 disabled={isReactivating}
                               >
-                                {isReactivating
-                                  ? <Loader2 className="h-4 w-4 text-emerald-500/60 animate-spin" />
-                                  : <RotateCw className="h-4 w-4 text-emerald-500/60" />}
+                                {isReactivating ? (
+                                  <Loader2 className="h-4 w-4 text-emerald-500/60 animate-spin" />
+                                ) : (
+                                  <RotateCw className="h-4 w-4 text-emerald-500/60" />
+                                )}
                               </Button>
                             )}
 
@@ -297,9 +362,11 @@ export function RecurringTemplatesView() {
                               onClick={() => setDeleteTemplateId(template.id)}
                               disabled={isDeleting}
                             >
-                              {isDeleting
-                                ? <Loader2 className="h-4 w-4 text-red-500/60 animate-spin" />
-                                : <Trash2 className="h-4 w-4 text-red-500/60" />}
+                              {isDeleting ? (
+                                <Loader2 className="h-4 w-4 text-red-500/60 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4 text-red-500/60" />
+                              )}
                             </Button>
                           </div>
                         </div>
@@ -319,7 +386,16 @@ export function RecurringTemplatesView() {
         template={editingTemplate}
       />
 
-      <AlertDialog open={!!archiveTemplateId} onOpenChange={(open) => !open && setArchiveTemplateId(null)}>
+      <UpgradeDrawer
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        featureKey="featureRecurring"
+      />
+
+      <AlertDialog
+        open={!!archiveTemplateId}
+        onOpenChange={(open) => !open && setArchiveTemplateId(null)}
+      >
         <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
           <AlertDialogHeader className="space-y-4">
             <div className="w-16 h-16 rounded-[1.5rem] bg-amber-500/10 flex items-center justify-center mx-auto mb-2 text-amber-500">
@@ -346,7 +422,10 @@ export function RecurringTemplatesView() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!deleteTemplateId} onOpenChange={(open) => !open && setDeleteTemplateId(null)}>
+      <AlertDialog
+        open={!!deleteTemplateId}
+        onOpenChange={(open) => !open && setDeleteTemplateId(null)}
+      >
         <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
           <AlertDialogHeader className="space-y-4">
             <div className="w-16 h-16 rounded-[1.5rem] bg-red-500/10 flex items-center justify-center mx-auto mb-2 text-red-500">

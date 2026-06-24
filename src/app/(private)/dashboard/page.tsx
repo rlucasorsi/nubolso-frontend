@@ -6,12 +6,15 @@ import { useEffect } from 'react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
+import { ME_QUERY_KEY } from '@/modules/users/hooks/use-get-me';
 
 export default function DashboardPage() {
   const { addEntry, updateEntry, deleteEntry } = useCashFlow();
   const t = useTranslations('dashboard');
   const searchParams = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     document.title = t('pageTitle');
@@ -20,11 +23,12 @@ export default function DashboardPage() {
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') {
       toast.success('Bem-vindo ao PRO! Sua assinatura está ativa.');
+      queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
       const url = new URL(window.location.href);
       url.searchParams.delete('upgraded');
       router.replace(url.pathname + (url.search || ''));
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, queryClient]);
 
   return (
     <PainelView onAddEntry={addEntry} onUpdateEntry={updateEntry} onDeleteEntry={deleteEntry} />

@@ -18,7 +18,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ChevronLeft, CalendarDays, Palette, Wallet, Save, Loader2, Download, Shield, Trash2, HelpCircle, MessageSquare, User } from 'lucide-react';
+import {
+  ChevronLeft,
+  CalendarDays,
+  Palette,
+  Wallet,
+  Save,
+  Loader2,
+  Download,
+  Shield,
+  Trash2,
+  HelpCircle,
+  MessageSquare,
+  User,
+  Sparkles,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from '@/i18n/useTranslations';
 import { getPeriodForDate } from '@/lib/cashflow';
@@ -30,15 +44,29 @@ import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
 import { HttpClient } from '@/network/http-client';
 import { useLogout } from '@/hooks/useLogout';
 import { toast } from 'sonner';
+import { usePlan } from '@/modules/billing/hooks/use-plan';
+import { FREE_LIMITS } from '@/modules/billing/constants/plan-limits.constant';
+import { UpgradeButton } from '@/components/billing/UpgradeButton';
+import { ManageSubscriptionButton } from '@/components/billing/ManageSubscriptionButton';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
   const tn = useTranslations('nav');
   const tc = useTranslations('common');
+  const tb = useTranslations('billing');
   const logout = useLogout();
   const { data: me } = useGetMe();
+  const { isPro, isFree } = usePlan();
   const [supportOpen, setSupportOpen] = useState(false);
-  const { startDay, updateStartDay, balanceSettings, updateBalanceSettings, saldoInicial, updateSaldoInicial, isSavingBalance } = useCashFlow();
+  const {
+    startDay,
+    updateStartDay,
+    balanceSettings,
+    updateBalanceSettings,
+    saldoInicial,
+    updateSaldoInicial,
+    isSavingBalance,
+  } = useCashFlow();
 
   const savedBalanceValue = saldoInicial.value.toFixed(2).replace('.', ',');
   const [balanceValue, setBalanceValue] = useState(savedBalanceValue);
@@ -203,7 +231,11 @@ export default function SettingsPage() {
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
                     {t('referenceDate')}
                   </label>
-                  <DatePicker date={balanceDate} onChange={setBalanceDate} className="h-10 text-sm px-3" />
+                  <DatePicker
+                    date={balanceDate}
+                    onChange={setBalanceDate}
+                    className="h-10 text-sm px-3"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -244,7 +276,9 @@ export default function SettingsPage() {
                   <Palette className="h-4 w-4 text-primary" />
                   <CardTitle className="text-base">{t('balanceIndicators')}</CardTitle>
                 </div>
-                <CardDescription className="text-xs">{t('balanceIndicatorsDescription')}</CardDescription>
+                <CardDescription className="text-xs">
+                  {t('balanceIndicatorsDescription')}
+                </CardDescription>
               </div>
               <Button size="icon" onClick={handleSaveIndicators} disabled={!hasIndicatorChanges}>
                 <Save />
@@ -257,14 +291,22 @@ export default function SettingsPage() {
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
                     {t('greenFrom')}
                   </Label>
-                  <AmountInputField value={greenValue} onChange={setGreenValue} inputClassName="h-10 text-sm" />
+                  <AmountInputField
+                    value={greenValue}
+                    onChange={setGreenValue}
+                    inputClassName="h-10 text-sm"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-amber-400" />
                     {t('yellowFrom')}
                   </Label>
-                  <AmountInputField value={yellowValue} onChange={setYellowValue} inputClassName="h-10 text-sm" />
+                  <AmountInputField
+                    value={yellowValue}
+                    onChange={setYellowValue}
+                    inputClassName="h-10 text-sm"
+                  />
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground">{t('belowYellow')}</p>
@@ -282,6 +324,50 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="account" className="space-y-4 mt-4">
+          {/* Plan card */}
+          <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
+            <CardHeader className="p-4 pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">{tb('currentPlan')}</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 space-y-3">
+              {isPro ? (
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold">
+                      <Sparkles className="h-3 w-3" />
+                      {tb('proActive')}
+                    </span>
+                  </div>
+                  <ManageSubscriptionButton className="h-9 rounded-xl border-white/10 hover:bg-white/5 text-sm" />
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-muted-foreground">{tb('planFree')}</span>
+                    <UpgradeButton className="h-9 rounded-xl text-sm font-bold" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-xl bg-white/[0.03] border border-white/5 px-2 py-2">
+                      <p className="text-[10px] text-muted-foreground mb-0.5">Cartões</p>
+                      <p className="text-sm font-bold">1/{FREE_LIMITS.creditCards}</p>
+                    </div>
+                    <div className="rounded-xl bg-white/[0.03] border border-white/5 px-2 py-2">
+                      <p className="text-[10px] text-muted-foreground mb-0.5">Metas</p>
+                      <p className="text-sm font-bold">–/{FREE_LIMITS.goals}</p>
+                    </div>
+                    <div className="rounded-xl bg-white/[0.03] border border-white/5 px-2 py-2">
+                      <p className="text-[10px] text-muted-foreground mb-0.5">Recorrentes</p>
+                      <p className="text-sm font-bold">–/{FREE_LIMITS.recurringTemplates}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 p-4 pb-2">
               <div className="flex items-center gap-2">
@@ -360,7 +446,9 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between gap-4 rounded-xl bg-white/5 px-4 py-3">
                 <div>
                   <p className="text-sm font-medium">{t('exportData')}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t('exportDataDescription')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('exportDataDescription')}
+                  </p>
                 </div>
                 <Button
                   size="sm"
@@ -369,7 +457,11 @@ export default function SettingsPage() {
                   onClick={handleExport}
                   disabled={isExporting}
                 >
-                  {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
                   {isExporting ? t('exporting') : t('exportData')}
                 </Button>
               </div>
@@ -377,7 +469,9 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between gap-4 rounded-xl bg-white/5 px-4 py-3">
                 <div>
                   <p className="text-sm font-medium text-destructive">{t('deleteAccount')}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t('deleteAccountDescription')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t('deleteAccountDescription')}
+                  </p>
                 </div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -387,7 +481,11 @@ export default function SettingsPage() {
                       className="shrink-0 gap-2 border-destructive/30 text-destructive hover:bg-destructive/10"
                       disabled={isDeleting}
                     >
-                      {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      {isDeleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                       {isDeleting ? t('deleting') : t('deleteAccount')}
                     </Button>
                   </AlertDialogTrigger>
@@ -410,11 +508,17 @@ export default function SettingsPage() {
               </div>
 
               <p className="text-xs text-muted-foreground">
-                <Link href="/privacy" className="text-primary underline underline-offset-2 hover:opacity-80">
+                <Link
+                  href="/privacy"
+                  className="text-primary underline underline-offset-2 hover:opacity-80"
+                >
                   Política de Privacidade
                 </Link>
                 {' · '}
-                <Link href="/terms" className="text-primary underline underline-offset-2 hover:opacity-80">
+                <Link
+                  href="/terms"
+                  className="text-primary underline underline-offset-2 hover:opacity-80"
+                >
                   Termos de Uso
                 </Link>
               </p>
@@ -424,21 +528,56 @@ export default function SettingsPage() {
 
         <TabsContent value="faq" className="space-y-2 mt-4">
           {[
-            { q: 'O que é o NuBolso?', a: 'Um aplicativo de controle financeiro pessoal. Registre entradas e saídas, acompanhe faturas de cartão de crédito, crie metas e visualize projeções de saldo.' },
-            { q: 'Como configuro o saldo inicial?', a: 'Em Sistema → Saldo Inicial. Informe o valor que você tinha em uma data de referência e o app calcula o saldo dia a dia a partir daí.' },
-            { q: 'O que é o "Período do Mês"?', a: 'Define quando começa o seu mês financeiro. Se suas contas chegam todo dia 10, configure o início no dia 10 e o painel refletirá esse ciclo.' },
-            { q: 'Como funciona o cartão de crédito?', a: 'Adicione seu cartão em Cartões com os dias de fechamento e vencimento. Compras parceladas são distribuídas automaticamente nas faturas corretas.' },
-            { q: 'O que é antecipar parcelas?', a: 'Permite pagar parcelas futuras na fatura atual com desconto. Na tela de detalhe da fatura, clique em "Antecipar" na compra e informe o valor negociado.' },
-            { q: 'Posso importar meu extrato bancário?', a: 'Sim. Acesse Lançamentos → Importar e selecione um arquivo OFX exportado pelo seu banco. O app identifica duplicatas automaticamente.' },
-            { q: 'Posso criar transações recorrentes?', a: 'Sim. Em Recorrentes, cadastre contas fixas (aluguel, assinaturas, etc.) com valor estimado e dia de vencimento.' },
-            { q: 'Como exportar meus dados?', a: 'Em Conta → Meus Dados → Exportar meus dados. Um JSON com todas as suas informações será baixado.' },
-            { q: 'Como excluir minha conta?', a: 'Em Conta → Meus Dados → Excluir conta. Confirme na tela de confirmação. A ação é permanente e não pode ser desfeita.' },
-            { q: 'Como falo com o suporte?', a: 'Use o formulário em Conta → Suporte ou pelo ícone de balão no menu lateral. Respondemos em até 2 dias úteis.' },
+            {
+              q: 'O que é o NuBolso?',
+              a: 'Um aplicativo de controle financeiro pessoal. Registre entradas e saídas, acompanhe faturas de cartão de crédito, crie metas e visualize projeções de saldo.',
+            },
+            {
+              q: 'Como configuro o saldo inicial?',
+              a: 'Em Sistema → Saldo Inicial. Informe o valor que você tinha em uma data de referência e o app calcula o saldo dia a dia a partir daí.',
+            },
+            {
+              q: 'O que é o "Período do Mês"?',
+              a: 'Define quando começa o seu mês financeiro. Se suas contas chegam todo dia 10, configure o início no dia 10 e o painel refletirá esse ciclo.',
+            },
+            {
+              q: 'Como funciona o cartão de crédito?',
+              a: 'Adicione seu cartão em Cartões com os dias de fechamento e vencimento. Compras parceladas são distribuídas automaticamente nas faturas corretas.',
+            },
+            {
+              q: 'O que é antecipar parcelas?',
+              a: 'Permite pagar parcelas futuras na fatura atual com desconto. Na tela de detalhe da fatura, clique em "Antecipar" na compra e informe o valor negociado.',
+            },
+            {
+              q: 'Posso importar meu extrato bancário?',
+              a: 'Sim. Acesse Lançamentos → Importar e selecione um arquivo OFX exportado pelo seu banco. O app identifica duplicatas automaticamente.',
+            },
+            {
+              q: 'Posso criar transações recorrentes?',
+              a: 'Sim. Em Recorrentes, cadastre contas fixas (aluguel, assinaturas, etc.) com valor estimado e dia de vencimento.',
+            },
+            {
+              q: 'Como exportar meus dados?',
+              a: 'Em Conta → Meus Dados → Exportar meus dados. Um JSON com todas as suas informações será baixado.',
+            },
+            {
+              q: 'Como excluir minha conta?',
+              a: 'Em Conta → Meus Dados → Excluir conta. Confirme na tela de confirmação. A ação é permanente e não pode ser desfeita.',
+            },
+            {
+              q: 'Como falo com o suporte?',
+              a: 'Use o formulário em Conta → Suporte ou pelo ícone de balão no menu lateral. Respondemos em até 2 dias úteis.',
+            },
           ].map((faq, i) => (
-            <details key={i} className="group glass-card border border-white/10 rounded-2xl overflow-hidden">
+            <details
+              key={i}
+              className="group glass-card border border-white/10 rounded-2xl overflow-hidden"
+            >
               <summary className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none select-none hover:bg-white/5 transition-colors">
                 <span className="text-sm font-semibold text-foreground">{faq.q}</span>
-                <span className="shrink-0 text-muted-foreground text-lg leading-none transition-transform duration-200 group-open:rotate-45">+</span>
+                <span className="shrink-0 text-muted-foreground text-lg leading-none transition-transform duration-200 group-open:rotate-45">
+                  +
+                </span>
               </summary>
               <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed border-t border-white/5 pt-3">
                 {faq.a}

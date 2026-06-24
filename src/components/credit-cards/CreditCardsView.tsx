@@ -14,17 +14,21 @@ import { CreditCardsSummary } from '@/components/credit-cards/CreditCardsSummary
 import { AddButton } from '@/components/ui/add-button';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
+import { usePlan } from '@/modules/billing/hooks/use-plan';
+import { UpgradeDrawer } from '@/components/billing/UpgradeDrawer';
 
 export function CreditCardsView() {
   const t = useTranslations('creditCardsView');
   const cardsQuery = useGetCreditCards();
   const invoicesQuery = useGetAllInvoices();
+  const { isFree, limits } = usePlan();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<CreditCard | undefined>(undefined);
   const [detailCardId, setDetailCardId] = useState<string | null>(null);
   const [addPurchaseCardId, setAddPurchaseCardId] = useState<string | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const cards = useMemo(() => cardsQuery.data ?? [], [cardsQuery.data]);
   const invoices = useMemo(() => invoicesQuery.data ?? [], [invoicesQuery.data]);
@@ -39,6 +43,10 @@ export function CreditCardsView() {
   const detailCard = cards.find((c) => c.id === detailCardId) ?? null;
 
   const handleNewCard = () => {
+    if (isFree && summary.activeCardsCount >= limits.creditCards) {
+      setUpgradeOpen(true);
+      return;
+    }
     setEditingCard(undefined);
     setDrawerOpen(true);
   };
@@ -60,12 +68,18 @@ export function CreditCardsView() {
     const unpaidInvoices = activeInvoices.filter((invoice) => !invoice.isPaid);
     const totalOpenInvoices = unpaidInvoices.reduce((sum, invoice) => sum + invoice.totalAmount, 0);
 
-    const sortedUnpaid = [...unpaidInvoices].sort((a, b) => a.paymentDate.localeCompare(b.paymentDate));
+    const sortedUnpaid = [...unpaidInvoices].sort((a, b) =>
+      a.paymentDate.localeCompare(b.paymentDate),
+    );
     const nextDueDate = sortedUnpaid[0]?.paymentDate ?? null;
 
     const now = new Date();
     const currentMonthTotal = invoices
-      .filter((invoice) => invoice.referenceMonth === now.getMonth() + 1 && invoice.referenceYear === now.getFullYear())
+      .filter(
+        (invoice) =>
+          invoice.referenceMonth === now.getMonth() + 1 &&
+          invoice.referenceYear === now.getFullYear(),
+      )
       .reduce((sum, invoice) => sum + invoice.totalAmount, 0);
 
     return {
@@ -80,19 +94,22 @@ export function CreditCardsView() {
     <div className="container max-w-6xl mx-auto py-8 px-4 space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display">
-            {t('title')}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {t('subtitle')}
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display">{t('title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
-        <AddButton
-          onClick={handleNewCard}
-          title={t('addCardTitle')}
-          label={t('addCard')}
-          className="w-full sm:w-auto"
-        />
+        <div className="flex flex-col items-end gap-1">
+          {isFree && (
+            <p className="text-xs text-muted-foreground">
+              {summary.activeCardsCount}/{limits.creditCards} cartões
+            </p>
+          )}
+          <AddButton
+            onClick={handleNewCard}
+            title={t('addCardTitle')}
+            label={t('addCard')}
+            className="w-full sm:w-auto"
+          />
+        </div>
       </div>
 
       {isError ? (
@@ -101,12 +118,18 @@ export function CreditCardsView() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-[124px] bg-card/50 animate-pulse rounded-base border border-white/5" />
+              <div
+                key={i}
+                className="h-[124px] bg-card/50 animate-pulse rounded-base border border-white/5"
+              />
             ))}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="min-h-[280px] bg-card/50 animate-pulse rounded-2xl border border-white/5" />
+              <div
+                key={i}
+                className="min-h-[280px] bg-card/50 animate-pulse rounded-2xl border border-white/5"
+              />
             ))}
           </div>
         </>
@@ -116,11 +139,7 @@ export function CreditCardsView() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cards.map((card) => (
-              <CreditCardCard
-                key={card.id}
-                card={card}
-                onClick={() => handleCardClick(card)}
-              />
+              <CreditCardCard key={card.id} card={card} onClick={() => handleCardClick(card)} />
             ))}
 
             <button
@@ -136,11 +155,7 @@ export function CreditCardsView() {
         </>
       )}
 
-      <CreditCardDrawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-        card={editingCard}
-      />
+      <CreditCardDrawer open={drawerOpen} onOpenChange={setDrawerOpen} card={editingCard} />
 
       <CreditCardDetailDrawer
         open={!!detailCard}
@@ -162,7 +177,12 @@ export function CreditCardsView() {
         open={!!selectedInvoiceId}
         onClose={() => setSelectedInvoiceId(null)}
       />
+
+      <UpgradeDrawer
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        featureKey="featureCreditCards"
+      />
     </div>
   );
 }
-

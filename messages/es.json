@@ -716,5 +716,28 @@
     "message": "Usamos cookies esenciales para mantener tu sesión activa. Al continuar, aceptas nuestra",
     "privacyPolicy": "Política de Privacidad",
     "accept": "Entendido"
+  },
+  "billing": {
+    "upgradeTitle": "Función PRO",
+    "upgradeSubtitle": "Actualiza a PRO y desbloquea todo.",
+    "featureCreditCards": "Límite de tarjetas alcanzado",
+    "featureGoals": "Límite de metas alcanzado",
+    "featureRecurring": "Límite de recurrentes alcanzado",
+    "featureOfx": "Importación OFX",
+    "benefitsTitle": "Con PRO tienes:",
+    "benefit1": "Tarjetas de crédito ilimitadas",
+    "benefit2": "Metas ilimitadas",
+    "benefit3": "Recurrentes ilimitados",
+    "benefit4": "Importación de extractos OFX",
+    "subscribePro": "Suscribirse a PRO",
+    "managePlan": "Gestionar suscripción",
+    "currentPlan": "Plan actual",
+    "planFree": "Gratis",
+    "planPro": "PRO",
+    "proActive": "PRO activo",
+    "limitCards": "{count}/{max} tarjetas",
+    "limitGoals": "{count}/{max} metas",
+    "limitRecurring": "{count}/{max} recurrentes",
+    "close": "Cerrar"
   }
 }

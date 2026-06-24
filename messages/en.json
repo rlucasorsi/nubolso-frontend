@@ -716,5 +716,28 @@
     "message": "We use essential cookies to keep your session active. By continuing, you agree to our",
     "privacyPolicy": "Privacy Policy",
     "accept": "Got it"
+  },
+  "billing": {
+    "upgradeTitle": "PRO Feature",
+    "upgradeSubtitle": "Upgrade to PRO and unlock everything.",
+    "featureCreditCards": "Credit card limit reached",
+    "featureGoals": "Goals limit reached",
+    "featureRecurring": "Recurring templates limit reached",
+    "featureOfx": "OFX Import",
+    "benefitsTitle": "With PRO you get:",
+    "benefit1": "Unlimited credit cards",
+    "benefit2": "Unlimited goals",
+    "benefit3": "Unlimited recurring templates",
+    "benefit4": "OFX bank statement import",
+    "subscribePro": "Subscribe to PRO",
+    "managePlan": "Manage subscription",
+    "currentPlan": "Current plan",
+    "planFree": "Free",
+    "planPro": "PRO",
+    "proActive": "PRO active",
+    "limitCards": "{count}/{max} cards",
+    "limitGoals": "{count}/{max} goals",
+    "limitRecurring": "{count}/{max} recurring",
+    "close": "Close"
   }
 }
