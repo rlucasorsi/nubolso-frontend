@@ -302,7 +302,8 @@
     "serverError": "Algo deu errado.",
     "serverErrorDescription": "Não foi possível carregar os dados. Verifique sua conexão e tente novamente.",
     "invalidData": "Dados inválidos",
-    "selectDate": "Selecione uma data"
+    "selectDate": "Selecione uma data",
+    "today": "Hoje"
   },
   "languageSwitcher": {
     "label": "Idioma"

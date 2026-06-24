@@ -302,7 +302,8 @@
     "serverError": "Something went wrong.",
     "serverErrorDescription": "We couldn’t load this data. Check your connection and try again.",
     "invalidData": "Invalid data",
-    "selectDate": "Select a date"
+    "selectDate": "Select a date",
+    "today": "Today"
   },
   "languageSwitcher": {
     "label": "Language"
