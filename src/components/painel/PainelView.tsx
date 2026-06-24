@@ -145,13 +145,17 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
 
   return (
     <div ref={rootRef} className="flex flex-col w-full pb-24 overflow-x-hidden">
-      {/* Premium Header */}
-      <div className="px-5 pt-10 pb-4 space-y-2">
+      {/* Header */}
+      <div className="px-5 pt-10 pb-4">
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-3xl font-black font-display tracking-tight text-white leading-none">
-            <span className="text-white">Nu</span>
-            <span className="text-brand-gradient">Bolso</span>
-          </h1>
+          <PeriodNav
+            periods={periods}
+            periodIdx={periodIdx}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onToday={handleToday}
+            isCurrentPeriod={isCurrentPeriod}
+          />
           <div className="shrink-0 flex items-center gap-2">
             <ImportOfxDrawer />
             <AddEntryDrawer
@@ -162,17 +166,6 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
               minDate={saldoInicial.date}
             />
           </div>
-        </div>
-
-        <div className="flex items-center">
-          <PeriodNav
-            periods={periods}
-            periodIdx={periodIdx}
-            onPrev={handlePrev}
-            onNext={handleNext}
-            onToday={handleToday}
-            isCurrentPeriod={isCurrentPeriod}
-          />
         </div>
       </div>
 

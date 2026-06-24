@@ -56,37 +56,39 @@ export function PeriodNav({
   return (
     <div className="flex items-center gap-2">
       {/* Nav group — arrows tight to label */}
-      <div className="flex items-center rounded-xl bg-white/5 border border-white/8 p-0.5 gap-0.5">
+      <div className="flex items-center rounded-xl bg-white/5 border border-white/[0.08] p-1 gap-1">
         <button
           onClick={onPrev}
           disabled={!canPrev}
           title="← Período anterior"
-          className="h-7 w-7 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-white/8 hover:text-foreground transition-colors disabled:opacity-20 disabled:pointer-events-none"
+          className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors disabled:opacity-20 disabled:pointer-events-none"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
 
-        <div className="flex flex-col items-center px-2 min-w-[120px]">
-          <div className="flex items-baseline gap-1.5 leading-none">
+        <div className="flex flex-col items-center px-2 min-w-[130px]">
+          <div className="flex items-baseline gap-2 leading-none">
             {isStandardMonth ? (
               <>
-                <span className="text-sm font-bold font-display text-foreground">{parts[0]}</span>
-                <span className="text-xs font-medium text-muted-foreground">{year}</span>
+                <span className="text-xl font-black font-display text-foreground tracking-tight">
+                  {parts[0]}
+                </span>
+                <span className="text-sm font-semibold text-muted-foreground">{year}</span>
               </>
             ) : (
               <>
-                <span className="text-sm font-bold font-display text-foreground">
+                <span className="text-xl font-black font-display text-foreground tracking-tight">
                   {parts[0].slice(0, 3)}
-                  <span className="mx-1 text-muted-foreground/60 font-normal text-xs">→</span>
+                  <span className="mx-1.5 text-muted-foreground/50 font-normal text-base">→</span>
                   {parts[1].slice(0, 3)}
                 </span>
-                <span className="text-xs font-medium text-muted-foreground">{year}</span>
+                <span className="text-sm font-semibold text-muted-foreground">{year}</span>
               </>
             )}
           </div>
 
           {!isStandardMonth && (
-            <span className="text-[9px] text-muted-foreground/40 leading-none mt-0.5">
+            <span className="text-[10px] text-muted-foreground/40 leading-none mt-0.5">
               {fmtShort(period.startDate)} – {fmtShort(period.endDate)}
             </span>
           )}
@@ -96,7 +98,7 @@ export function PeriodNav({
           onClick={onNext}
           disabled={!canNext}
           title="→ Próximo período"
-          className="h-7 w-7 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-white/8 hover:text-foreground transition-colors disabled:opacity-20 disabled:pointer-events-none"
+          className="h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors disabled:opacity-20 disabled:pointer-events-none"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
