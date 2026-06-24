@@ -1,20 +1,16 @@
 ﻿import { useMemo, useState } from 'react';
-import { Period, formatCurrency, formatCurrencyCompact, formatDateAxis, formatDateLong } from '@/lib/cashflow';
+import {
+  Period,
+  formatCurrency,
+  formatCurrencyCompact,
+  formatDateAxis,
+  formatDateLong,
+} from '@/lib/cashflow';
 import { BalanceSettings } from '@/hooks/useCashFlow';
 import { Card } from '@/components/ui/card';
 import { TrendingUp, Info, HelpCircle, Wallet } from 'lucide-react';
-import {
-  ChartContainer,
-  ChartTooltip,
-} from '@/components/ui/chart';
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  ReferenceLine,
-} from 'recharts';
+import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { InvoiceMonthlyChart } from '@/components/credit-cards/InvoiceMonthlyChart';
@@ -85,8 +81,8 @@ export function DashboardSummary({
       }));
 
       const saldoValues = activeChartDays.map((d) => d.saldoAcumulado);
-      const rawMin = Math.min(...saldoValues, balanceSettings.yellowThreshold);
-      const rawMax = Math.max(...saldoValues, balanceSettings.greenThreshold);
+      const rawMin = Math.min(...saldoValues, balanceSettings.yellowThreshold, 0);
+      const rawMax = Math.max(...saldoValues, balanceSettings.greenThreshold, 0);
       const range = Math.max(rawMax - rawMin, 1);
       const rough = range / 4;
       const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
@@ -95,11 +91,20 @@ export function DashboardSummary({
       const niceStep = multiplier * magnitude;
       const yMin = Math.floor(rawMin / niceStep) * niceStep;
       const yMax = Math.ceil(rawMax / niceStep) * niceStep;
-      const yDomain: [number, number] = yMin === yMax ? [yMin - niceStep, yMax + niceStep] : [yMin, yMax];
+      const yDomain: [number, number] =
+        yMin === yMax ? [yMin - niceStep, yMax + niceStep] : [yMin, yMax];
       const yTicks: number[] = [];
       for (let v = yDomain[0]; v <= yDomain[1] + 1e-6; v += niceStep) yTicks.push(v);
 
-      return { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, chartData, yDomain, yTicks };
+      return {
+        maxExpenseDay,
+        maxExpenseAmount,
+        bestDay,
+        bestDayAmount,
+        chartData,
+        yDomain,
+        yTicks,
+      };
     }, [period, activeChartDays, today, balanceSettings]);
 
   const getZoneColor = (value: number) => {
@@ -150,8 +155,13 @@ export function DashboardSummary({
         </div>
         <div className="flex items-center justify-between gap-4 mt-1.5 pt-1.5 border-t border-white/10">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: getZoneColor(value) }} />
-            <span className="text-[10px] text-white/60 font-bold uppercase tracking-wide">{t('balance')}</span>
+            <div
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: getZoneColor(value) }}
+            />
+            <span className="text-[10px] text-white/60 font-bold uppercase tracking-wide">
+              {t('balance')}
+            </span>
           </div>
           <span className="text-sm font-bold text-white font-display">{formatCurrency(value)}</span>
         </div>
@@ -206,7 +216,9 @@ export function DashboardSummary({
       <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-8">
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-base font-bold text-white font-display">{t('balanceProjection')}</h3>
+            <h3 className="text-base font-bold text-white font-display">
+              {t('balanceProjection')}
+            </h3>
             <div className="flex gap-0.5 bg-white/5 rounded-xl p-1">
               {(['period', '60', '90'] as ChartView[]).map((v) => (
                 <button
@@ -231,11 +243,15 @@ export function DashboardSummary({
               <AreaChart data={chartData} margin={{ top: 12, right: 12, left: 4, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7b5cff" stopOpacity={0.25}/>
-                    <stop offset="95%" stopColor="#7b5cff" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#7b5cff" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#7b5cff" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-white/[0.06]" />
+                <CartesianGrid
+                  vertical={false}
+                  strokeDasharray="3 3"
+                  className="stroke-white/[0.06]"
+                />
 
                 <XAxis
                   dataKey="date"
@@ -258,6 +274,8 @@ export function DashboardSummary({
                   content={renderTooltipContent}
                   cursor={{ stroke: 'rgba(255,255,255,0.15)', strokeDasharray: '3 3' }}
                 />
+
+                <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
 
                 <ReferenceLine
                   y={balanceSettings.greenThreshold}
@@ -302,7 +320,15 @@ export function DashboardSummary({
                   stroke="#cbd5e1"
                   strokeOpacity={0.35}
                   strokeDasharray="3 3"
-                  label={{ value: t('today'), position: 'insideTopRight', fill: '#cbd5e1', fontSize: 9, fontWeight: 700, opacity: 0.7, dy: -4 }}
+                  label={{
+                    value: t('today'),
+                    position: 'insideTopRight',
+                    fill: '#cbd5e1',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    opacity: 0.7,
+                    dy: -4,
+                  }}
                 />
               </AreaChart>
             </ChartContainer>
@@ -322,11 +348,17 @@ export function DashboardSummary({
               <span>{t('today')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 border-t-2 border-dashed" style={{ borderColor: ZONE_COLORS.warning }} />
+              <div
+                className="w-3 border-t-2 border-dashed"
+                style={{ borderColor: ZONE_COLORS.warning }}
+              />
               <span style={{ color: ZONE_COLORS.warning }}>{t('warning')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 border-t-2 border-dashed" style={{ borderColor: ZONE_COLORS.danger }} />
+              <div
+                className="w-3 border-t-2 border-dashed"
+                style={{ borderColor: ZONE_COLORS.danger }}
+              />
               <span style={{ color: ZONE_COLORS.danger }}>{t('critical')}</span>
             </div>
           </div>
@@ -339,24 +371,26 @@ export function DashboardSummary({
       <div className="space-y-3">
         <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
           <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0">
-             <Info className="w-6 h-6 text-muted-foreground" />
+            <Info className="w-6 h-6 text-muted-foreground" />
           </div>
           <div className="space-y-0.5">
             <p className="text-sm font-bold text-white">{t('largestExpense')}</p>
             <p className="text-xs text-muted-foreground/60 font-medium">
-              {t('onDay', { date: formatDateLong(maxExpenseDay.date) })} | - {formatCurrency(maxExpenseAmount)}
+              {t('onDay', { date: formatDateLong(maxExpenseDay.date) })} | -{' '}
+              {formatCurrency(maxExpenseAmount)}
             </p>
           </div>
         </Card>
 
         <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
           <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0">
-             <TrendingUp className="w-6 h-6 text-muted-foreground" />
+            <TrendingUp className="w-6 h-6 text-muted-foreground" />
           </div>
           <div className="space-y-0.5">
             <p className="text-sm font-bold text-white">{t('bestDay')}</p>
             <p className="text-xs text-muted-foreground/60 font-medium">
-              {t('onDay', { date: formatDateLong(bestDay.date) })} | + {formatCurrency(bestDayAmount)}
+              {t('onDay', { date: formatDateLong(bestDay.date) })} | +{' '}
+              {formatCurrency(bestDayAmount)}
             </p>
           </div>
         </Card>
@@ -364,4 +398,3 @@ export function DashboardSummary({
     </div>
   );
 }
-
