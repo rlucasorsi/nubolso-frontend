@@ -24,13 +24,19 @@ interface PainelViewProps {
   onDeleteEntry: (id: string) => void;
 }
 
-export function PainelView({
-  onAddEntry,
-  onUpdateEntry,
-  onDeleteEntry,
-}: PainelViewProps) {
+export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelViewProps) {
   const t = useTranslations('dashboard');
-  const { periods, allDays, currentBalance, balanceSettings, saldoInicial, allEntries, isLoading, isError, refetchAll } = useCashFlow();
+  const {
+    periods,
+    allDays,
+    currentBalance,
+    balanceSettings,
+    saldoInicial,
+    allEntries,
+    isLoading,
+    isError,
+    refetchAll,
+  } = useCashFlow();
 
   const [periodIdx, setPeriodIdx] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -45,9 +51,7 @@ export function PainelView({
 
   const findTodayPeriodIdx = () => {
     const today = new Date().toISOString().split('T')[0];
-    const idx = periods.findIndex(
-      (p) => p.startDate <= today && p.endDate >= today,
-    );
+    const idx = periods.findIndex((p) => p.startDate <= today && p.endDate >= today);
     return idx >= 0 ? idx : 0;
   };
 
@@ -108,7 +112,9 @@ export function PainelView({
     : period.days;
 
   const pastDays = isCurrentPeriod ? displayedDays.filter((d) => d.date < today) : [];
-  const fromTodayDays = isCurrentPeriod ? displayedDays.filter((d) => d.date >= today) : displayedDays;
+  const fromTodayDays = isCurrentPeriod
+    ? displayedDays.filter((d) => d.date >= today)
+    : displayedDays;
 
   const handleHeaderAddSave = (values: EntryFormValues) => {
     onAddEntry({
@@ -141,32 +147,33 @@ export function PainelView({
     <div ref={rootRef} className="flex flex-col w-full pb-24 overflow-x-hidden">
       {/* Premium Header */}
       <div className="px-5 pt-10 pb-4 space-y-2">
-         <div className="flex items-center justify-between gap-4">
-            <h1 className="text-3xl font-black font-display tracking-tight text-white leading-none">
-              <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
-            </h1>
-            <div className="shrink-0 flex items-center gap-2">
-               <ImportOfxDrawer />
-               <AddEntryDrawer
-                 isOpen={isAddingInHeader}
-                 onOpen={() => setIsAddingInHeader(true)}
-                 onSave={handleHeaderAddSave}
-                 onCancel={() => setIsAddingInHeader(false)}
-                 minDate={saldoInicial.date}
-               />
-            </div>
-         </div>
-         
-         <div className="flex items-center gap-1 -ml-1 w-full pr-1">
-           <PeriodNav
-             periods={periods}
-             periodIdx={periodIdx}
-             onPrev={handlePrev}
-             onNext={handleNext}
-             onToday={handleToday}
-             isCurrentPeriod={isCurrentPeriod}
-           />
-         </div>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-3xl font-black font-display tracking-tight text-white leading-none">
+            <span className="text-white">Nu</span>
+            <span className="text-brand-gradient">Bolso</span>
+          </h1>
+          <div className="shrink-0 flex items-center gap-2">
+            <ImportOfxDrawer />
+            <AddEntryDrawer
+              isOpen={isAddingInHeader}
+              onOpen={() => setIsAddingInHeader(true)}
+              onSave={handleHeaderAddSave}
+              onCancel={() => setIsAddingInHeader(false)}
+              minDate={saldoInicial.date}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <PeriodNav
+            periods={periods}
+            periodIdx={periodIdx}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onToday={handleToday}
+            isCurrentPeriod={isCurrentPeriod}
+          />
+        </div>
       </div>
 
       <div className="mt-2">
@@ -209,7 +216,9 @@ export function PainelView({
                 onClick={() => setShowPastDays((v) => !v)}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors py-1"
               >
-                <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', showPastDays && 'rotate-180')} />
+                <ChevronDown
+                  className={cn('w-3.5 h-3.5 transition-transform', showPastDays && 'rotate-180')}
+                />
                 {pastDays.length === 1
                   ? `${showPastDays ? t('hide') : t('show')} 1 ${t('previousDay')}`
                   : `${showPastDays ? t('hide') : t('show')} ${pastDays.length} ${t('previousDays')}`}
@@ -221,10 +230,10 @@ export function PainelView({
             <button
               onClick={() => setShowPendingOnly((prev) => !prev)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-semibold transition-colors",
+                'flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-semibold transition-colors',
                 showPendingOnly
-                  ? "bg-primary/20 text-primary border-primary/50"
-                  : "bg-card border-white/10 text-muted-foreground hover:bg-white/5 hover:text-foreground",
+                  ? 'bg-primary/20 text-primary border-primary/50'
+                  : 'bg-card border-white/10 text-muted-foreground hover:bg-white/5 hover:text-foreground',
               )}
             >
               <Filter className="w-4 h-4" />
@@ -232,8 +241,10 @@ export function PainelView({
               {pendingDaysCount > 0 && (
                 <span
                   className={cn(
-                    "flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold",
-                    showPendingOnly ? "bg-primary text-primary-foreground" : "bg-amber-400/20 text-amber-400",
+                    'flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold',
+                    showPendingOnly
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-amber-400/20 text-amber-400',
                   )}
                 >
                   {pendingDaysCount}
@@ -244,9 +255,7 @@ export function PainelView({
 
           {displayedDays.length === 0 ? (
             <div className="px-5 py-12 text-center">
-              <p className="text-sm text-muted-foreground/60 font-medium">
-                {t('noPendingDays')}
-              </p>
+              <p className="text-sm text-muted-foreground/60 font-medium">{t('noPendingDays')}</p>
             </div>
           ) : (
             <>
