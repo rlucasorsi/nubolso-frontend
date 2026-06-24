@@ -15,6 +15,7 @@ import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDraw
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { ActionsSection } from './ActionsSection';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
+import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslations } from '@/i18n/useTranslations';
 
@@ -203,73 +204,73 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
         </TabsContent>
 
         <TabsContent value="days" className="mt-2">
-          <div className="px-5 py-4 flex items-center justify-between gap-3">
-            {isCurrentPeriod && pastDays.length > 0 ? (
-              <button
-                onClick={() => setShowPastDays((v) => !v)}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors py-1"
-              >
-                <ChevronDown
-                  className={cn('w-3.5 h-3.5 transition-transform', showPastDays && 'rotate-180')}
-                />
-                {pastDays.length === 1
-                  ? `${showPastDays ? t('hide') : t('show')} 1 ${t('previousDay')}`
-                  : `${showPastDays ? t('hide') : t('show')} ${pastDays.length} ${t('previousDays')}`}
-              </button>
-            ) : (
-              <span />
-            )}
-
-            <button
-              onClick={() => setShowPendingOnly((prev) => !prev)}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-semibold transition-colors',
-                showPendingOnly
-                  ? 'bg-primary/20 text-primary border-primary/50'
-                  : 'bg-card border-white/10 text-muted-foreground hover:bg-white/5 hover:text-foreground',
-              )}
-            >
-              <Filter className="w-4 h-4" />
-              <span>{showPendingOnly ? t('withPending') : t('filter')}</span>
-              {pendingDaysCount > 0 && (
-                <span
-                  className={cn(
-                    'flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold',
-                    showPendingOnly
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-amber-400/20 text-amber-400',
-                  )}
+          <Card className="mx-5 bg-[#1c1a24] border-none rounded-[2rem] pb-2">
+            <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-3">
+              {isCurrentPeriod && pastDays.length > 0 ? (
+                <button
+                  onClick={() => setShowPastDays((v) => !v)}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors py-1"
                 >
-                  {pendingDaysCount}
-                </span>
+                  <ChevronDown
+                    className={cn('w-3.5 h-3.5 transition-transform', showPastDays && 'rotate-180')}
+                  />
+                  {pastDays.length === 1
+                    ? `${showPastDays ? t('hide') : t('show')} 1 ${t('previousDay')}`
+                    : `${showPastDays ? t('hide') : t('show')} ${pastDays.length} ${t('previousDays')}`}
+                </button>
+              ) : (
+                <span />
               )}
-            </button>
-          </div>
 
-          {displayedDays.length === 0 ? (
-            <div className="px-5 py-12 text-center">
-              <p className="text-sm text-muted-foreground/60 font-medium">{t('noPendingDays')}</p>
+              <button
+                onClick={() => setShowPendingOnly((prev) => !prev)}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-colors',
+                  showPendingOnly
+                    ? 'bg-primary/20 text-primary border-primary/50'
+                    : 'border-white/10 text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                )}
+              >
+                <Filter className="w-3.5 h-3.5" />
+                <span>{showPendingOnly ? t('withPending') : t('filter')}</span>
+                {pendingDaysCount > 0 && (
+                  <span
+                    className={cn(
+                      'flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold',
+                      showPendingOnly
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-amber-400/20 text-amber-400',
+                    )}
+                  >
+                    {pendingDaysCount}
+                  </span>
+                )}
+              </button>
             </div>
-          ) : (
-            <>
-              {isCurrentPeriod && pastDays.length > 0 && showPastDays && (
-                <div className="px-5 mb-1">
+
+            {displayedDays.length === 0 ? (
+              <div className="py-12 text-center">
+                <p className="text-sm text-muted-foreground/60 font-medium">{t('noPendingDays')}</p>
+              </div>
+            ) : (
+              <>
+                {isCurrentPeriod && pastDays.length > 0 && showPastDays && (
                   <DayList
                     period={{ ...period, days: pastDays }}
                     today={today}
                     onOpenSheet={setSheet}
                     onAddEntry={onAddEntry}
                   />
-                </div>
-              )}
-              <DayList
-                period={{ ...period, days: fromTodayDays }}
-                today={today}
-                onOpenSheet={setSheet}
-                onAddEntry={onAddEntry}
-              />
-            </>
-          )}
+                )}
+                <DayList
+                  period={{ ...period, days: fromTodayDays }}
+                  today={today}
+                  onOpenSheet={setSheet}
+                  onAddEntry={onAddEntry}
+                />
+              </>
+            )}
+          </Card>
         </TabsContent>
       </Tabs>
 

@@ -117,6 +117,7 @@
     "income": "Ingresos",
     "expenses": "Gastos",
     "balance": "Saldo",
+    "forecast": "Proyección",
     "goingRed": "Entrarás en números rojos",
     "alreadyRed": "Estás en números rojos",
     "warningZone": "El saldo entra en zona de atención",

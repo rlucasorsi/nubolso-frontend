@@ -60,25 +60,32 @@ export function DayCard({
   return (
     <div
       className={cn(
-        "relative bg-[#1c1a24] rounded-3xl overflow-hidden transition-all border border-transparent",
+        'relative bg-[#252132] rounded-3xl overflow-hidden transition-all border',
+        'shadow-[0_2px_8px_rgba(0,0,0,0.5),_inset_0_1px_0_rgba(255,255,255,0.04)]',
         isDisabled
-          ? "opacity-40 grayscale cursor-not-allowed"
-          : "cursor-pointer hover:border-white/5",
-        isToday && !isDisabled ? 'ring-1 ring-primary/20' : '',
+          ? 'opacity-40 grayscale cursor-not-allowed border-white/[0.06]'
+          : 'cursor-pointer border-white/[0.09] hover:border-white/[0.14] hover:shadow-[0_4px_14px_rgba(0,0,0,0.6),_inset_0_1px_0_rgba(255,255,255,0.06)]',
+        isToday && !isDisabled ? 'ring-1 ring-primary/30 border-primary/25' : '',
       )}
     >
       {/* Sidebar Accent */}
-      <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${
-        isToday ? 'bg-primary' : isNegative ? 'bg-red-500' : 'bg-muted-foreground/10'
-      }`} />
+      <div
+        className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${
+          isToday ? 'bg-primary' : isNegative ? 'bg-red-500' : 'bg-muted-foreground/10'
+        }`}
+      />
 
       <div className="p-5">
         {/* Header row: date/weekday — saldo + eye button */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center leading-none shrink-0">
-              <span className="text-2xl font-black font-display text-white">{String(d.getDate()).padStart(2, '0')}</span>
-              <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-[0.1em]">{td(MONTH_KEYS[d.getMonth()])}</span>
+              <span className="text-2xl font-black font-display text-white">
+                {String(d.getDate()).padStart(2, '0')}
+              </span>
+              <span className="text-[8px] font-extrabold text-muted-foreground uppercase tracking-[0.1em]">
+                {td(MONTH_KEYS[d.getMonth()])}
+              </span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -95,10 +102,14 @@ export function DayCard({
                 )}
               </div>
               {statusLine && (
-                <p className={cn(
-                  "hidden sm:block text-[9px] font-semibold mt-0.5",
-                  isNegative && !isToday && !day.isBeforeStartDate ? 'text-red-400' : 'text-muted-foreground/50'
-                )}>
+                <p
+                  className={cn(
+                    'hidden sm:block text-[9px] font-semibold mt-0.5',
+                    isNegative && !isToday && !day.isBeforeStartDate
+                      ? 'text-red-400'
+                      : 'text-muted-foreground/50',
+                  )}
+                >
                   {statusLine}
                 </p>
               )}
@@ -106,23 +117,38 @@ export function DayCard({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className={cn("flex items-baseline gap-1.5 text-right", saldoBorderClass(saldoStatus))}>
-              <span className="text-[8px] font-black uppercase tracking-wide text-white">{t('balance')}</span>
+            <div
+              className={cn(
+                'flex items-baseline gap-1.5 text-right',
+                saldoBorderClass(saldoStatus),
+              )}
+            >
+              <span className="text-[8px] font-black uppercase tracking-wide text-white">
+                {t('balance')}
+              </span>
               {isDisabled ? (
                 <span className="text-sm font-black font-display text-white/30">—</span>
               ) : (
-                <span className={cn("text-sm font-black font-display", saldoValueClass(saldoStatus))}>
+                <span
+                  className={cn('text-sm font-black font-display', saldoValueClass(saldoStatus))}
+                >
                   <span className="text-[9px] opacity-60 mr-0.5">R$</span>
-                  {day.saldoAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {day.saldoAcumulado.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </span>
               )}
             </div>
             <button
-              onClick={(e) => { e.stopPropagation(); if (!isDisabled) onOpenSheet?.(day.date, 'all'); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!isDisabled) onOpenSheet?.(day.date, 'all');
+              }}
               disabled={isDisabled}
               className={cn(
-                "w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-muted-foreground/60 transition-all shrink-0",
-                isDisabled ? "cursor-not-allowed" : "hover:bg-primary/20 hover:text-primary",
+                'w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-muted-foreground/60 transition-all shrink-0',
+                isDisabled ? 'cursor-not-allowed' : 'hover:bg-primary/20 hover:text-primary',
               )}
             >
               <Eye className="w-5 h-5" />
@@ -134,31 +160,46 @@ export function DayCard({
         <div
           onClick={isDisabled ? undefined : onToggle}
           className={cn(
-            "flex justify-between mt-3 pt-3 border-t border-white/5",
-            isDisabled ? "cursor-not-allowed" : "cursor-pointer",
+            'flex justify-between mt-3 pt-3 border-t border-white/5',
+            isDisabled ? 'cursor-not-allowed' : 'cursor-pointer',
           )}
         >
           <div className="space-y-1">
-            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">{t('income')}</p>
+            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">
+              {t('income')}
+            </p>
             <p className="text-xs font-bold font-display text-emerald-500">
               <span className="text-[8px] font-black mr-0.5">+</span>
-              {day.income.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {day.income.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </div>
 
           <div className="space-y-1">
-            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">{t('expense')}</p>
+            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">
+              {t('expense')}
+            </p>
             <p className="text-xs font-bold font-display text-red-500">
               <span className="text-[8px] font-black mr-0.5">-</span>
-              {day.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {day.expense.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </div>
 
           <div className="space-y-1">
-            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">{t('spending')}</p>
+            <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">
+              {t('spending')}
+            </p>
             <p className="text-xs font-bold font-display text-orange-400">
               <span className="text-[8px] font-black mr-0.5">-</span>
-              {day.spending.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {day.spending.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </div>
         </div>
@@ -166,4 +207,3 @@ export function DayCard({
     </div>
   );
 }
-

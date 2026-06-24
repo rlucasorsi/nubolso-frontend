@@ -117,6 +117,7 @@
     "income": "Income",
     "expenses": "Expenses",
     "balance": "Balance",
+    "forecast": "Forecast",
     "goingRed": "You'll go into the red",
     "alreadyRed": "You're in the red",
     "warningZone": "Balance enters warning zone",
