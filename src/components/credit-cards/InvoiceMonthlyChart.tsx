@@ -24,10 +24,10 @@ interface InvoiceMonthlyChartProps {
 
 type CardFilter = 'all' | string[];
 
-const PAST_MONTHS = 6;
+const PAST_MONTHS = 5;
 const FUTURE_MONTHS = 6;
-const ITEM_WIDTH = 56;
-const MAX_BAR_HEIGHT = 104;
+const ARROW_PADDING = 56; // px-7 on each side (28px × 2)
+const MAX_BAR_HEIGHT = 160;
 const MIN_BAR_HEIGHT = 6;
 
 function monthKey(year: number, month: number) {
@@ -43,19 +43,32 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   const cards = cardsData ?? [];
 
   const [cardFilter, setCardFilter] = useState<CardFilter>('all');
+
+  const isCardSelected = (id: string) => cardFilter === 'all' || cardFilter.includes(id);
+
+  const toggleCard = (id: string) => {
+    if (cardFilter === 'all') {
+      setCardFilter(cards.filter((c) => c.id !== id).map((c) => c.id));
+      return;
+    }
+    const next = cardFilter.includes(id) ? cardFilter.filter((c) => c !== id) : [...cardFilter, id];
+    setCardFilter(next.length === 0 || next.length === cards.length ? 'all' : next);
+  };
   const [openMonthKey, setOpenMonthKey] = useState<number | null>(null);
+  const [itemWidth, setItemWidth] = useState(56);
   const scrollRef = useRef<HTMLDivElement>(null);
   const didScrollRef = useRef(false);
 
-  const isCardSelected = (cardId: string) => cardFilter === 'all' || cardFilter.includes(cardId);
-
-  const toggleCard = (cardId: string, checked: boolean) => {
-    setCardFilter((prev) => {
-      if (prev === 'all') return checked ? [cardId] : 'all';
-      const next = checked ? [...prev, cardId] : prev.filter((id) => id !== cardId);
-      return next.length === 0 ? 'all' : next;
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const observer = new ResizeObserver(() => {
+      if (scrollRef.current) {
+        setItemWidth((scrollRef.current.clientWidth - ARROW_PADDING) / 12);
+      }
     });
-  };
+    observer.observe(scrollRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const buckets = useMemo(() => {
     const invoices = invoicesData ?? [];
@@ -63,8 +76,14 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     const todayKey = monthKey(now.getFullYear(), now.getMonth() + 1);
 
     const invoiceKeys = invoices.map((inv) => monthKey(inv.referenceYear, inv.referenceMonth));
-    const minKey = Math.min(todayKey - PAST_MONTHS, ...(invoiceKeys.length ? invoiceKeys : [todayKey]));
-    const maxKey = Math.max(todayKey + FUTURE_MONTHS, ...(invoiceKeys.length ? invoiceKeys : [todayKey]));
+    const minKey = Math.min(
+      todayKey - PAST_MONTHS,
+      ...(invoiceKeys.length ? invoiceKeys : [todayKey]),
+    );
+    const maxKey = Math.max(
+      todayKey + FUTURE_MONTHS,
+      ...(invoiceKeys.length ? invoiceKeys : [todayKey]),
+    );
 
     const filteredInvoices = invoices.filter(
       (inv) => cardFilter === 'all' || cardFilter.includes(inv.cardId),
@@ -78,7 +97,16 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
         (inv) => inv.referenceYear === year && inv.referenceMonth === month,
       );
       const total = monthInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
-      list.push({ key, year, month, total, invoices: monthInvoices, isCurrentMonth: key === todayKey });
+      const hasOpenInvoice = monthInvoices.some((inv) => !inv.isPaid);
+      list.push({
+        key,
+        year,
+        month,
+        total,
+        invoices: monthInvoices,
+        isCurrentMonth: key === todayKey,
+        hasOpenInvoice,
+      });
     }
     return list;
   }, [invoicesData, cardFilter]);
@@ -89,20 +117,20 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   // range has bars to scroll to (tab content unmounts/remounts on switch,
   // so this naturally re-centers each time the user opens this tab).
   useEffect(() => {
-    if (didScrollRef.current || !scrollRef.current) return;
+    if (didScrollRef.current || !scrollRef.current || itemWidth <= 0) return;
     const idx = buckets.findIndex((b) => b.isCurrentMonth);
     if (idx < 0) return;
     const frame = requestAnimationFrame(() => {
       if (!scrollRef.current) return;
-      const target = idx * ITEM_WIDTH - scrollRef.current.clientWidth / 2 + ITEM_WIDTH / 2;
+      const target = idx * itemWidth - scrollRef.current.clientWidth / 2 + itemWidth / 2;
       scrollRef.current.scrollLeft = Math.max(target, 0);
       didScrollRef.current = true;
     });
     return () => cancelAnimationFrame(frame);
-  }, [buckets]);
+  }, [buckets, itemWidth]);
 
   const scrollByMonths = (direction: 1 | -1) => {
-    scrollRef.current?.scrollBy({ left: direction * ITEM_WIDTH * 3, behavior: 'smooth' });
+    scrollRef.current?.scrollBy({ left: direction * itemWidth * 3, behavior: 'smooth' });
   };
 
   const handleBarClick = (bucket: (typeof buckets)[number]) => {
@@ -120,7 +148,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     cardFilter === 'all'
       ? t('allCards')
       : cardFilter.length === 1
-        ? cards.find((c) => c.id === cardFilter[0])?.name ?? t('allCards')
+        ? (cards.find((c) => c.id === cardFilter[0])?.name ?? t('allCards'))
         : t('cardsSelected', { count: cardFilter.length });
 
   return (
@@ -152,7 +180,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                 <DropdownMenuCheckboxItem
                   key={card.id}
                   checked={isCardSelected(card.id)}
-                  onCheckedChange={(checked) => toggleCard(card.id, Boolean(checked))}
+                  onCheckedChange={() => toggleCard(card.id)}
                   className="focus:bg-white/10 focus:text-white"
                 >
                   {card.name}
@@ -195,10 +223,10 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                       onClick={() => handleBarClick(bucket)}
                       disabled={!hasInvoice}
                       className={cn(
-                        'shrink-0 w-14 flex flex-col items-center justify-end gap-2 pt-2 pb-1',
+                        'shrink-0 flex flex-col items-center justify-end gap-2 pt-2 pb-1',
                         hasInvoice ? 'cursor-pointer' : 'cursor-default opacity-50',
                       )}
-                      style={{ height: MAX_BAR_HEIGHT + 36 }}
+                      style={{ height: MAX_BAR_HEIGHT + 36, minWidth: itemWidth }}
                     >
                       {hasInvoice && (
                         <span className="text-[8px] font-bold text-muted-foreground/60 leading-none">
@@ -207,19 +235,19 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                       )}
                       <div
                         className={cn(
-                          'w-8 rounded-t-[2px] transition-all',
-                          bucket.isCurrentMonth
+                          'rounded-[4px] transition-all',
+                          bucket.hasOpenInvoice
                             ? 'bg-[#7b5cff]'
                             : hasInvoice
                               ? 'bg-[#7b5cff]/40'
                               : 'bg-white/10',
                         )}
-                        style={{ height: barHeight }}
+                        style={{ height: barHeight, width: Math.max(8, itemWidth * 0.55) }}
                       />
                       <span
                         className={cn(
                           'text-[9px] font-bold leading-none',
-                          bucket.isCurrentMonth ? 'text-[#7b5cff]' : 'text-muted-foreground/60',
+                          bucket.hasOpenInvoice ? 'text-[#7b5cff]' : 'text-muted-foreground/60',
                         )}
                       >
                         {td(MONTH_KEYS[bucket.month - 1])}
