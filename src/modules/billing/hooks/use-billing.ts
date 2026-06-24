@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { billingService } from '../service/billing-service';
+import { toast } from '@/components/ui/sonner';
+import { createCheckoutSessionAction } from '../actions/create-checkout-session';
+import { createPortalSessionAction } from '../actions/create-portal-session';
 
 export function useUpgrade() {
   const [isLoading, setIsLoading] = useState(false);
@@ -7,8 +9,14 @@ export function useUpgrade() {
   const upgrade = async () => {
     setIsLoading(true);
     try {
-      const url = await billingService.createCheckoutSession();
-      window.location.href = url;
+      const result = await createCheckoutSessionAction();
+      if (!result.success || !result.data) {
+        toast.error(result.message ?? 'Erro ao iniciar checkout. Tente novamente.');
+        return;
+      }
+      window.location.href = result.data;
+    } catch {
+      toast.error('Erro ao iniciar checkout. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -23,8 +31,14 @@ export function useManageSubscription() {
   const manage = async () => {
     setIsLoading(true);
     try {
-      const url = await billingService.createPortalSession();
-      window.location.href = url;
+      const result = await createPortalSessionAction();
+      if (!result.success || !result.data) {
+        toast.error(result.message ?? 'Erro ao abrir portal. Tente novamente.');
+        return;
+      }
+      window.location.href = result.data;
+    } catch {
+      toast.error('Erro ao abrir portal. Tente novamente.');
     } finally {
       setIsLoading(false);
     }

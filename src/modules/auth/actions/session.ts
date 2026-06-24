@@ -8,7 +8,7 @@ const THIRTY_DAYS = 30 * 24 * 60 * 60;
 const baseOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: 'lax' as const,
   path: '/',
 };
 
