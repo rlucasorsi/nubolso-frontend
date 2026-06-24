@@ -66,7 +66,7 @@ export function UserMenu({ name, email, onLogout }: UserMenuProps) {
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-52">
+      <DropdownMenuContent align="end" sideOffset={16} className="w-52">
         {name && (
           <>
             <DropdownMenuLabel className="pb-1">
