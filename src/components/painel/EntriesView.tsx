@@ -4,7 +4,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
 import { ServerErrorState } from '@/components/ui/server-error-state';
-import { CashFlowEntry, FlowType, RecurringTemplateLike, formatCurrency, generateVirtualEntriesForRange } from '@/lib/cashflow';
+import {
+  CashFlowEntry,
+  FlowType,
+  RecurringTemplateLike,
+  formatCurrency,
+  generateVirtualEntriesForRange,
+} from '@/lib/cashflow';
 import { TYPE_CONFIG } from './config';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -20,17 +26,9 @@ import {
   CircleDollarSign,
   RotateCw,
 } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -113,7 +111,9 @@ export function EntriesView() {
       const month = now.getMonth() + 1;
       const lastDayOfMonth = new Date(year, month, 0).getDate();
       const effStart = filters.startDate ?? `${year}-${String(month).padStart(2, '0')}-01`;
-      const effEnd = filters.endDate ?? `${year}-${String(month).padStart(2, '0')}-${String(lastDayOfMonth).padStart(2, '0')}`;
+      const effEnd =
+        filters.endDate ??
+        `${year}-${String(month).padStart(2, '0')}-${String(lastDayOfMonth).padStart(2, '0')}`;
 
       list.push(...generateVirtualEntriesForRange(recurringTemplates, list, effStart, effEnd));
     }
@@ -182,18 +182,18 @@ export function EntriesView() {
               <Button
                 variant="outline"
                 className={cn(
-                  "h-10 px-3 justify-start text-left font-normal bg-background/50 border-white/10 hover:bg-white/5 rounded-xl transition-all shrink-0 whitespace-nowrap",
-                  !dateRange && "text-muted-foreground"
+                  'h-10 px-3 justify-start text-left font-normal bg-background/50 border-white/10 hover:bg-white/5 rounded-xl transition-all shrink-0 whitespace-nowrap',
+                  !dateRange && 'text-muted-foreground',
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
                 {dateRange?.from ? (
                   dateRange.to ? (
                     <>
-                      {format(dateRange.from, "dd/MM/yy")} - {format(dateRange.to, "dd/MM/yy")}
+                      {format(dateRange.from, 'dd/MM/yy')} - {format(dateRange.to, 'dd/MM/yy')}
                     </>
                   ) : (
-                    format(dateRange.from, "dd/MM/yy")
+                    format(dateRange.from, 'dd/MM/yy')
                   )
                 ) : (
                   <span className="hidden sm:inline">{t('filterPeriod')}</span>
@@ -201,7 +201,11 @@ export function EntriesView() {
                 <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 rounded-2xl border-white/10 shadow-2xl bg-card overflow-hidden" align="end">
+            <PopoverContent
+              className="w-auto p-0 rounded-2xl border-white/10 shadow-2xl bg-card overflow-hidden"
+              collisionPadding={{ top: 72, bottom: 8, left: 8, right: 8 }}
+              align="end"
+            >
               <Calendar
                 initialFocus
                 mode="range"
@@ -227,7 +231,10 @@ export function EntriesView() {
 
         <div className="flex items-center gap-2">
           <Switch id="show-recurring" checked={showRecurring} onCheckedChange={setShowRecurring} />
-          <label htmlFor="show-recurring" className="text-xs font-medium text-muted-foreground cursor-pointer select-none">
+          <label
+            htmlFor="show-recurring"
+            className="text-xs font-medium text-muted-foreground cursor-pointer select-none"
+          >
             {t('showEstimated')}
           </label>
         </div>
@@ -236,7 +243,10 @@ export function EntriesView() {
       <div className="px-4 py-4 space-y-1">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-20 w-full bg-card/50 animate-pulse rounded-2xl border border-white/5 mb-3" />
+            <div
+              key={i}
+              className="h-20 w-full bg-card/50 animate-pulse rounded-2xl border border-white/5 mb-3"
+            />
           ))
         ) : isError ? (
           <ServerErrorState onRetry={refetch} />
@@ -263,25 +273,35 @@ export function EntriesView() {
                   </span>
                   <ChevronDown
                     className={cn(
-                      "h-4 w-4 text-muted-foreground transition-transform",
-                      isOpen && "rotate-180"
+                      'h-4 w-4 text-muted-foreground transition-transform',
+                      isOpen && 'rotate-180',
                     )}
                   />
                 </CollapsibleTrigger>
 
                 <CollapsibleContent className="space-y-3 pb-3">
                   {dayEntries.map((entry) => {
-                    const cfg = TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.spending;
+                    const cfg =
+                      TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.spending;
 
                     return (
                       <div
                         key={entry.id}
                         className="group bg-card/40 hover:bg-card/60 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300 flex items-center gap-4"
                       >
-                        <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110 shrink-0", cfg.bg)}>
-                          {entry.type === 'income' ? <ArrowUpRight className="h-5 w-5" /> :
-                           entry.type === 'expense' ? <ArrowDownLeft className="h-5 w-5" /> :
-                           <CircleDollarSign className="h-5 w-5" />}
+                        <div
+                          className={cn(
+                            'p-3 rounded-2xl transition-transform group-hover:scale-110 shrink-0',
+                            cfg.bg,
+                          )}
+                        >
+                          {entry.type === 'income' ? (
+                            <ArrowUpRight className="h-5 w-5" />
+                          ) : entry.type === 'expense' ? (
+                            <ArrowDownLeft className="h-5 w-5" />
+                          ) : (
+                            <CircleDollarSign className="h-5 w-5" />
+                          )}
                         </div>
 
                         <div className="flex-1 min-w-0">
@@ -291,22 +311,31 @@ export function EntriesView() {
                             </p>
                           </div>
                           <div className="flex flex-wrap items-center justify-between gap-y-1 mt-1">
-                            <p className={cn("text-base font-bold whitespace-nowrap", cfg.color)}>
+                            <p className={cn('text-base font-bold whitespace-nowrap', cfg.color)}>
                               {cfg.sign} {formatCurrency(entry.amount)}
                             </p>
                             <div className="flex flex-wrap items-center justify-end gap-1.5">
                               {entry.templateId && (
-                                <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02] whitespace-nowrap">
+                                <Badge
+                                  variant="outline"
+                                  className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02] whitespace-nowrap"
+                                >
                                   <RotateCw className="h-2.5 w-2.5" />
                                   {dailyT('recurring')}
                                 </Badge>
                               )}
                               {entry.isVirtual ? (
-                                <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10 whitespace-nowrap">
+                                <Badge
+                                  variant="outline"
+                                  className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10 whitespace-nowrap"
+                                >
                                   {dailyT('estimated')}
                                 </Badge>
                               ) : entry.templateId ? (
-                                <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10 whitespace-nowrap">
+                                <Badge
+                                  variant="outline"
+                                  className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10 whitespace-nowrap"
+                                >
                                   {dailyT('confirmed')}
                                 </Badge>
                               ) : null}
@@ -328,4 +357,3 @@ export function EntriesView() {
     </div>
   );
 }
-
