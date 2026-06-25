@@ -25,7 +25,7 @@ interface InvoiceMonthlyChartProps {
 type CardFilter = 'all' | string[];
 
 const PAST_MONTHS = 5;
-const FUTURE_MONTHS = 6;
+const FUTURE_MONTHS = 12;
 const ARROW_PADDING = 56; // px-7 on each side (28px × 2)
 const MAX_BAR_HEIGHT = 160;
 const MIN_BAR_HEIGHT = 6;
@@ -58,11 +58,47 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   const [itemWidth, setItemWidth] = useState(56);
   const scrollRef = useRef<HTMLDivElement>(null);
   const didScrollRef = useRef(false);
+  const itemWidthReadyRef = useRef(false);
+  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0, hasDragged: false });
+
+  const onDragStart = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    dragRef.current = {
+      active: true,
+      startX: e.pageX,
+      scrollLeft: scrollRef.current.scrollLeft,
+      hasDragged: false,
+    };
+    scrollRef.current.style.cursor = 'grabbing';
+    scrollRef.current.style.scrollBehavior = 'auto';
+  };
+
+  const onDragMove = (e: React.MouseEvent) => {
+    if (!dragRef.current.active || !scrollRef.current) return;
+    const delta = e.pageX - dragRef.current.startX;
+    if (Math.abs(delta) > 4) dragRef.current.hasDragged = true;
+    scrollRef.current.scrollLeft = dragRef.current.scrollLeft - delta;
+  };
+
+  const onDragEnd = () => {
+    dragRef.current.active = false;
+    if (!scrollRef.current) return;
+    scrollRef.current.style.cursor = '';
+    scrollRef.current.style.scrollBehavior = '';
+  };
+
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (dragRef.current.hasDragged) {
+      e.stopPropagation();
+      dragRef.current.hasDragged = false;
+    }
+  };
 
   useEffect(() => {
     if (!scrollRef.current) return;
     const observer = new ResizeObserver(() => {
       if (scrollRef.current) {
+        itemWidthReadyRef.current = true;
         const visibleMonths = scrollRef.current.clientWidth < 480 ? 6 : 12;
         setItemWidth((scrollRef.current.clientWidth - ARROW_PADDING) / visibleMonths);
       }
@@ -76,15 +112,15 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     const now = new Date();
     const todayKey = monthKey(now.getFullYear(), now.getMonth() + 1);
 
-    const invoiceKeys = invoices.map((inv) => monthKey(inv.referenceYear, inv.referenceMonth));
-    const minKey = Math.min(
-      todayKey - PAST_MONTHS,
-      ...(invoiceKeys.length ? invoiceKeys : [todayKey]),
-    );
-    const maxKey = Math.max(
-      todayKey + FUTURE_MONTHS,
-      ...(invoiceKeys.length ? invoiceKeys : [todayKey]),
-    );
+    // Anchor = first open invoice at or after today (fatura atual), or today if none.
+    const openFutureKeys = invoices
+      .filter((inv) => !inv.isPaid)
+      .map((inv) => monthKey(inv.referenceYear, inv.referenceMonth))
+      .filter((k) => k >= todayKey);
+    const anchorKey = openFutureKeys.length > 0 ? Math.min(...openFutureKeys) : todayKey;
+
+    const minKey = anchorKey - PAST_MONTHS;
+    const maxKey = anchorKey + FUTURE_MONTHS;
 
     const filteredInvoices = invoices.filter(
       (inv) => cardFilter === 'all' || cardFilter.includes(inv.cardId),
@@ -114,20 +150,20 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
 
   const maxTotal = Math.max(1, ...buckets.map((b) => b.total));
 
-  // Centers the scroller on the current month once, the first time the
-  // range has bars to scroll to (tab content unmounts/remounts on switch,
-  // so this naturally re-centers each time the user opens this tab).
   useEffect(() => {
-    if (didScrollRef.current || !scrollRef.current || itemWidth <= 0) return;
-    const currentMonthIdx = buckets.findIndex((b) => b.isCurrentMonth);
-    if (currentMonthIdx < 0) return;
-    // Prefer the first open invoice at or after the current month (fatura atual);
-    // fall back to the current month if none exists.
-    const openIdx = buckets.findIndex((b, i) => i >= currentMonthIdx && b.hasOpenInvoice);
-    const idx = openIdx >= 0 ? openIdx : currentMonthIdx;
+    // Wait for ResizeObserver to measure the real itemWidth before scrolling.
+    // Without this guard the effect fires with the initial itemWidth=56 placeholder,
+    // sets scrollLeft incorrectly and locks didScrollRef before the real width arrives.
+    if (!itemWidthReadyRef.current || didScrollRef.current || !scrollRef.current || itemWidth <= 0)
+      return;
+    const currentIdx = buckets.findIndex((b) => b.isCurrentMonth);
+    if (currentIdx < 0) return;
+    // Scroll so the first open invoice at or after today is the leftmost visible bar.
+    const openIdx = buckets.findIndex((b, i) => i >= currentIdx && b.hasOpenInvoice);
+    const idx = openIdx >= 0 ? openIdx : currentIdx;
     const frame = requestAnimationFrame(() => {
       if (!scrollRef.current) return;
-      const SIDE_PAD = 28; // px-7 = 28px on each side
+      const SIDE_PAD = 28; // px-7 padding on each side of the scroll container
       scrollRef.current.scrollLeft = Math.max(idx * itemWidth - SIDE_PAD, 0);
       didScrollRef.current = true;
     });
@@ -207,8 +243,13 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
 
           <div
             ref={scrollRef}
-            className="flex overflow-x-auto px-7 scroll-smooth"
+            className="flex overflow-x-auto px-7 scroll-smooth cursor-grab"
             style={{ scrollbarWidth: 'none' }}
+            onMouseDown={onDragStart}
+            onMouseMove={onDragMove}
+            onMouseUp={onDragEnd}
+            onMouseLeave={onDragEnd}
+            onClickCapture={onClickCapture}
           >
             {buckets.map((bucket) => {
               const hasInvoice = bucket.invoices.length > 0;
