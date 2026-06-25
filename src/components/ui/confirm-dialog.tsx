@@ -16,18 +16,20 @@ type ConfirmVariant = 'destructive' | 'warning';
 const variantStyles: Record<ConfirmVariant, { icon: string; action: string }> = {
   destructive: {
     icon: 'bg-red-500/10 text-red-500',
-    action: 'bg-red-500 hover:bg-red-600 shadow-red-500/20',
+    action:
+      'bg-red-500 text-white border-red-500 hover:bg-red-600 hover:text-white hover:border-red-600',
   },
   warning: {
     icon: 'bg-amber-500/10 text-amber-500',
-    action: 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20',
+    action:
+      'bg-amber-500 text-white border-amber-500 hover:bg-amber-600 hover:text-white hover:border-amber-600',
   },
 };
 
 interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   variant?: ConfirmVariant;
   title: React.ReactNode;
   description: React.ReactNode;
@@ -55,24 +57,22 @@ export function ConfirmDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <div
-            className={cn(
-              'w-16 h-16 rounded-[1.5rem] flex items-center justify-center mx-auto mb-2',
-              styles.icon,
-            )}
-          >
-            {icon}
-          </div>
+          {icon && (
+            <div
+              className={cn(
+                'w-10 h-10 rounded-xl flex items-center justify-center mb-1',
+                styles.icon,
+              )}
+            >
+              {icon}
+            </div>
+          )}
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onAction}
-            disabled={actionDisabled}
-            className={cn('shadow-lg', styles.action)}
-          >
+          <AlertDialogAction onClick={onAction} disabled={actionDisabled} className={styles.action}>
             {actionLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
