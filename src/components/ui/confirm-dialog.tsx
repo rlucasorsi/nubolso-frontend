@@ -53,8 +53,8 @@ export function ConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
-        <AlertDialogHeader className="space-y-4">
+      <AlertDialogContent>
+        <AlertDialogHeader>
           <div
             className={cn(
               'w-16 h-16 rounded-[1.5rem] flex items-center justify-center mx-auto mb-2',
@@ -63,24 +63,15 @@ export function ConfirmDialog({
           >
             {icon}
           </div>
-          <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-            {title}
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-            {description}
-          </AlertDialogDescription>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
-          <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-            {cancelLabel}
-          </AlertDialogCancel>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onAction}
             disabled={actionDisabled}
-            className={cn(
-              'flex-1 h-12 rounded-2xl text-white transition-all font-bold shadow-lg',
-              styles.action,
-            )}
+            className={cn('shadow-lg', styles.action)}
           >
             {actionLabel}
           </AlertDialogAction>
