@@ -14,9 +14,6 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 type View = 'days' | 'months' | 'years';
 
-// DayPicker with fixedWeeks renders exactly: head (h-9=36px) + 6 rows × (h-9+mt-2=44px) = 300px
-const BODY_HEIGHT = 300;
-
 function Calendar({
   className,
   classNames,
@@ -116,12 +113,10 @@ function Calendar({
         </div>
       </div>
 
-      {/* Fixed-height body — all three views occupy the same BODY_HEIGHT */}
-      <div style={{ height: BODY_HEIGHT }}>
+      <div>
         {view === 'days' && (
           <DayPicker
             showOutsideDays={showOutsideDays}
-            fixedWeeks
             month={month}
             onMonthChange={changeMonth}
             locale={locale}
@@ -159,7 +154,7 @@ function Calendar({
         )}
 
         {view === 'months' && (
-          <div className="grid grid-cols-3 gap-x-3 h-full content-around items-center">
+          <div className="grid grid-cols-3 gap-x-3 gap-y-2 py-3">
             {monthAbbrevs.map((abbr, i) => (
               <button
                 key={i}
@@ -184,7 +179,7 @@ function Calendar({
         )}
 
         {view === 'years' && (
-          <div className="grid grid-cols-4 gap-x-2 h-full content-around items-center overflow-y-auto">
+          <div className="grid grid-cols-4 gap-x-2 gap-y-2 py-3 overflow-y-auto max-h-[220px]">
             {years.map((y) => (
               <button
                 key={y}
