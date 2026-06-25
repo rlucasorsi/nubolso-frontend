@@ -88,7 +88,7 @@ const AlertDialogAction = React.forwardRef<
     ref={ref}
     className={cn(
       buttonVariants({ variant: 'outline' }),
-      'bg-white text-black border-white hover:bg-white/90 hover:text-black font-semibold',
+      'bg-white text-black border-white hover:bg-white/90 hover:text-black font-semibold h-9 text-sm px-3',
       className,
     )}
     {...props}
@@ -104,7 +104,7 @@ const AlertDialogCancel = React.forwardRef<
     ref={ref}
     className={cn(
       buttonVariants({ variant: 'outline' }),
-      'border-white/10 text-white hover:bg-white/5 hover:text-white font-semibold',
+      'border-white/10 text-white hover:bg-white/5 hover:text-white font-semibold h-9 text-sm px-3',
       className,
     )}
     {...props}
