@@ -4,16 +4,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AddButton } from '@/components/ui/add-button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   RotateCw,
   Pencil,
@@ -392,65 +383,29 @@ export function RecurringTemplatesView() {
         featureKey="featureRecurring"
       />
 
-      <AlertDialog
+      <ConfirmDialog
         open={!!archiveTemplateId}
         onOpenChange={(open) => !open && setArchiveTemplateId(null)}
-      >
-        <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
-          <AlertDialogHeader className="space-y-4">
-            <div className="w-16 h-16 rounded-[1.5rem] bg-amber-500/10 flex items-center justify-center mx-auto mb-2 text-amber-500">
-              <Archive className="w-8 h-8" />
-            </div>
-            <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              {t('archiveTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              {t('archiveDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
-            <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              {t('cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleArchiveTemplate}
-              className="flex-1 h-12 rounded-2xl bg-amber-500 text-white hover:bg-amber-600 transition-all font-bold shadow-lg shadow-amber-500/20"
-            >
-              {t('archive')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        variant="warning"
+        icon={<Archive className="w-8 h-8" />}
+        title={t('archiveTitle')}
+        description={t('archiveDescription')}
+        cancelLabel={t('cancel')}
+        actionLabel={t('archive')}
+        onAction={handleArchiveTemplate}
+      />
 
-      <AlertDialog
+      <ConfirmDialog
         open={!!deleteTemplateId}
         onOpenChange={(open) => !open && setDeleteTemplateId(null)}
-      >
-        <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
-          <AlertDialogHeader className="space-y-4">
-            <div className="w-16 h-16 rounded-[1.5rem] bg-red-500/10 flex items-center justify-center mx-auto mb-2 text-red-500">
-              <Trash2 className="w-8 h-8" />
-            </div>
-            <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              {t('deleteTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              {t('deleteDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
-            <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              {t('cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteTemplate}
-              className="flex-1 h-12 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all font-bold shadow-lg shadow-red-500/20"
-            >
-              {t('delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        variant="destructive"
+        icon={<Trash2 className="w-8 h-8" />}
+        title={t('deleteTitle')}
+        description={t('deleteDescription')}
+        cancelLabel={t('cancel')}
+        actionLabel={t('delete')}
+        onAction={handleDeleteTemplate}
+      />
     </div>
   );
 }

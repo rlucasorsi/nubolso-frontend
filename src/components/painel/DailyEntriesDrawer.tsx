@@ -31,16 +31,7 @@ import {
   DrawerFooter,
   SheetTitle,
 } from '@/components/ui/app-drawer';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const TYPE_ORDER: Record<FlowType, number> = {
   income: 0,
@@ -646,33 +637,18 @@ export function DailyEntriesDrawer({
         }}
       />
 
-      <AlertDialog open={reopenDialogOpen} onOpenChange={setReopenDialogOpen}>
-        <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
-          <AlertDialogHeader className="space-y-4">
-            <div className="w-16 h-16 rounded-[1.5rem] bg-amber-500/10 flex items-center justify-center mx-auto mb-2 text-amber-500">
-              <RotateCcw className="w-8 h-8" />
-            </div>
-            <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              {t('reopenTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              {t('reopenDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
-            <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              {t('cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleReopenInvoice}
-              disabled={reopenInvoiceMutation.isPending}
-              className="flex-1 h-12 rounded-2xl bg-amber-500 text-white hover:bg-amber-600 transition-all font-bold shadow-lg shadow-amber-500/20"
-            >
-              {reopenInvoiceMutation.isPending ? t('reopening') : t('reopen')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={reopenDialogOpen}
+        onOpenChange={setReopenDialogOpen}
+        variant="warning"
+        icon={<RotateCcw className="w-8 h-8" />}
+        title={t('reopenTitle')}
+        description={t('reopenDescription')}
+        cancelLabel={t('cancel')}
+        actionLabel={reopenInvoiceMutation.isPending ? t('reopening') : t('reopen')}
+        onAction={handleReopenInvoice}
+        actionDisabled={reopenInvoiceMutation.isPending}
+      />
     </>
   );
 }
