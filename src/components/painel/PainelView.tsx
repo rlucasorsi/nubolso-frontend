@@ -149,14 +149,16 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
       {/* Header */}
       <div className="px-5 pt-10 pb-4">
         <div className="flex items-center justify-between gap-4">
-          <PeriodNav
-            periods={periods}
-            periodIdx={periodIdx}
-            onPrev={handlePrev}
-            onNext={handleNext}
-            onToday={handleToday}
-            isCurrentPeriod={isCurrentPeriod}
-          />
+          <div className="min-w-0 flex-1">
+            <PeriodNav
+              periods={periods}
+              periodIdx={periodIdx}
+              onPrev={handlePrev}
+              onNext={handleNext}
+              onToday={handleToday}
+              isCurrentPeriod={isCurrentPeriod}
+            />
+          </div>
           <div className="shrink-0 flex items-center gap-2">
             <ImportOfxDrawer />
             <AddEntryDrawer

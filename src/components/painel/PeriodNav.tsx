@@ -66,7 +66,7 @@ export function PeriodNav({
           <ChevronLeft className="h-4 w-4" />
         </button>
 
-        <div className="flex flex-col items-center px-2 min-w-[130px]">
+        <div className="flex flex-col items-center px-2 min-w-[90px] sm:min-w-[130px]">
           <div className="flex items-baseline gap-2 leading-none">
             {isStandardMonth ? (
               <>
