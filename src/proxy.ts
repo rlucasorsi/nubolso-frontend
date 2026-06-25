@@ -6,7 +6,7 @@ import { COOKIE_KEYS } from '@/shared/constants/cookie-keys.constant';
 const AUTH_PATHS = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
 
 // Accessible by anyone regardless of auth state (legal pages, etc.)
-const OPEN_PATHS = ['/privacy', '/terms', '/faq', '/monitoring'];
+const OPEN_PATHS = ['/privacy', '/terms', '/faq', '/monitoring', '/auth/google-callback'];
 
 function matches(pathname: string, paths: string[]) {
   return paths.some((p) => pathname === p || pathname.startsWith(p + '/'));

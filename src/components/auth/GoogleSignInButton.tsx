@@ -25,12 +25,13 @@ export function GoogleSignInButton() {
         size="large"
         text="continue_with"
         locale={locale === 'pt-BR' ? 'pt-BR' : locale === 'es' ? 'es' : 'en'}
-        // Safari (iOS) blocks third-party cookies by default, which makes Google's
-        // SDK fall back to a redirect that POSTs the credential to the current page
-        // (no login_uri configured), hitting our /login page route and returning 405.
-        // FedCM avoids that fallback entirely; forcing popup mode is a second guard.
+        // Safari (iOS) blocks third-party cookies by default, which can make Google's
+        // SDK fall back to a redirect that POSTs the credential as a real form
+        // submission instead of calling onSuccess. FedCM/popup reduce how often that
+        // happens; login_uri gives the fallback itself a real handler to land on.
         ux_mode="popup"
         use_fedcm_for_button
+        login_uri="/auth/google-callback"
         onSuccess={async (credentialResponse) => {
           if (!credentialResponse.credential) {
             toast.error(t('googleError'));
