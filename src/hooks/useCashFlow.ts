@@ -18,24 +18,9 @@ import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
 
-const START_DAY_KEY = 'cashflow_start_day';
-
 export interface BalanceSettings {
   greenThreshold: number;
   yellowThreshold: number;
-}
-
-function load<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function save(key: string, data: unknown) {
-  localStorage.setItem(key, JSON.stringify(data));
 }
 
 export function useCashFlow() {
@@ -57,9 +42,7 @@ export function useCashFlow() {
     }),
     [me],
   );
-  const [startDay, setStartDay] = useState<number>(() =>
-    load(START_DAY_KEY, 1),
-  );
+  const startDay = useMemo(() => me?.cashflowStartDay ?? 1, [me]);
   const balanceSettings: BalanceSettings = useMemo(
     () => ({
       greenThreshold: me?.greenThreshold ?? 0,
@@ -84,7 +67,7 @@ export function useCashFlow() {
   const rawEntries = useMemo(() => {
     if (!entriesQuery.data) return [];
 
-    return (entriesQuery.data as any[]).map(item => ({
+    return (entriesQuery.data as any[]).map((item) => ({
       id: item.id,
       date: item.date.split('T')[0], // Garante formato YYYY-MM-DD
       type: item.type as FlowType,
@@ -101,10 +84,7 @@ export function useCashFlow() {
 
   // Entries that count toward balances/totals: skipped ("ignorado") instances
   // are excluded, since they represent an explicitly-empty occurrence.
-  const entries = useMemo(
-    () => rawEntries.filter((e) => !e.isSkipped),
-    [rawEntries],
-  );
+  const entries = useMemo(() => rawEntries.filter((e) => !e.isSkipped), [rawEntries]);
 
   // Map recurring templates from API (backend, uppercase type) to RecurringTemplateLike (lowercase)
   const recurringTemplates = useMemo<RecurringTemplateLike[]>(() => {
@@ -159,10 +139,9 @@ export function useCashFlow() {
 
   const updateStartDay = useCallback(
     (day: number) => {
-      setStartDay(day);
-      save(START_DAY_KEY, day);
+      updateMeMutation.mutate({ cashflowStartDay: day });
     },
-    [],
+    [updateMeMutation],
   );
 
   const updateBalanceSettings = useCallback(
@@ -206,7 +185,12 @@ export function useCashFlow() {
     const lastEnd = periodRanges[periodRanges.length - 1].end;
     // Uses rawEntries so a skipped ("ignorado") instance also blocks regenerating
     // the virtual estimate for that month.
-    const recurringEntries = generateVirtualEntriesForRange(recurringTemplates, rawEntries, firstStart, lastEnd);
+    const recurringEntries = generateVirtualEntriesForRange(
+      recurringTemplates,
+      rawEntries,
+      firstStart,
+      lastEnd,
+    );
     const invoiceEntries = generateInvoiceEntriesForRange(creditCardInvoices, firstStart, lastEnd);
     return [...recurringEntries, ...invoiceEntries];
   }, [recurringTemplates, rawEntries, creditCardInvoices, periodRanges]);
@@ -218,7 +202,10 @@ export function useCashFlow() {
 
   // Includes skipped entries so the drawer can show them as "Ignorado" with a
   // "Reativar" action; they're excluded from `entries`/`periods` totals above.
-  const allEntries = useMemo(() => [...rawEntries, ...virtualEntries], [rawEntries, virtualEntries]);
+  const allEntries = useMemo(
+    () => [...rawEntries, ...virtualEntries],
+    [rawEntries, virtualEntries],
+  );
 
   // Current balance: last historical day
   const today = new Date().toISOString().split('T')[0];
@@ -231,9 +218,7 @@ export function useCashFlow() {
     // Fallback: last day with data
     const allDays = periods.flatMap((p) => p.days);
     const pastDays = allDays.filter((d) => d.date <= today);
-    return pastDays.length > 0
-      ? pastDays[pastDays.length - 1].saldoAcumulado
-      : saldoInicial.value;
+    return pastDays.length > 0 ? pastDays[pastDays.length - 1].saldoAcumulado : saldoInicial.value;
   }, [periods, today, saldoInicial]);
 
   // Monthly summary for current month
@@ -241,9 +226,7 @@ export function useCashFlow() {
     const now = new Date();
     const monthEntries = entries.filter((e) => {
       const d = new Date(e.date + 'T00:00:00');
-      return (
-        d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-      );
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
     return {
       totalIncome: monthEntries
@@ -270,9 +253,7 @@ export function useCashFlow() {
       const daysUntil = Math.ceil(
         (new Date(negDay.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
       );
-      result.push(
-        `⚠️ Saldo ficará negativo em ${daysUntil} dias (${negDay.date})`,
-      );
+      result.push(`⚠️ Saldo ficará negativo em ${daysUntil} dias (${negDay.date})`);
       result.push(
         `💡 Reduza R$ ${Math.abs(negDay.saldoAcumulado).toFixed(2)} em gastos para evitar saldo negativo`,
       );

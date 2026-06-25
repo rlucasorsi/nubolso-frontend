@@ -6,6 +6,7 @@ export interface UserProfile {
   balanceStartDate: string | null;
   greenThreshold: number;
   yellowThreshold: number;
+  cashflowStartDay: number;
   plan: 'FREE' | 'PRO';
 }
 
@@ -17,6 +18,7 @@ export interface UpdateUserRequest {
   balanceStartDate?: string;
   greenThreshold?: number;
   yellowThreshold?: number;
+  cashflowStartDay?: number;
 }
 
 export type UpdateUserResponse = UserProfile;
