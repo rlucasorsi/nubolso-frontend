@@ -63,7 +63,8 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     if (!scrollRef.current) return;
     const observer = new ResizeObserver(() => {
       if (scrollRef.current) {
-        setItemWidth((scrollRef.current.clientWidth - ARROW_PADDING) / 12);
+        const visibleMonths = scrollRef.current.clientWidth < 480 ? 6 : 12;
+        setItemWidth((scrollRef.current.clientWidth - ARROW_PADDING) / visibleMonths);
       }
     });
     observer.observe(scrollRef.current);
