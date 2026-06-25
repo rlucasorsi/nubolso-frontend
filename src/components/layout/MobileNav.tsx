@@ -28,7 +28,7 @@ export function MobileNav() {
   const [left, right] = [NAV_ITEMS.slice(0, 2), NAV_ITEMS.slice(2)];
 
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-2 py-0.5 flex justify-around items-center border-t border-white/10 bg-background/95 backdrop-blur-3xl shadow-[0_-5px_20px_-10px_rgba(0,0,0,0.8)] animate-fade-in">
+    <nav className="sm:hidden fixed bottom-3 left-3 right-3 z-50 px-2 py-2 flex justify-around items-center rounded-2xl border border-white/10 bg-background/95 backdrop-blur-3xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.8)] animate-fade-in">
       {left.map((item) => (
         <NavLink key={item.href} item={item} isActive={pathname === item.href} />
       ))}
@@ -73,7 +73,12 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
           isActive ? 'bg-primary/10 scale-110' : 'bg-transparent group-active:scale-95',
         )}
       >
-        <Icon className={cn('h-6 w-6 transition-transform', isActive && 'drop-shadow-[0_0_8px_var(--primary)]')} />
+        <Icon
+          className={cn(
+            'h-6 w-6 transition-transform',
+            isActive && 'drop-shadow-[0_0_8px_var(--primary)]',
+          )}
+        />
       </div>
 
       {isActive && (
