@@ -8,6 +8,7 @@ import { useUpdateGoal } from '@/modules/goals/hooks/use-update-goal';
 import { useDeleteGoal } from '@/modules/goals/hooks/use-delete-goal';
 import { useAddGoalContribution } from '@/modules/goals/hooks/use-add-goal-contribution';
 import type { Goal } from '@/modules/goals/model/api/goal';
+import { logger } from '@/lib/logger';
 import { GoalCard } from '@/components/goals/GoalCard';
 import { GoalDetailDrawer } from '@/components/goals/GoalDetailDrawer';
 import { CreateGoalDrawer } from '@/components/goals/CreateGoalDrawer';
@@ -205,7 +206,9 @@ export function GoalsView() {
             });
             setSelectedGoal(updatedGoal);
           } catch (error) {
-            console.error('Failed to update goal contributions:', error);
+            logger.error('Failed to update goal contributions', {
+              err: error instanceof Error ? error : undefined,
+            });
           }
         }}
       />

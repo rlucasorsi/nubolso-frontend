@@ -3,6 +3,7 @@ import { ERROR_KEYS } from '@/shared/constants/error-keys.constant';
 import { getCookie, deleteCookie } from '@/shared/utils/cookies';
 import { getApiUrl } from '@/shared/utils/get-api-url';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
+import { logger } from '@/lib/logger';
 
 const enum HttpMethod {
   POST = 'POST',
@@ -123,7 +124,11 @@ export class HttpClient {
     const requestInit: RequestInit = {
       method,
       headers,
-      body: isMultipart ? (body as unknown as BodyInit) : ['GET', 'DELETE'].includes(method) ? undefined : JSON.stringify(body),
+      body: isMultipart
+        ? (body as unknown as BodyInit)
+        : ['GET', 'DELETE'].includes(method)
+          ? undefined
+          : JSON.stringify(body),
       ...fetchOptions,
     };
 
@@ -194,12 +199,21 @@ export class HttpClient {
         }
       } catch (error) {
         // Already classified and (if relevant) logged above — avoid double-logging.
-        if (typeof error === 'object' && error !== null && ('sessionExpired' in error || 'status' in error)) {
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          ('sessionExpired' in error || 'status' in error)
+        ) {
           throw error;
         }
 
         if (attempt < maxRetries) {
-          this.logHttpError(`Request threw, retrying (${attempt + 1}/${maxRetries})`, { url: fullUrl, method, params, error });
+          this.logHttpError(`Request threw, retrying (${attempt + 1}/${maxRetries})`, {
+            url: fullUrl,
+            method,
+            params,
+            error,
+          });
           continue;
         }
 
@@ -225,18 +239,18 @@ export class HttpClient {
     }
 
     const message = extractErrorMessage(error);
-    const isProd = process.env.NODE_ENV === 'production';
+    const err = error instanceof Error ? error : undefined;
+    const normalizedError = err
+      ? undefined
+      : typeof error === 'object' && error !== null
+        ? error
+        : { error: String(error) };
 
-    const normalizedError =
-      error instanceof Error
-        ? { message, ...(isProd ? {} : { stack: error.stack }) }
-        : typeof error === 'object' && error !== null
-          ? error
-          : { error: String(error) };
-
-    console.error(
-      `[HttpClient] ${context}: ${message || ErrorMessages.UNHANDLED_ERROR}`,
-      JSON.stringify({ ...rest, url, host, error: normalizedError }, null, 2),
-    );
+    logger.error(`[HttpClient] ${context}: ${message || ErrorMessages.UNHANDLED_ERROR}`, {
+      ...rest,
+      url,
+      host,
+      ...(err ? { err } : { error: normalizedError }),
+    });
   }
 }

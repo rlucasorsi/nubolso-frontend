@@ -21,6 +21,7 @@ import { UserMenu } from '@/components/layout/UserMenu';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
 import { useLogout } from '@/hooks/useLogout';
 import { InitialSetupDrawer } from '@/components/onboarding/InitialSetupDrawer';
+import { SentryUserContext } from '@/components/monitoring/SentryUserContext';
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('nav');
@@ -33,6 +34,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
+      <SentryUserContext />
       <InitialSetupDrawer open={needsOnboarding} />
       <SideMenuDrawer
         open={sideMenuOpen}
