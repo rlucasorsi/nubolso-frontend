@@ -11,16 +11,7 @@ import {
 } from '@/components/ui/app-drawer';
 import { Loader2, Plus, RotateCcw, Trash2, FastForward, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DateInputField } from '@/components/ui/form-field';
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
 import { MONTH_KEYS } from '@/components/painel/config';
@@ -55,7 +46,10 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
   const [deletePurchaseId, setDeletePurchaseId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [addPurchaseOpen, setAddPurchaseOpen] = useState(false);
-  const [anticipateTarget, setAnticipateTarget] = useState<{ purchaseId: string; description: string } | null>(null);
+  const [anticipateTarget, setAnticipateTarget] = useState<{
+    purchaseId: string;
+    description: string;
+  } | null>(null);
   const [revertError, setRevertError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -166,7 +160,12 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
         <DrawerContent>
           <DrawerHeader onClose={onClose}>
             <SheetTitle className="text-xl font-bold font-display text-primary">
-              {invoice ? t('invoiceMonth', { month: td(MONTH_KEYS[invoice.referenceMonth - 1]), year: invoice.referenceYear }) : t('title')}
+              {invoice
+                ? t('invoiceMonth', {
+                    month: td(MONTH_KEYS[invoice.referenceMonth - 1]),
+                    year: invoice.referenceYear,
+                  })
+                : t('title')}
             </SheetTitle>
             <p className="text-base font-bold text-white">{invoice?.cardName}</p>
             <SheetDescription className="sr-only">{t('title')}</SheetDescription>
@@ -184,7 +183,11 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                     {invoice.isPaid ? t('paidAmount') : t('invoiceTotal')}
                   </span>
                   <span className="text-3xl font-bold font-display">
-                    {formatCurrency(invoice.isPaid ? invoice.paidAmount ?? invoice.totalAmount : invoice.totalAmount)}
+                    {formatCurrency(
+                      invoice.isPaid
+                        ? (invoice.paidAmount ?? invoice.totalAmount)
+                        : invoice.totalAmount,
+                    )}
                   </span>
                 </div>
 
@@ -211,7 +214,11 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                     <p className="text-sm font-bold">{formatDateLong(invoice.paymentDate)}</p>
                   </div>
                 ) : (
-                  <DateInputField label={t('paymentDate')} value={paymentDate} onChange={handlePaymentDateChange} />
+                  <DateInputField
+                    label={t('paymentDate')}
+                    value={paymentDate}
+                    onChange={handlePaymentDateChange}
+                  />
                 )}
 
                 <div className="space-y-4">
@@ -238,7 +245,10 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                       </div>
                     ) : (
                       activeGroups.map((group) => (
-                        <div key={group.purchaseId} className="glass-card rounded-2xl p-4 space-y-2">
+                        <div
+                          key={group.purchaseId}
+                          className="glass-card rounded-2xl p-4 space-y-2"
+                        >
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                               <p className="text-sm font-bold truncate">{group.description}</p>
@@ -255,17 +265,29 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                                 className="shrink-0 w-7 h-7 rounded-lg bg-red-500/5 text-red-500/40 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center"
                                 title={t('deletePurchase')}
                               >
-                                {deletePurchaseMutation.isPending && deletePurchaseMutation.variables?.purchaseId === group.purchaseId
-                                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                  : <Trash2 className="h-3.5 w-3.5" />}
+                                {deletePurchaseMutation.isPending &&
+                                deletePurchaseMutation.variables?.purchaseId ===
+                                  group.purchaseId ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
                               </button>
                             )}
                           </div>
                           {group.installments.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between text-xs text-muted-foreground">
-                              <span>{t('installment', { n: item.number, total: item.totalCount })}</span>
-                              <span className={`font-bold ${group.isCredit ? 'text-green-400' : 'text-foreground'}`}>
-                                {group.isCredit ? '+' : ''}{formatCurrency(Math.abs(item.amount))}
+                            <div
+                              key={item.id}
+                              className="flex items-center justify-between text-xs text-muted-foreground"
+                            >
+                              <span>
+                                {t('installment', { n: item.number, total: item.totalCount })}
+                              </span>
+                              <span
+                                className={`font-bold ${group.isCredit ? 'text-green-400' : 'text-foreground'}`}
+                              >
+                                {group.isCredit ? '+' : ''}
+                                {formatCurrency(Math.abs(item.amount))}
                               </span>
                             </div>
                           ))}
@@ -273,7 +295,12 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                             <div className="flex items-center gap-2 pt-1 border-t border-white/5">
                               <button
                                 type="button"
-                                onClick={() => setAnticipateTarget({ purchaseId: group.purchaseId, description: group.description })}
+                                onClick={() =>
+                                  setAnticipateTarget({
+                                    purchaseId: group.purchaseId,
+                                    description: group.description,
+                                  })
+                                }
                                 className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 text-amber-400 text-xs font-bold hover:bg-amber-500/20 transition-colors"
                               >
                                 <FastForward className="h-3 w-3" />
@@ -292,12 +319,24 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                         {t('anticipatedSection')}
                       </h4>
                       {anticipatedGroups.map((group) => (
-                        <div key={group.purchaseId} className="glass-card rounded-2xl p-4 space-y-2 opacity-60">
-                          <p className="text-sm font-bold truncate line-through text-muted-foreground">{group.description}</p>
+                        <div
+                          key={group.purchaseId}
+                          className="glass-card rounded-2xl p-4 space-y-2 opacity-60"
+                        >
+                          <p className="text-sm font-bold truncate line-through text-muted-foreground">
+                            {group.description}
+                          </p>
                           {group.installments.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between text-xs text-muted-foreground">
-                              <span className="line-through">{t('installment', { n: item.number, total: item.totalCount })}</span>
-                              <span className="font-bold line-through">{formatCurrency(item.amount)}</span>
+                            <div
+                              key={item.id}
+                              className="flex items-center justify-between text-xs text-muted-foreground"
+                            >
+                              <span className="line-through">
+                                {t('installment', { n: item.number, total: item.totalCount })}
+                              </span>
+                              <span className="font-bold line-through">
+                                {formatCurrency(item.amount)}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -314,7 +353,10 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                         <div key={adv.id} className="glass-card rounded-2xl p-4 space-y-2">
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-sm font-bold">
-                              {t('advanceSummary', { n: adv.installmentsCount, desc: adv.purchaseDescription ?? '' })}
+                              {t('advanceSummary', {
+                                n: adv.installmentsCount,
+                                desc: adv.purchaseDescription ?? '',
+                              })}
                             </p>
                             {!invoice.isPaid && (
                               <button
@@ -335,19 +377,38 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                                 className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 text-muted-foreground text-xs font-bold hover:bg-white/10 hover:text-white transition-colors"
                                 title={t('revertAdvance')}
                               >
-                                {revertAdvanceMutation.isPending && revertAdvanceMutation.variables?.advanceId === adv.id
-                                  ? <Loader2 className="h-3 w-3 animate-spin" />
-                                  : <Undo2 className="h-3 w-3" />}
-                                {revertAdvanceMutation.isPending && revertAdvanceMutation.variables?.advanceId === adv.id
+                                {revertAdvanceMutation.isPending &&
+                                revertAdvanceMutation.variables?.advanceId === adv.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Undo2 className="h-3 w-3" />
+                                )}
+                                {revertAdvanceMutation.isPending &&
+                                revertAdvanceMutation.variables?.advanceId === adv.id
                                   ? t('reverting')
                                   : t('revertAdvance')}
                               </button>
                             )}
                           </div>
                           <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
-                            <span>{t('advanceOriginal')}: <span className="font-bold text-foreground">{formatCurrency(adv.originalAmount)}</span></span>
-                            <span>{t('advanceSavings')}: <span className="font-bold text-green-400">{formatCurrency(adv.discount)}</span></span>
-                            <span>{t('advancePaid')}: <span className="font-bold text-foreground">{formatCurrency(adv.paidAmount)}</span></span>
+                            <span>
+                              {t('advanceOriginal')}:{' '}
+                              <span className="font-bold text-foreground">
+                                {formatCurrency(adv.originalAmount)}
+                              </span>
+                            </span>
+                            <span>
+                              {t('advanceSavings')}:{' '}
+                              <span className="font-bold text-green-400">
+                                {formatCurrency(adv.discount)}
+                              </span>
+                            </span>
+                            <span>
+                              {t('advancePaid')}:{' '}
+                              <span className="font-bold text-foreground">
+                                {formatCurrency(adv.paidAmount)}
+                              </span>
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -359,9 +420,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
               <DrawerFooter className="flex-col sm:flex-col gap-3">
                 {invoice.isPaid ? (
                   <>
-                    <p className="text-xs text-muted-foreground text-center">
-                      {t('paidNote')}
-                    </p>
+                    <p className="text-xs text-muted-foreground text-center">{t('paidNote')}</p>
                     <Button
                       variant="outline"
                       onClick={() => setReopenDialogOpen(true)}
@@ -371,7 +430,9 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                       <RotateCcw className="h-4 w-4" />
                       {reopenMutation.isPending ? t('reopening') : t('reopenInvoice')}
                     </Button>
-                    {reopenError && <p className="text-xs text-destructive text-center">{reopenError}</p>}
+                    {reopenError && (
+                      <p className="text-xs text-destructive text-center">{reopenError}</p>
+                    )}
                   </>
                 ) : (
                   <PayInvoiceForm invoice={invoice} />
@@ -382,32 +443,17 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
         </DrawerContent>
       </Sheet>
 
-      <AlertDialog open={!!deletePurchaseId} onOpenChange={(open) => !open && setDeletePurchaseId(null)}>
-        <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
-          <AlertDialogHeader className="space-y-4">
-            <div className="w-16 h-16 rounded-[1.5rem] bg-red-500/10 flex items-center justify-center mx-auto mb-2 text-red-500">
-              <Trash2 className="w-8 h-8" />
-            </div>
-            <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              {t('deleteTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              {t('deleteDesc')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
-            <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              {t('cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeletePurchase}
-              className="flex-1 h-12 rounded-2xl bg-red-500 text-white hover:bg-red-600 transition-all font-bold shadow-lg shadow-red-500/20"
-            >
-              {t('delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!deletePurchaseId}
+        onOpenChange={(open) => !open && setDeletePurchaseId(null)}
+        variant="destructive"
+        icon={<Trash2 className="w-8 h-8" />}
+        title={t('deleteTitle')}
+        description={t('deleteDesc')}
+        cancelLabel={t('cancel')}
+        actionLabel={t('delete')}
+        onAction={handleDeletePurchase}
+      />
 
       <AddPurchaseDrawer
         open={addPurchaseOpen}
@@ -427,33 +473,17 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
         />
       )}
 
-      <AlertDialog open={reopenDialogOpen} onOpenChange={setReopenDialogOpen}>
-        <AlertDialogContent className="bg-[#1c1a24] border-white/10 rounded-[2rem] p-8 max-w-[400px]">
-          <AlertDialogHeader className="space-y-4">
-            <div className="w-16 h-16 rounded-[1.5rem] bg-amber-500/10 flex items-center justify-center mx-auto mb-2 text-amber-500">
-              <RotateCcw className="w-8 h-8" />
-            </div>
-            <AlertDialogTitle className="text-xl font-black font-display text-white text-center">
-              {t('reopenTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground text-center text-sm font-medium">
-              {t('reopenDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
-            <AlertDialogCancel className="flex-1 h-12 rounded-2xl bg-white/5 border-none text-white hover:bg-white/10 transition-all font-bold">
-              {t('cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleReopen}
-              className="flex-1 h-12 rounded-2xl bg-amber-500 text-white hover:bg-amber-600 transition-all font-bold shadow-lg shadow-amber-500/20"
-            >
-              {t('reopen')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={reopenDialogOpen}
+        onOpenChange={setReopenDialogOpen}
+        variant="warning"
+        icon={<RotateCcw className="w-8 h-8" />}
+        title={t('reopenTitle')}
+        description={t('reopenDescription')}
+        cancelLabel={t('cancel')}
+        actionLabel={t('reopen')}
+        onAction={handleReopen}
+      />
     </>
   );
 }
-
