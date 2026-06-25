@@ -12,6 +12,7 @@ import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
 import { toast } from 'sonner';
 import { loginSchema } from '@/lib/schemas/auth';
 import { STORAGE_KEYS } from '@/shared/constants/storage-keys.constant';
+import { logger } from '@/lib/logger';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
@@ -49,6 +50,7 @@ export default function LoginPage() {
 
     try {
       await authService.login({ email, password }, { remember });
+      logger.info('User signed in', { method: 'email' });
       toast.success(t('welcomeBack'));
       router.push('/dashboard');
     } catch (error) {
@@ -62,6 +64,7 @@ export default function LoginPage() {
         return;
       }
 
+      logger.warn('Login failed', { err: error instanceof Error ? error : undefined });
       toast.error(extractErrorMessage(error, t('loginError')));
     } finally {
       setLoading(false);

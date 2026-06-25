@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   CashFlowEntry,
   CreditCardInvoiceLike,
@@ -17,6 +17,7 @@ import { useGetMe } from '@/modules/users/hooks/use-get-me';
 import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
+import { logger } from '@/lib/logger';
 
 export interface BalanceSettings {
   greenThreshold: number;
@@ -266,6 +267,8 @@ export function useCashFlow() {
     return result;
   }, [allDays, today, currentBalance]);
 
+  const hasLoggedLoad = useRef(false);
+
   // True while any of the data this projection depends on is loading for the
   // first time — used to avoid flashing a zero-balance/empty period before
   // real data arrives.
@@ -280,6 +283,17 @@ export function useCashFlow() {
     isMeError ||
     recurringTemplatesQuery.isError ||
     creditCardInvoicesQuery.isError;
+
+  useEffect(() => {
+    if (!isLoading && !isError && !hasLoggedLoad.current) {
+      hasLoggedLoad.current = true;
+      logger.info('Dashboard loaded', {
+        entriesCount: entries.length,
+        periodsCount: periods.length,
+        currentBalance,
+      });
+    }
+  }, [isLoading, isError, entries.length, periods.length, currentBalance]);
 
   const refetchAll = useCallback(async () => {
     await Promise.all([
