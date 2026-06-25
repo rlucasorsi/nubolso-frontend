@@ -1,5 +1,4 @@
 import { HttpClient } from '@/network/http-client';
-import { setSessionTokenAction, clearSessionTokenAction } from '@/modules/auth/actions/session';
 
 export interface AuthUser {
   id: string;
@@ -55,6 +54,23 @@ export interface GoogleLoginPayload {
   idToken: string;
 }
 
+// Calls the /api/auth/session Route Handler instead of invoking the
+// setSessionTokenAction/clearSessionTokenAction Server Actions directly from
+// Client Components. A Server Action called from a Client Component POSTs to
+// the *current page's* URL (e.g. the statically prerendered /login page),
+// which can collide with that page's edge cache and start returning 405s.
+async function setSession(token: string, options?: { remember?: boolean }): Promise<void> {
+  await fetch('/api/auth/session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, remember: options?.remember }),
+  });
+}
+
+async function clearSession(): Promise<void> {
+  await fetch('/api/auth/session', { method: 'DELETE' });
+}
+
 export const authService = {
   async login(
     credentials: LoginCredentials,
@@ -64,7 +80,7 @@ export const authService = {
       includeToken: false,
     });
 
-    await setSessionTokenAction(data.accessToken, { remember: options?.remember });
+    await setSession(data.accessToken, { remember: options?.remember });
 
     return data;
   },
@@ -84,7 +100,7 @@ export const authService = {
       },
     );
 
-    await setSessionTokenAction(data.accessToken);
+    await setSession(data.accessToken);
 
     return data;
   },
@@ -116,12 +132,12 @@ export const authService = {
       includeToken: false,
     });
 
-    await setSessionTokenAction(data.accessToken);
+    await setSession(data.accessToken);
 
     return data;
   },
 
   async logout(): Promise<void> {
-    await clearSessionTokenAction();
+    await clearSession();
   },
 };
