@@ -119,12 +119,15 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   // so this naturally re-centers each time the user opens this tab).
   useEffect(() => {
     if (didScrollRef.current || !scrollRef.current || itemWidth <= 0) return;
-    const idx = buckets.findIndex((b) => b.isCurrentMonth);
-    if (idx < 0) return;
+    const currentMonthIdx = buckets.findIndex((b) => b.isCurrentMonth);
+    if (currentMonthIdx < 0) return;
+    // Prefer the first open invoice at or after the current month (fatura atual);
+    // fall back to the current month if none exists.
+    const openIdx = buckets.findIndex((b, i) => i >= currentMonthIdx && b.hasOpenInvoice);
+    const idx = openIdx >= 0 ? openIdx : currentMonthIdx;
     const frame = requestAnimationFrame(() => {
       if (!scrollRef.current) return;
-      const target = idx * itemWidth - scrollRef.current.clientWidth / 2 + itemWidth / 2;
-      scrollRef.current.scrollLeft = Math.max(target, 0);
+      scrollRef.current.scrollLeft = Math.max(idx * itemWidth, 0);
       didScrollRef.current = true;
     });
     return () => cancelAnimationFrame(frame);
