@@ -11,7 +11,9 @@ import {
   Menu,
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useTranslations } from '@/i18n/useTranslations';
+import { cn } from '@/lib/utils';
 
 import { MobileNav } from '@/components/layout/MobileNav';
 import { SideMenuDrawer } from '@/components/layout/SideMenuDrawer';
@@ -22,6 +24,7 @@ import { InitialSetupDrawer } from '@/components/onboarding/InitialSetupDrawer';
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('nav');
+  const pathname = usePathname();
   const { data: me } = useGetMe();
   const needsOnboarding = Boolean(me && !me.balanceStartDate);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
@@ -60,62 +63,39 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
           </Link>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/dashboard">
-              <LayoutDashboard className="h-4 w-4" />
-              <span>{t('dashboard')}</span>
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/entries">
-              <CircleDollarSign className="h-4 w-4" />
-              <span>{t('entries')}</span>
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/cards">
-              <CreditCard className="h-4 w-4" />
-              <span>{t('cards')}</span>
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/recurring">
-              <RotateCw className="h-4 w-4" />
-              <span>{t('recurring')}</span>
-            </Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden sm:flex gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/goals">
-              <Target className="h-4 w-4" />
-              <span>{t('goals')}</span>
-            </Link>
-          </Button>
+        <div className="flex items-center gap-1">
+          {(
+            [
+              { href: '/dashboard', icon: LayoutDashboard, label: t('dashboard') },
+              { href: '/entries', icon: CircleDollarSign, label: t('entries') },
+              { href: '/cards', icon: CreditCard, label: t('cards') },
+              { href: '/recurring', icon: RotateCw, label: t('recurring') },
+              { href: '/goals', icon: Target, label: t('goals') },
+            ] as const
+          ).map(({ href, icon: Icon, label }) => {
+            const isActive = pathname === href;
+            return (
+              <Button
+                key={href}
+                variant="ghost"
+                size="sm"
+                asChild
+                className={cn(
+                  'hidden sm:flex gap-2',
+                  isActive
+                    ? 'text-primary hover:text-primary hover:bg-transparent'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <Link href={href}>
+                  <Icon
+                    className={cn('h-4 w-4', isActive && 'drop-shadow-[0_0_6px_var(--primary)]')}
+                  />
+                  <span>{label}</span>
+                </Link>
+              </Button>
+            );
+          })}
           <UserMenu name={me?.name} email={me?.email} onLogout={handleLogout} />
         </div>
       </header>
