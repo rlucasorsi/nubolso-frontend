@@ -127,7 +127,8 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     const idx = openIdx >= 0 ? openIdx : currentMonthIdx;
     const frame = requestAnimationFrame(() => {
       if (!scrollRef.current) return;
-      scrollRef.current.scrollLeft = Math.max(idx * itemWidth, 0);
+      const SIDE_PAD = 28; // px-7 = 28px on each side
+      scrollRef.current.scrollLeft = Math.max(idx * itemWidth - SIDE_PAD, 0);
       didScrollRef.current = true;
     });
     return () => cancelAnimationFrame(frame);
