@@ -73,20 +73,31 @@ export function CreditCardsView() {
     );
     const nextDueDate = sortedUnpaid[0]?.paymentDate ?? null;
 
+    // Current invoice = first open invoice at or after today (by referenceYear/Month).
     const now = new Date();
-    const currentMonthTotal = invoices
-      .filter(
-        (invoice) =>
-          invoice.referenceMonth === now.getMonth() + 1 &&
-          invoice.referenceYear === now.getFullYear(),
-      )
-      .reduce((sum, invoice) => sum + invoice.totalAmount, 0);
+    const todayKey = now.getFullYear() * 12 + now.getMonth();
+    const openFuture = unpaidInvoices
+      .filter((inv) => inv.referenceYear * 12 + (inv.referenceMonth - 1) >= todayKey)
+      .sort(
+        (a, b) =>
+          a.referenceYear * 12 + a.referenceMonth - (b.referenceYear * 12 + b.referenceMonth),
+      );
+    const anchor = openFuture[0];
+    const currentInvoiceTotal = anchor
+      ? invoices
+          .filter(
+            (inv) =>
+              inv.referenceYear === anchor.referenceYear &&
+              inv.referenceMonth === anchor.referenceMonth,
+          )
+          .reduce((sum, inv) => sum + inv.totalAmount, 0)
+      : 0;
 
     return {
       activeCardsCount: activeCardIds.size,
       totalOpenInvoices,
       nextDueDate,
-      currentMonthTotal,
+      currentInvoiceTotal,
     };
   }, [cards, invoices]);
 

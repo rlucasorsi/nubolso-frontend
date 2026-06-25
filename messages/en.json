@@ -449,11 +449,11 @@
     "cards": "cards",
     "openInvoices": "Open Invoices",
     "nextDue": "Next Due Date",
-    "currentMonth": "This Month Total",
+    "currentMonth": "Current Invoice Total",
     "allUnpaid": "Sum of all unpaid invoices",
     "nextDueNote": "Next invoice payment date",
     "noInvoicesPending": "No pending invoices",
-    "thisMonthNote": "Purchases due this month"
+    "thisMonthNote": "Total of the next open invoice"
   },
   "creditCardDetail": {
     "inactive": "Inactive Card",

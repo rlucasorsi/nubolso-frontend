@@ -447,11 +447,11 @@
     "activeCards": "Tarjetas Activas",
     "openInvoices": "Facturas Pendientes",
     "nextDue": "Próximo Vencimiento",
-    "currentMonth": "Total del Mes Actual",
+    "currentMonth": "Total de la Factura Actual",
     "allUnpaid": "Suma de todas las facturas sin pagar",
     "nextDueNote": "Fecha de la próxima factura a pagar",
     "noInvoicesPending": "Sin facturas pendientes",
-    "thisMonthNote": "Compras con vencimiento este mes",
+    "thisMonthNote": "Total de la próxima factura abierta",
     "card": "tarjeta",
     "cards": "tarjetas"
   },

@@ -8,14 +8,14 @@ interface CreditCardsSummaryProps {
   activeCardsCount: number;
   totalOpenInvoices: number;
   nextDueDate: string | null;
-  currentMonthTotal: number;
+  currentInvoiceTotal: number;
 }
 
 export function CreditCardsSummary({
   activeCardsCount,
   totalOpenInvoices,
   nextDueDate,
-  currentMonthTotal,
+  currentInvoiceTotal,
 }: CreditCardsSummaryProps) {
   const t = useTranslations('creditCardsSummary');
   return (
@@ -24,27 +24,23 @@ export function CreditCardsSummary({
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
           {t('activeCards')}
         </span>
-        <span className="text-2xl font-bold font-display text-primary">
-          {activeCardsCount}
-        </span>
+        <span className="text-2xl font-bold font-display text-primary">{activeCardsCount}</span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
           <CreditCard className="h-4 w-4" />
-          <span className="font-bold">
-            {activeCardsCount === 1 ? t('card') : t('cards')}
-          </span>
+          <span className="font-bold">{activeCardsCount === 1 ? t('card') : t('cards')}</span>
         </div>
       </div>
 
       <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-          {t('openInvoices')}
+          {t('currentMonth')}
         </span>
-        <span className="text-2xl font-bold font-display text-red-500">
-          {formatCurrency(totalOpenInvoices)}
+        <span className="text-2xl font-bold font-display">
+          {formatCurrency(currentInvoiceTotal)}
         </span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
-          <Wallet className="h-4 w-4" />
-          <span className="font-bold">{t('allUnpaid')}</span>
+          <TrendingDown className="h-4 w-4" />
+          <span className="font-bold">{t('thisMonthNote')}</span>
         </div>
       </div>
 
@@ -65,17 +61,14 @@ export function CreditCardsSummary({
 
       <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-          {t('currentMonth')}
+          {t('openInvoices')}
         </span>
-        <span className="text-2xl font-bold font-display">
-          {formatCurrency(currentMonthTotal)}
-        </span>
+        <span className="text-2xl font-bold font-display">{formatCurrency(totalOpenInvoices)}</span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
-          <TrendingDown className="h-4 w-4" />
-          <span className="font-bold">{t('thisMonthNote')}</span>
+          <Wallet className="h-4 w-4" />
+          <span className="font-bold">{t('allUnpaid')}</span>
         </div>
       </div>
     </div>
   );
 }
-
