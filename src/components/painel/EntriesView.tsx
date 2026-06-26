@@ -37,6 +37,7 @@ import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
+import { useGetMe } from '@/modules/users/hooks/use-get-me';
 
 function formatDayHeader(dateStr: string, dateFnsLocale: Locale) {
   const date = new Date(dateStr + 'T12:00:00');
@@ -50,6 +51,8 @@ export function EntriesView() {
   const dailyT = useTranslations('dailyEntries');
   const { locale } = useLanguage();
   const dateFnsLocale = getDateFnsLocale(locale);
+  const { data: me } = useGetMe();
+  const minDate = me?.balanceStartDate ? me.balanceStartDate.split('T')[0] : undefined;
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -119,7 +122,8 @@ export function EntriesView() {
     }
 
     // Ordena do mais recente para o mais antigo
-    const sorted = [...list].sort((a, b) => b.date.localeCompare(a.date));
+    const filtered = minDate ? list.filter((e) => e.date >= minDate) : list;
+    const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
 
     if (!debouncedSearch) return sorted;
 
