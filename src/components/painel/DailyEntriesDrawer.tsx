@@ -8,12 +8,10 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Check,
   ChevronDown,
   RotateCw,
   RotateCcw,
   Ban,
-  X,
   CreditCard,
 } from 'lucide-react';
 import { EntryFormValues } from './EntryForm';
@@ -369,40 +367,61 @@ export function DailyEntriesDrawer({
                                 </div>
                               ) : (
                                 <>
-                                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 pl-2">
-                                    <div className="flex-1">
-                                      {isEditing || isRealizing ? (
-                                        <div className="space-y-4">
-                                          <TextInputField
-                                            label={t('entries')}
-                                            value={editValues.description}
-                                            onChange={(description) =>
-                                              setEditValues((prev) => ({ ...prev, description }))
+                                  {isEditing || isRealizing ? (
+                                    <div className="pl-2 space-y-3">
+                                      <TextInputField
+                                        label={typeT('descriptionLabel')}
+                                        value={editValues.description}
+                                        onChange={(description) =>
+                                          setEditValues((prev) => ({ ...prev, description }))
+                                        }
+                                        autoFocus
+                                      />
+                                      {isRealizing && (
+                                        <div>
+                                          <DateInputField
+                                            label={t('realizationDate')}
+                                            value={editValues.date}
+                                            onChange={(date) =>
+                                              setEditValues((prev) => ({ ...prev, date }))
                                             }
-                                            autoFocus
                                           />
-                                          <AmountInputField
-                                            value={editValues.amount}
-                                            onChange={(amount) =>
-                                              setEditValues((prev) => ({ ...prev, amount }))
-                                            }
-                                          />
-                                          {isRealizing && (
-                                            <>
-                                              <DateInputField
-                                                label={t('realizationDate')}
-                                                value={editValues.date}
-                                                onChange={(date) =>
-                                                  setEditValues((prev) => ({ ...prev, date }))
-                                                }
-                                              />
-                                              <p className="text-[10px] text-muted-foreground/40 font-medium pl-1">
-                                                {t('dateNote')}
-                                              </p>
-                                            </>
-                                          )}
+                                          <p className="text-xs text-muted-foreground/60 mt-1.5">
+                                            {t('dateNote')}
+                                          </p>
                                         </div>
-                                      ) : (
+                                      )}
+                                      <AmountInputField
+                                        label={typeT('amount')}
+                                        value={editValues.amount}
+                                        onChange={(amount) =>
+                                          setEditValues((prev) => ({ ...prev, amount }))
+                                        }
+                                      />
+                                      <div className="flex gap-2 justify-end">
+                                        <button
+                                          onClick={() =>
+                                            isEditing ? setEditingId(null) : setRealizingId(null)
+                                          }
+                                          className="h-9 px-4 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-semibold"
+                                        >
+                                          {t('cancel')}
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            isEditing
+                                              ? handleSaveEdit()
+                                              : handleConfirmRealize(entry)
+                                          }
+                                          className="h-9 px-4 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-xs font-bold"
+                                        >
+                                          {t('confirm')}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 pl-2">
+                                      <div className="flex-1">
                                         <div className="flex items-center justify-between gap-2">
                                           <div>
                                             <p className="text-sm font-bold text-white tracking-tight">
@@ -485,52 +504,34 @@ export function DailyEntriesDrawer({
                                             </div>
                                           </div>
                                         </div>
-                                      )}
-                                    </div>
+                                      </div>
 
-                                    <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t border-white/5 sm:border-0">
-                                      {entry.isSkipped ? (
-                                        <button
-                                          onClick={() => onDeleteEntry(entry.id)}
-                                          className="flex-1 h-10 rounded-xl bg-white/5 text-muted-foreground/60 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
-                                        >
-                                          <RotateCcw className="h-4 w-4" />
-                                          {t('reactivate')}
-                                        </button>
-                                      ) : isPendingInvoice ? (
-                                        <button
-                                          onClick={() =>
-                                            onPayInvoice?.(entry.creditCardInvoiceId as string)
-                                          }
-                                          className="flex-1 h-10 rounded-xl bg-amber-400/10 text-amber-400 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
-                                        >
-                                          <CreditCard className="h-4 w-4" />
-                                          {t('payInvoice')}
-                                        </button>
-                                      ) : entry.isVirtual ? (
-                                        isRealizing ? (
-                                          <>
-                                            <button
-                                              onClick={() => handleConfirmRealize(entry)}
-                                              className="flex-1 h-10 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 text-xs font-bold px-4"
-                                            >
-                                              <Check className="h-4 w-4" />
-                                              {t('confirm')}
-                                            </button>
-                                            <button
-                                              onClick={() => setRealizingId(null)}
-                                              className="shrink-0 w-10 h-10 rounded-xl bg-white/5 text-muted-foreground/40 hover:bg-white/10 transition-all flex items-center justify-center shadow-sm"
-                                            >
-                                              <X className="h-4 w-4" />
-                                            </button>
-                                          </>
-                                        ) : (
+                                      <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t border-white/5 sm:border-0">
+                                        {entry.isSkipped ? (
+                                          <button
+                                            onClick={() => onDeleteEntry(entry.id)}
+                                            className="flex-1 h-10 rounded-xl bg-white/5 text-muted-foreground/60 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
+                                          >
+                                            <RotateCcw className="h-4 w-4" />
+                                            {t('reactivate')}
+                                          </button>
+                                        ) : isPendingInvoice ? (
+                                          <button
+                                            onClick={() =>
+                                              onPayInvoice?.(entry.creditCardInvoiceId as string)
+                                            }
+                                            className="flex-1 h-10 rounded-xl bg-amber-400/10 text-amber-400 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
+                                          >
+                                            <CreditCard className="h-4 w-4" />
+                                            {t('payInvoice')}
+                                          </button>
+                                        ) : entry.isVirtual ? (
                                           <>
                                             <button
                                               onClick={() => startRealize(entry)}
-                                              className="flex-1 h-10 rounded-xl bg-amber-400/10 text-amber-400 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
+                                              className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors flex items-center gap-1.5"
                                             >
-                                              <RotateCw className="h-4 w-4" />
+                                              <RotateCw className="h-3.5 w-3.5" />
                                               {t('apply')}
                                             </button>
                                             <button
@@ -540,47 +541,39 @@ export function DailyEntriesDrawer({
                                               <Trash2 className="h-4 w-4" />
                                             </button>
                                           </>
-                                        )
-                                      ) : isPaidInvoice ? (
-                                        <button
-                                          onClick={() => {
-                                            setReopenError(null);
-                                            setReopenInvoiceId(entry.creditCardInvoiceId as string);
-                                            setReopenDialogOpen(true);
-                                          }}
-                                          className="flex-1 h-10 rounded-xl bg-white/5 text-muted-foreground/60 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
-                                        >
-                                          <RotateCcw className="h-4 w-4" />
-                                          {t('reopenInvoice')}
-                                        </button>
-                                      ) : (
-                                        <>
-                                          {isEditing ? (
-                                            <button
-                                              onClick={handleSaveEdit}
-                                              className="flex-1 sm:w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all shadow-lg flex items-center justify-center p-0"
-                                            >
-                                              <Check className="h-5 w-5" />
-                                            </button>
-                                          ) : (
+                                        ) : isPaidInvoice ? (
+                                          <button
+                                            onClick={() => {
+                                              setReopenError(null);
+                                              setReopenInvoiceId(
+                                                entry.creditCardInvoiceId as string,
+                                              );
+                                              setReopenDialogOpen(true);
+                                            }}
+                                            className="flex-1 h-10 rounded-xl bg-white/5 text-muted-foreground/60 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
+                                          >
+                                            <RotateCcw className="h-4 w-4" />
+                                            {t('reopenInvoice')}
+                                          </button>
+                                        ) : (
+                                          <>
                                             <button
                                               onClick={() => startEdit(entry)}
                                               className="flex-1 sm:w-10 h-10 rounded-xl bg-white/5 text-muted-foreground/40 hover:bg-primary/20 hover:text-primary transition-all flex items-center justify-center shadow-sm"
                                             >
                                               <Pencil className="h-4 w-4" />
                                             </button>
-                                          )}
-
-                                          <button
-                                            onClick={() => setDeleteConfirmId(entry.id)}
-                                            className="flex-1 sm:w-10 h-10 rounded-xl bg-red-500/5 text-red-500/40 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
-                                          >
-                                            <Trash2 className="h-4 w-4" />
-                                          </button>
-                                        </>
-                                      )}
+                                            <button
+                                              onClick={() => setDeleteConfirmId(entry.id)}
+                                              className="flex-1 sm:w-10 h-10 rounded-xl bg-red-500/5 text-red-500/40 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
+                                  )}
                                   {isPaidInvoice &&
                                     reopenError &&
                                     reopenInvoiceId === entry.creditCardInvoiceId && (

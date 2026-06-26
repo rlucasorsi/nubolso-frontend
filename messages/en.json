@@ -136,7 +136,20 @@
     "previousDays": "previous days",
     "noPendingDays": "No days with pending items in this period.",
     "cycle": "Cycle",
-    "pageTitle": "Dashboard — nubolso"
+    "pageTitle": "Dashboard — nubolso",
+    "pending": "Pending",
+    "pendingEmpty": "All caught up!",
+    "pendingEmptyHint": "No pending items in this period.",
+    "pendingSearchPlaceholder": "Search by description or amount...",
+    "pendingFilterAll": "All",
+    "pendingFilterAlert": "In alert",
+    "pendingEfetivar": "Confirm",
+    "pendingConfirm": "Confirm",
+    "pendingNoneFound": "No pending items found.",
+    "pendingOverdue": "Overdue",
+    "pendingDueToday": "Due today",
+    "pendingDueTomorrow": "Due tomorrow",
+    "pendingDueInDays": "Due in {days} days"
   },
   "entry": {
     "addButtonLabel": "Entry",
@@ -289,7 +302,10 @@
     "profileName": "Name",
     "profileEmail": "Email (cannot be changed)",
     "profileSaved": "Name updated!",
-    "profileError": "Error updating name. Try again."
+    "profileError": "Error updating name. Try again.",
+    "pendingAlertsTitle": "Pending alerts",
+    "pendingAlertsDescription": "Days in advance before a recurrence is shown as an alert.",
+    "pendingAlertsDays": "Days in advance"
   },
   "common": {
     "cancel": "Cancel",
@@ -351,7 +367,7 @@
     "reopenInvoice": "Reopen Invoice",
     "reopenError": "Couldn't reopen the invoice",
     "realizationDate": "Realization date",
-    "dateNote": "Adjust the date if the receipt occurred on a different day than planned.",
+    "dateNote": "Adjust the transaction date if it occurred on a different day than planned.",
     "cannotAdd": "Cannot add entries before the initial date"
   },
   "entries": {

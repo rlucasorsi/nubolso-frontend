@@ -17,6 +17,8 @@ import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslations } from '@/i18n/useTranslations';
+import { PendingEntriesView } from './PendingEntriesView';
+import { usePendingAlertDays, getPendingAlertStatus } from '@/hooks/usePendingAlertDays';
 
 interface PainelViewProps {
   onAddEntry: (entry: Omit<CashFlowEntry, 'id'>) => void;
@@ -33,10 +35,12 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
     balanceSettings,
     saldoInicial,
     allEntries,
+    virtualEntries,
     isLoading,
     isError,
     refetchAll,
   } = useCashFlow();
+  const { alertDays } = usePendingAlertDays();
 
   const [periodIdx, setPeriodIdx] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -106,6 +110,14 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   const today = new Date().toISOString().split('T')[0];
   const isCurrentPeriod = period.startDate <= today && period.endDate >= today;
 
+  const pendingAlertCount = virtualEntries.filter(
+    (e) =>
+      e.isVirtual &&
+      e.templateId &&
+      e.date >= period.startDate &&
+      e.date <= period.endDate &&
+      getPendingAlertStatus(e.date, today, alertDays) !== null,
+  ).length;
   const pendingDaysCount = period.days.filter((d) => d.hasPendingRecurring).length;
   const displayedDays = showPendingOnly
     ? period.days.filter((d) => d.hasPendingRecurring)
@@ -185,6 +197,19 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
               className="relative h-11 px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
             >
               {t('periodDays')}
+            </TabsTrigger>
+            <TabsTrigger
+              value="pending"
+              className="relative h-11 px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
+            >
+              <span className="flex items-center gap-1.5">
+                {t('pending')}
+                {pendingAlertCount > 0 && (
+                  <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-400">
+                    {pendingAlertCount}
+                  </span>
+                )}
+              </span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -268,6 +293,10 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
               </>
             )}
           </Card>
+        </TabsContent>
+
+        <TabsContent value="pending" className="mt-4">
+          <PendingEntriesView period={period} />
         </TabsContent>
       </Tabs>
 

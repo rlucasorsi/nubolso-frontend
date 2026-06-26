@@ -136,7 +136,20 @@
     "previousDays": "días anteriores",
     "noPendingDays": "No hay días con pendientes en este período.",
     "cycle": "Ciclo",
-    "pageTitle": "Panel — nubolso"
+    "pageTitle": "Panel — nubolso",
+    "pending": "Pendientes",
+    "pendingEmpty": "¡Todo al día!",
+    "pendingEmptyHint": "Sin pendientes en este período.",
+    "pendingSearchPlaceholder": "Buscar por descripción o monto...",
+    "pendingFilterAll": "Todos",
+    "pendingFilterAlert": "En alerta",
+    "pendingEfetivar": "Confirmar",
+    "pendingConfirm": "Confirmar",
+    "pendingNoneFound": "Sin pendientes encontrados.",
+    "pendingOverdue": "Atrasada",
+    "pendingDueToday": "Vence hoy",
+    "pendingDueTomorrow": "Vence mañana",
+    "pendingDueInDays": "Vence en {days} días"
   },
   "entry": {
     "addButtonLabel": "Movimiento",
@@ -289,7 +302,10 @@
     "profileName": "Nombre",
     "profileEmail": "Email (no se puede cambiar)",
     "profileSaved": "¡Nombre actualizado!",
-    "profileError": "Error al actualizar nombre. Inténtalo de nuevo."
+    "profileError": "Error al actualizar nombre. Inténtalo de nuevo.",
+    "pendingAlertsTitle": "Alertas de pendientes",
+    "pendingAlertsDescription": "Días de anticipación antes de que una recurrencia aparezca como alerta.",
+    "pendingAlertsDays": "Días de anticipación"
   },
   "common": {
     "cancel": "Cancelar",
@@ -351,7 +367,7 @@
     "reopenInvoice": "Reabrir Factura",
     "reopenError": "No se pudo reabrir la factura",
     "realizationDate": "Fecha de aplicación",
-    "dateNote": "Ajusta la fecha si el cobro ocurrió en un día diferente al planificado.",
+    "dateNote": "Ajusta la fecha de la transacción si ocurrió en un día diferente al planificado.",
     "cannotAdd": "No se pueden agregar movimientos antes de la fecha inicial"
   },
   "entries": {

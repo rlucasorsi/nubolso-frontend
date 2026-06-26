@@ -136,7 +136,20 @@
     "previousDays": "dias anteriores",
     "noPendingDays": "Nenhum dia com pendências neste período.",
     "cycle": "Ciclo",
-    "pageTitle": "Painel — nubolso"
+    "pageTitle": "Painel — nubolso",
+    "pending": "Pendências",
+    "pendingEmpty": "Tudo em dia!",
+    "pendingEmptyHint": "Nenhuma pendência neste período.",
+    "pendingSearchPlaceholder": "Buscar por descrição ou valor...",
+    "pendingFilterAll": "Todos",
+    "pendingFilterAlert": "Em alerta",
+    "pendingEfetivar": "Efetivar",
+    "pendingConfirm": "Confirmar",
+    "pendingNoneFound": "Nenhuma pendência encontrada.",
+    "pendingOverdue": "Atrasada",
+    "pendingDueToday": "Vence hoje",
+    "pendingDueTomorrow": "Vence amanhã",
+    "pendingDueInDays": "Vence em {days} dias"
   },
   "entry": {
     "addButtonLabel": "Lançamento",
@@ -289,7 +302,10 @@
     "profileName": "Nome",
     "profileEmail": "Email (não pode ser alterado)",
     "profileSaved": "Nome atualizado!",
-    "profileError": "Erro ao atualizar nome. Tente novamente."
+    "profileError": "Erro ao atualizar nome. Tente novamente.",
+    "pendingAlertsTitle": "Alertas de pendências",
+    "pendingAlertsDescription": "Dias de antecedência antes da recorrência para exibir o alerta.",
+    "pendingAlertsDays": "Dias de antecedência"
   },
   "common": {
     "cancel": "Cancelar",
@@ -351,7 +367,7 @@
     "reopenInvoice": "Reabrir Fatura",
     "reopenError": "Não foi possível reabrir a fatura",
     "realizationDate": "Data de efetivação",
-    "dateNote": "Ajuste a data se o recebimento ocorreu em dia diferente do planejado.",
+    "dateNote": "Ajuste a data da transação se ocorreu em dia diferente do planejado.",
     "cannotAdd": "Não é possível adicionar lançamentos antes da data inicial"
   },
   "entries": {

@@ -32,11 +32,13 @@ import {
   MessageSquare,
   User,
   Sparkles,
+  Bell,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from '@/i18n/useTranslations';
 import { getPeriodForDate } from '@/lib/cashflow';
 import { useEffect, useMemo, useState } from 'react';
+import { usePendingAlertDays } from '@/hooks/usePendingAlertDays';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { SupportDrawer } from '@/components/support/SupportDrawer';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
@@ -101,6 +103,14 @@ export default function SettingsPage() {
   const handleSaveStartDay = () => {
     updateStartDay(localStartDay);
   };
+
+  const { alertDays, updateAlertDays } = usePendingAlertDays();
+  const [localAlertDays, setLocalAlertDays] = useState(alertDays);
+  useEffect(() => {
+    setLocalAlertDays(alertDays);
+  }, [alertDays]);
+  const hasAlertDaysChanges = localAlertDays !== alertDays;
+  const handleSaveAlertDays = () => updateAlertDays(localAlertDays);
 
   const savedGreenValue = balanceSettings.greenThreshold.toFixed(2).replace('.', ',');
   const savedYellowValue = balanceSettings.yellowThreshold.toFixed(2).replace('.', ',');
@@ -266,6 +276,29 @@ export default function SettingsPage() {
                 {t('to')}{' '}
                 <span className="font-medium text-foreground">{periodPreview.endDate}</span>
               </p>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 p-4 pb-2">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">{t('pendingAlertsTitle')}</CardTitle>
+              </div>
+              <Button size="icon" onClick={handleSaveAlertDays} disabled={!hasAlertDaysChanges}>
+                <Save />
+              </Button>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 space-y-3">
+              <NumberInputField
+                id="alert-days"
+                label={t('pendingAlertsDays')}
+                value={localAlertDays}
+                onChange={setLocalAlertDays}
+                min={0}
+                max={30}
+              />
+              <p className="text-xs text-muted-foreground">{t('pendingAlertsDescription')}</p>
             </CardContent>
           </Card>
 
