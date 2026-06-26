@@ -212,7 +212,13 @@
     "deadlineExpired": "Deadline expired",
     "forecast": "Forecast: {month} {year}",
     "longTerm": "Long-term goal ({year})",
-    "addFunds": "Add Funds"
+    "addFunds": "Add Funds",
+    "manage": "Manage",
+    "deleteGoal": "Delete Goal",
+    "deleteConfirmTitle": "Delete this goal?",
+    "deleteConfirmDescription": "This action cannot be undone. All recorded contributions will be lost.",
+    "delete": "Delete",
+    "cancel": "Cancel"
   },
   "import": {
     "button": "Import OFX",
@@ -377,7 +383,17 @@
     "clearFilter": "Clear Filter",
     "showEstimated": "Show estimated recurrences",
     "noResults": "No entries found",
-    "noResultsHint": "Try adjusting your search filters"
+    "noResultsHint": "Try adjusting your search filters",
+    "perPage": "Per page",
+    "total": "{total} records",
+    "edit": "Edit",
+    "delete": "Delete",
+    "editEntry": "Edit entry",
+    "deleteConfirmTitle": "Delete entry?",
+    "deleteConfirmDescription": "This action cannot be undone.",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel"
   },
   "goalsView": {
     "title": "Goals & Objectives",
@@ -472,6 +488,7 @@
     "thisMonthNote": "Total of the next open invoice"
   },
   "creditCardDetail": {
+    "delete": "Delete",
     "inactive": "Inactive Card",
     "currentInvoice": "Current Invoice",
     "upcomingInvoices": "Upcoming Invoices",
@@ -562,6 +579,7 @@
     "advancesSection": "Completed Anticipations",
     "moveHere": "Move to this invoice",
     "anticipate": "Anticipate",
+    "anticipatedContext": "{n} anticipated · {remaining} remaining after this invoice",
     "moving": "Moving...",
     "moveError": "Couldn't move the installments",
     "advanceSummary": "Anticipation {n}x — {desc}",

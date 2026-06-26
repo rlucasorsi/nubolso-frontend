@@ -68,7 +68,7 @@ export function useCashFlow() {
   const rawEntries = useMemo(() => {
     if (!entriesQuery.data) return [];
 
-    return (entriesQuery.data as any[]).map((item) => ({
+    return (entriesQuery.data?.data ?? []).map((item) => ({
       id: item.id,
       date: item.date.split('T')[0], // Garante formato YYYY-MM-DD
       type: item.type as FlowType,

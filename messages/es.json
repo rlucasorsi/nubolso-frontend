@@ -212,7 +212,13 @@
     "deadlineExpired": "Plazo vencido",
     "forecast": "Pronóstico: {month} {year}",
     "longTerm": "Meta a largo plazo ({year})",
-    "addFunds": "Agregar Fondos"
+    "addFunds": "Agregar Fondos",
+    "manage": "Administrar",
+    "deleteGoal": "Eliminar Meta",
+    "deleteConfirmTitle": "¿Eliminar esta meta?",
+    "deleteConfirmDescription": "Esta acción no se puede deshacer. Todas las contribuciones registradas se perderán.",
+    "delete": "Eliminar",
+    "cancel": "Cancelar"
   },
   "import": {
     "button": "Importar OFX",
@@ -377,7 +383,17 @@
     "clearFilter": "Limpiar Filtro",
     "showEstimated": "Mostrar recurrencias estimadas",
     "noResults": "No se encontraron movimientos",
-    "noResultsHint": "Intenta ajustar tus filtros de búsqueda"
+    "noResultsHint": "Intenta ajustar tus filtros de búsqueda",
+    "perPage": "Por página",
+    "total": "{total} registros",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "editEntry": "Editar movimiento",
+    "deleteConfirmTitle": "¿Eliminar movimiento?",
+    "deleteConfirmDescription": "Esta acción no se puede deshacer.",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "cancel": "Cancelar"
   },
   "goalsView": {
     "title": "Metas y Objetivos",
@@ -472,6 +488,7 @@
     "cards": "tarjetas"
   },
   "creditCardDetail": {
+    "delete": "Eliminar",
     "inactive": "Tarjeta Inactiva",
     "currentInvoice": "Factura Actual",
     "upcomingInvoices": "Próximas Facturas",
@@ -562,6 +579,7 @@
     "advancesSection": "Anticipaciones Realizadas",
     "moveHere": "Mover a esta factura",
     "anticipate": "Anticipar",
+    "anticipatedContext": "{n} anticipadas · {remaining} restantes tras esta factura",
     "moving": "Moviendo...",
     "moveError": "No fue posible mover las cuotas",
     "advanceSummary": "Anticipación {n}x — {desc}",

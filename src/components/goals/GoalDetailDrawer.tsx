@@ -52,9 +52,7 @@ interface GoalDetailDrawerProps {
   goal: Goal | null;
   onClose: () => void;
   onAddFunds: (goal: Goal) => void;
-  onDelete: (goalId: string) => void;
   onUpdateGoal?: (goal: Goal) => void;
-  isDeleting?: boolean;
 }
 
 export function GoalDetailDrawer({
@@ -62,9 +60,7 @@ export function GoalDetailDrawer({
   goal,
   onClose,
   onAddFunds,
-  onDelete,
   onUpdateGoal,
-  isDeleting = false,
 }: GoalDetailDrawerProps) {
   const t = useTranslations('goalDetail');
   const { locale } = useLanguage();
@@ -72,17 +68,13 @@ export function GoalDetailDrawer({
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState<string>('');
   const [editDate, setEditDate] = useState<string>('');
-  const [confirmDeleteGoal, setConfirmDeleteGoal] = useState(false);
 
   const percent = useMemo(
     () => (goal ? Math.round((goal.savedAmount / goal.targetAmount) * 100) : 0),
-    [goal]
+    [goal],
   );
 
-  const remaining = useMemo(
-    () => (goal ? goal.targetAmount - goal.savedAmount : 0),
-    [goal]
-  );
+  const remaining = useMemo(() => (goal ? goal.targetAmount - goal.savedAmount : 0), [goal]);
 
   const monthlySavings = useMemo(() => {
     if (!goal || goal.contributions.length === 0) return 0;
@@ -127,13 +119,12 @@ export function GoalDetailDrawer({
   if (!goal) return null;
 
   const sortedContributions = [...goal.contributions].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
   const handleOpenChange = (o: boolean) => {
     if (!o) {
       setEditingEntryId(null);
-      setConfirmDeleteGoal(false);
       onClose();
     }
   };
@@ -154,15 +145,8 @@ export function GoalDetailDrawer({
         <div className="flex-1 px-6 pb-6 space-y-8 mt-4">
           {/* Progress Ring */}
           <div className="flex flex-col items-center text-center">
-            <CircularProgress
-              percent={percent}
-              size={192}
-              strokeWidth={6}
-              className="mb-4"
-            >
-              <span className="text-3xl font-bold font-display text-white">
-                {percent}%
-              </span>
+            <CircularProgress percent={percent} size={192} strokeWidth={6} className="mb-4">
+              <span className="text-3xl font-bold font-display text-white">{percent}%</span>
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                 {t('completed')}
               </span>
@@ -201,26 +185,20 @@ export function GoalDetailDrawer({
                   {t('deadline')}
                 </span>
               </div>
-              <p className="text-sm font-bold">
-                {getDeadlineLabel(goal.deadline, dateFnsLocale)}
-              </p>
+              <p className="text-sm font-bold">{getDeadlineLabel(goal.deadline, dateFnsLocale)}</p>
             </div>
           </div>
 
           {/* Recent Contributions */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold font-display">
-                {t('history')}
-              </h3>
+              <h3 className="text-base font-bold font-display">{t('history')}</h3>
             </div>
 
             <div className="space-y-2">
               {sortedContributions.length === 0 ? (
                 <div className="glass-card rounded-2xl p-8 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    {t('noContributions')}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t('noContributions')}</p>
                 </div>
               ) : (
                 sortedContributions.map((c) => (
@@ -244,11 +222,7 @@ export function GoalDetailDrawer({
                           />
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            onClick={handleUpdateEntry}
-                            className="h-8 flex-1"
-                          >
+                          <Button size="sm" onClick={handleUpdateEntry} className="h-8 flex-1">
                             {t('save')}
                           </Button>
                           <Button
@@ -269,9 +243,7 @@ export function GoalDetailDrawer({
                               <CheckCircle2 className="h-4 w-4 text-primary" />
                             </div>
                             <div>
-                              <p className="text-sm font-bold">
-                                {c.description}
-                              </p>
+                              <p className="text-sm font-bold">{c.description}</p>
                               <p className="text-[11px] text-muted-foreground">
                                 {formatDate(c.date, dateFnsLocale)}
                               </p>
@@ -308,62 +280,16 @@ export function GoalDetailDrawer({
           </div>
         </div>
 
-        <DrawerFooter className="flex-col sm:flex-col gap-3">
-          {confirmDeleteGoal ? (
-            <div className="glass-card rounded-2xl p-4 space-y-4 border border-destructive/30 w-full">
-              <div className="flex items-start gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center bg-red-500/10 text-red-500">
-                  <Trash2 className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 pt-1.5">
-                  <p className="text-sm font-bold text-white tracking-tight">
-                    {t('confirmDelete')}
-                  </p>
-                  <p className="text-xs text-muted-foreground/60 font-medium mt-1">
-                    {t('confirmDeleteDesc')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setConfirmDeleteGoal(false)}
-                  disabled={isDeleting}
-                  className="flex-1 h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  onClick={() => onDelete(goal.id)}
-                  disabled={isDeleting}
-                  className="flex-1 h-10 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all text-xs font-bold shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isDeleting ? t('deleting') : t('delete')}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <Button
-                onClick={() => onAddFunds(goal)}
-                className="w-full h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                <Plus className="h-5 w-5" />
-                {t('addContribution')}
-              </Button>
-
-              <button
-                onClick={() => setConfirmDeleteGoal(true)}
-                className="w-full h-11 rounded-xl border border-destructive/20 text-destructive font-bold text-sm hover:bg-destructive/10 transition-all flex items-center justify-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                {t('deleteGoal')}
-              </button>
-            </>
-          )}
+        <DrawerFooter>
+          <Button
+            onClick={() => onAddFunds(goal)}
+            className="w-full h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            {t('addContribution')}
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Sheet>
   );
 }
-
-

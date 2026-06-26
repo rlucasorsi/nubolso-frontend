@@ -33,20 +33,20 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
       <div className="w-full space-y-3">
         <div className="flex gap-3">
           <Button
-            onClick={handleFullPayment}
-            disabled={payMutation.isPending}
-            className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
-          >
-            {payMutation.isPending ? t('processing') : t('payAll')}
-          </Button>
-
-          <Button
             onClick={() => setPartialOpen(true)}
             variant="outline"
             disabled={payMutation.isPending}
             className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5 font-bold"
           >
             {t('partialPayment')}
+          </Button>
+
+          <Button
+            onClick={handleFullPayment}
+            disabled={payMutation.isPending}
+            className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            {payMutation.isPending ? t('processing') : t('payAll')}
           </Button>
         </div>
 
@@ -61,4 +61,3 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
     </>
   );
 }
-

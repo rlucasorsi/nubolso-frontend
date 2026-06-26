@@ -16,6 +16,7 @@ import { DateInputField } from '@/components/ui/form-field';
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
 import { MONTH_KEYS } from '@/components/painel/config';
 import { useGetInvoice } from '@/modules/credit-cards/hooks/use-get-invoice';
+import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
 import { useUpdateInvoicePaymentDate } from '@/modules/credit-cards/hooks/use-update-invoice-payment-date';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
 import { useDeletePurchase } from '@/modules/credit-cards/hooks/use-delete-purchase';
@@ -36,6 +37,7 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
   const t = useTranslations('invoiceDetail');
   const td = useTranslations('dateNames');
   const { data: invoice, isLoading } = useGetInvoice(invoiceId ?? undefined, open);
+  const { data: cardInvoices } = useGetCardInvoices(invoice?.cardId, open);
   const updatePaymentDateMutation = useUpdateInvoicePaymentDate();
   const reopenMutation = useReopenInvoice();
   const deletePurchaseMutation = useDeletePurchase();
@@ -136,9 +138,38 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     };
   }, [invoice, t]);
 
+  // Conta parcelas antecipadas e restantes por purchaseId varrendo TODAS as faturas do cartão.
+  // Necessário porque o advance fica na fatura onde foi feita a antecipação, não nas subsequentes.
+  // "remaining" = faturas não pagas e não antecipadas com paymentDate DEPOIS da fatura atual.
+  const anticipationByPurchase = useMemo(() => {
+    const map = new Map<string, { anticipated: number; remaining: number }>();
+    if (!cardInvoices || !invoice) return map;
+
+    for (const inv of cardInvoices) {
+      for (const inst of inv.installments) {
+        if (!map.has(inst.purchaseId)) {
+          map.set(inst.purchaseId, { anticipated: 0, remaining: 0 });
+        }
+        const entry = map.get(inst.purchaseId)!;
+        if (inst.isAnticipated) {
+          entry.anticipated += 1;
+        } else if (!inv.isPaid && inv.paymentDate > invoice.paymentDate) {
+          entry.remaining += 1;
+        }
+      }
+    }
+    return map;
+  }, [cardInvoices, invoice]);
+
   const hasFutureInstallments = (group: InstallmentGroup) => {
-    const maxNumber = Math.max(...group.installments.map((i) => i.number));
-    const totalCount = group.installments[0]?.totalCount ?? 0;
+    const anticipatedGroup = anticipatedGroups.find((g) => g.purchaseId === group.purchaseId);
+    const allNums = [
+      ...group.installments.map((i) => i.number),
+      ...(anticipatedGroup?.installments.map((i) => i.number) ?? []),
+    ];
+    const maxNumber = allNums.length > 0 ? Math.max(...allNums) : 0;
+    const totalCount =
+      (group.installments[0] ?? anticipatedGroup?.installments[0])?.totalCount ?? 0;
     return maxNumber < totalCount;
   };
 
@@ -275,22 +306,37 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                               </button>
                             )}
                           </div>
-                          {group.installments.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex items-center justify-between text-xs text-muted-foreground"
-                            >
-                              <span>
-                                {t('installment', { n: item.number, total: item.totalCount })}
-                              </span>
-                              <span
-                                className={`font-bold ${group.isCredit ? 'text-green-400' : 'text-foreground'}`}
+                          {group.installments.map((item) => {
+                            const stats = anticipationByPurchase.get(item.purchaseId);
+                            const totalAnticipated = stats?.anticipated ?? 0;
+                            const remainingOther = stats?.remaining ?? 0;
+
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-center justify-between text-xs text-muted-foreground"
                               >
-                                {group.isCredit ? '+' : ''}
-                                {formatCurrency(Math.abs(item.amount))}
-                              </span>
-                            </div>
-                          ))}
+                                <span className="flex items-center gap-1.5 flex-wrap">
+                                  {t('installment', { n: item.number, total: item.totalCount })}
+                                  {totalAnticipated > 0 && remainingOther >= 0 && (
+                                    <span className="text-amber-400/80 font-medium">
+                                      ·{' '}
+                                      {t('anticipatedContext', {
+                                        n: totalAnticipated,
+                                        remaining: remainingOther,
+                                      })}
+                                    </span>
+                                  )}
+                                </span>
+                                <span
+                                  className={`font-bold ${group.isCredit ? 'text-green-400' : 'text-foreground'}`}
+                                >
+                                  {group.isCredit ? '+' : ''}
+                                  {formatCurrency(Math.abs(item.amount))}
+                                </span>
+                              </div>
+                            );
+                          })}
                           {!invoice.isPaid && hasFutureInstallments(group) && isCurrentInvoice && (
                             <div className="flex items-center gap-2 pt-1 border-t border-white/5">
                               <button

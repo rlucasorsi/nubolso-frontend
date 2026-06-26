@@ -23,6 +23,8 @@ export interface GetEntriesFilters {
   type?: 'income' | 'expense' | 'spending';
   categoryId?: string;
   isPaid?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 interface PaginatedTransactionsResponse {
@@ -47,10 +49,16 @@ export const entriesService = {
       { params },
     );
 
-    return response.data.map((t) => ({
-      ...t,
-      type: t.type.toLowerCase() as 'income' | 'expense' | 'spending',
-    }));
+    return {
+      data: response.data.map((t) => ({
+        ...t,
+        type: t.type.toLowerCase() as 'income' | 'expense' | 'spending',
+      })),
+      total: response.total,
+      page: response.page,
+      limit: response.limit,
+      hasMore: response.hasMore,
+    };
   },
 
   create: async (params: any) => {

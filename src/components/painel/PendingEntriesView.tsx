@@ -156,199 +156,206 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
     { value: 'spending', label: typeT('spending') },
   ];
 
-  if (allPendingEntries.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center px-5">
-        <div className="p-4 rounded-full bg-emerald-500/10 mb-4">
-          <CheckCircle2 className="h-8 w-8 text-emerald-500/60" />
-        </div>
-        <h3 className="text-base font-semibold text-foreground">{t('pendingEmpty')}</h3>
-        <p className="text-sm text-muted-foreground mt-1">{t('pendingEmptyHint')}</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col">
-      <div className="px-5 space-y-3 pb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t('pendingSearchPlaceholder')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 h-10 bg-[#1c1a24] border-none focus:ring-primary/20 rounded-xl"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-full transition-colors"
-            >
-              <X className="h-3 w-3 text-muted-foreground" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex gap-2 flex-wrap items-center">
-          {typeOptions.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setTypeFilter(opt.value)}
-              className={cn(
-                'px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
-                typeFilter === opt.value
-                  ? 'bg-primary/20 border-primary/50 text-primary'
-                  : 'border-white/10 text-muted-foreground hover:bg-white/5',
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
-          <div className="w-px h-4 bg-white/10 mx-1" />
-          <button
-            onClick={() => setAlertOnly((v) => !v)}
-            className={cn(
-              'px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
-              alertOnly
-                ? 'bg-amber-400/20 border-amber-400/50 text-amber-400'
-                : 'border-white/10 text-muted-foreground hover:bg-white/5',
-            )}
-          >
-            {t('pendingFilterAlert')}
-          </button>
-        </div>
-      </div>
-
-      <div className="px-5 space-y-1">
-        {filteredEntries.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-sm text-muted-foreground/60">{t('pendingNoneFound')}</p>
+    <div className="px-4 pb-4">
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
+        {allPendingEntries.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center px-5">
+            <div className="p-4 rounded-full bg-emerald-500/10 mb-4">
+              <CheckCircle2 className="h-8 w-8 text-emerald-500/60" />
+            </div>
+            <h3 className="text-base font-semibold text-foreground">{t('pendingEmpty')}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{t('pendingEmptyHint')}</p>
           </div>
         ) : (
-          groupedByDay.map(([date, dayEntries]) => {
-            const isOpen = !collapsedDays.has(date);
-            return (
-              <Collapsible
-                key={date}
-                open={isOpen}
-                onOpenChange={(open) =>
-                  setCollapsedDays((prev) => {
-                    const next = new Set(prev);
-                    if (!open) next.add(date);
-                    else next.delete(date);
-                    return next;
-                  })
-                }
-              >
-                <CollapsibleTrigger className="flex items-center justify-between w-full py-2 group">
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
-                    {formatDayHeader(date, dateFnsLocale)}
-                  </span>
-                  <ChevronDown
+          <>
+            <div className="p-4 space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder={t('pendingSearchPlaceholder')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 h-10 bg-[#1c1a24] border-none focus:ring-primary/20 rounded-xl"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-full transition-colors"
+                  >
+                    <X className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex gap-2 flex-wrap items-center">
+                {typeOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setTypeFilter(opt.value)}
                     className={cn(
-                      'h-4 w-4 text-muted-foreground transition-transform',
-                      isOpen && 'rotate-180',
+                      'px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
+                      typeFilter === opt.value
+                        ? 'bg-primary/20 border-primary/50 text-primary'
+                        : 'border-white/10 text-muted-foreground hover:bg-white/5',
                     )}
-                  />
-                </CollapsibleTrigger>
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                <div className="w-px h-4 bg-white/10 mx-1" />
+                <button
+                  onClick={() => setAlertOnly((v) => !v)}
+                  className={cn(
+                    'px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
+                    alertOnly
+                      ? 'bg-amber-400/20 border-amber-400/50 text-amber-400'
+                      : 'border-white/10 text-muted-foreground hover:bg-white/5',
+                  )}
+                >
+                  {t('pendingFilterAlert')}
+                </button>
+              </div>
+            </div>
 
-                <CollapsibleContent className="space-y-3 pb-3">
-                  {dayEntries.map((entry) => {
-                    const cfg =
-                      TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.spending;
-                    const isConfirming = realizingId === entry.id;
-                    const alertStatus = getPendingAlertStatus(entry.date, today, alertDays);
+            <div className="px-4 space-y-1 pb-4">
+              {filteredEntries.length === 0 ? (
+                <div className="py-12 text-center">
+                  <p className="text-sm text-muted-foreground/60">{t('pendingNoneFound')}</p>
+                </div>
+              ) : (
+                groupedByDay.map(([date, dayEntries]) => {
+                  const isOpen = !collapsedDays.has(date);
+                  return (
+                    <Collapsible
+                      key={date}
+                      open={isOpen}
+                      onOpenChange={(open) =>
+                        setCollapsedDays((prev) => {
+                          const next = new Set(prev);
+                          if (!open) next.add(date);
+                          else next.delete(date);
+                          return next;
+                        })
+                      }
+                    >
+                      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 group">
+                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
+                          {formatDayHeader(date, dateFnsLocale)}
+                        </span>
+                        <ChevronDown
+                          className={cn(
+                            'h-4 w-4 text-muted-foreground transition-transform',
+                            isOpen && 'rotate-180',
+                          )}
+                        />
+                      </CollapsibleTrigger>
 
-                    return (
-                      <div
-                        key={entry.id}
-                        className={cn(
-                          'bg-[#1c1a24] border rounded-2xl p-4 transition-all duration-200',
-                          isConfirming ? 'border-primary/30' : 'border-transparent',
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={cn('p-3 rounded-2xl shrink-0', cfg.bg)}>
-                            {cfg.icon('md')}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-sm font-semibold truncate">
-                                {entry.description || '—'}
-                              </p>
-                              {alertStatus && (
-                                <AlertBadge
-                                  status={alertStatus}
-                                  entryDate={entry.date}
-                                  today={today}
-                                  t={t}
-                                />
+                      <CollapsibleContent className="space-y-3 pb-3">
+                        {dayEntries.map((entry) => {
+                          const cfg =
+                            TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] ||
+                            TYPE_CONFIG.spending;
+                          const isConfirming = realizingId === entry.id;
+                          const alertStatus = getPendingAlertStatus(entry.date, today, alertDays);
+
+                          return (
+                            <div
+                              key={entry.id}
+                              className={cn(
+                                'bg-[#1c1a24] border rounded-2xl p-4 transition-all duration-200',
+                                isConfirming ? 'border-primary/30' : 'border-transparent',
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={cn('p-3 rounded-2xl shrink-0', cfg.bg)}>
+                                  {cfg.icon('md')}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="text-sm font-semibold truncate">
+                                      {entry.description || '—'}
+                                    </p>
+                                    {alertStatus && (
+                                      <AlertBadge
+                                        status={alertStatus}
+                                        entryDate={entry.date}
+                                        today={today}
+                                        t={t}
+                                      />
+                                    )}
+                                  </div>
+                                  <p className={cn('text-base font-bold mt-0.5', cfg.color)}>
+                                    {cfg.sign} {formatCurrency(entry.amount)}
+                                  </p>
+                                </div>
+                                {!isConfirming && (
+                                  <button
+                                    onClick={() => startRealize(entry)}
+                                    className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors flex items-center gap-1.5"
+                                  >
+                                    <RotateCw className="h-3.5 w-3.5" />
+                                    {td('apply')}
+                                  </button>
+                                )}
+                              </div>
+
+                              {isConfirming && (
+                                <div className="mt-3 pt-3 border-t border-white/5 space-y-3">
+                                  <TextInputField
+                                    label={typeT('descriptionLabel')}
+                                    value={editValues.description}
+                                    onChange={(v) =>
+                                      setEditValues((prev) => ({ ...prev, description: v }))
+                                    }
+                                  />
+                                  <div>
+                                    <DateInputField
+                                      label={td('realizationDate')}
+                                      value={editValues.date}
+                                      onChange={(v) =>
+                                        setEditValues((prev) => ({ ...prev, date: v }))
+                                      }
+                                    />
+                                    <p className="text-xs text-muted-foreground/60 mt-1.5">
+                                      {td('dateNote')}
+                                    </p>
+                                  </div>
+                                  <AmountInputField
+                                    label={typeT('amount')}
+                                    value={editValues.amount}
+                                    onChange={(v) =>
+                                      setEditValues((prev) => ({ ...prev, amount: v }))
+                                    }
+                                  />
+                                  <div className="flex gap-2 justify-end">
+                                    <button
+                                      onClick={cancelRealize}
+                                      disabled={isSubmitting}
+                                      className="h-9 px-4 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-semibold"
+                                    >
+                                      {td('cancel')}
+                                    </button>
+                                    <button
+                                      onClick={() => confirmRealize(entry)}
+                                      disabled={isSubmitting}
+                                      className="h-9 px-4 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-xs font-bold disabled:opacity-50"
+                                    >
+                                      {td('confirm')}
+                                    </button>
+                                  </div>
+                                </div>
                               )}
                             </div>
-                            <p className={cn('text-base font-bold mt-0.5', cfg.color)}>
-                              {cfg.sign} {formatCurrency(entry.amount)}
-                            </p>
-                          </div>
-                          {!isConfirming && (
-                            <button
-                              onClick={() => startRealize(entry)}
-                              className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors flex items-center gap-1.5"
-                            >
-                              <RotateCw className="h-3.5 w-3.5" />
-                              {td('apply')}
-                            </button>
-                          )}
-                        </div>
-
-                        {isConfirming && (
-                          <div className="mt-3 pt-3 border-t border-white/5 space-y-3">
-                            <TextInputField
-                              label={typeT('descriptionLabel')}
-                              value={editValues.description}
-                              onChange={(v) =>
-                                setEditValues((prev) => ({ ...prev, description: v }))
-                              }
-                            />
-                            <div>
-                              <DateInputField
-                                label={td('realizationDate')}
-                                value={editValues.date}
-                                onChange={(v) => setEditValues((prev) => ({ ...prev, date: v }))}
-                              />
-                              <p className="text-xs text-muted-foreground/60 mt-1.5">
-                                {td('dateNote')}
-                              </p>
-                            </div>
-                            <AmountInputField
-                              label={typeT('amount')}
-                              value={editValues.amount}
-                              onChange={(v) => setEditValues((prev) => ({ ...prev, amount: v }))}
-                            />
-                            <div className="flex gap-2 justify-end">
-                              <button
-                                onClick={cancelRealize}
-                                disabled={isSubmitting}
-                                className="h-9 px-4 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-semibold"
-                              >
-                                {td('cancel')}
-                              </button>
-                              <button
-                                onClick={() => confirmRealize(entry)}
-                                disabled={isSubmitting}
-                                className="h-9 px-4 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-xs font-bold disabled:opacity-50"
-                              >
-                                {td('confirm')}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </CollapsibleContent>
-              </Collapsible>
-            );
-          })
+                          );
+                        })}
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                })
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>

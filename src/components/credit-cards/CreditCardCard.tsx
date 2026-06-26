@@ -3,18 +3,26 @@
 import type { CreditCard as CreditCardType } from '@/modules/credit-cards/model/api/credit-card';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
-import { CreditCard as CreditCardIcon } from 'lucide-react';
+import { CreditCard as CreditCardIcon, MoreHorizontal, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useTranslations } from '@/i18n/useTranslations';
 
 interface CreditCardCardProps {
   card: CreditCardType;
   onClick: () => void;
+  onDelete: () => void;
 }
 
-export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
+export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps) {
   const t = useTranslations('creditCard');
+  const td = useTranslations('creditCardDetail');
   const { data: invoices, isLoading } = useGetCardInvoices(card.id);
 
   const unpaidInvoices = (invoices ?? [])
@@ -46,11 +54,39 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
             </p>
           </div>
         </div>
-        {!card.isActive && (
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg shrink-0">
-            {t('inactive')}
-          </span>
-        )}
+        <div className="flex flex-col items-end gap-2">
+          {card.isActive ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground/40 hover:text-foreground hover:bg-white/10 transition-all"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-44 bg-card border-white/10 rounded-xl shadow-xl"
+              >
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  className="gap-2 text-sm cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {td('delete')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-white/5 px-2 py-1 rounded-lg">
+              {t('inactive')}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4 mt-auto">
@@ -94,4 +130,3 @@ export function CreditCardCard({ card, onClick }: CreditCardCardProps) {
     </div>
   );
 }
-

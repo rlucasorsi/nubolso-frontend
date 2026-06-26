@@ -15,6 +15,16 @@ import { CreateGoalDrawer } from '@/components/goals/CreateGoalDrawer';
 import { AddFundsDrawer } from '@/components/goals/AddFundsDrawer';
 import { GoalsSummary } from '@/components/goals/GoalsSummary';
 import { AddButton } from '@/components/ui/add-button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Target } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { usePlan } from '@/modules/billing/hooks/use-plan';
@@ -22,6 +32,7 @@ import { UpgradeDrawer } from '@/components/billing/UpgradeDrawer';
 
 export function GoalsView() {
   const t = useTranslations('goalsView');
+  const tg = useTranslations('goals');
   const goalsQuery = useGetGoals();
   const createGoalMutation = useCreateGoal();
   const updateGoalMutation = useUpdateGoal();
@@ -34,6 +45,7 @@ export function GoalsView() {
   const [addFundsGoal, setAddFundsGoal] = useState<Goal | null>(null);
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [deletingGoal, setDeletingGoal] = useState<Goal | null>(null);
 
   const goals = goalsQuery.data ?? [];
   const isLoading = goalsQuery.isLoading;
@@ -156,6 +168,7 @@ export function GoalsView() {
                 goal={goal}
                 onClick={() => handleGoalClick(goal)}
                 onAddFunds={() => setAddFundsGoal(goal)}
+                onDelete={() => setDeletingGoal(goal)}
               />
             ))}
 
@@ -195,8 +208,6 @@ export function GoalsView() {
           setSelectedGoal(null);
         }}
         onAddFunds={handleAddFundsFromDetail}
-        onDelete={handleDeleteGoal}
-        isDeleting={deleteGoalMutation.isPending}
         onUpdateGoal={async (updatedGoal) => {
           try {
             await updateGoalMutation.mutateAsync({
@@ -226,6 +237,37 @@ export function GoalsView() {
         onClose={() => setUpgradeOpen(false)}
         featureKey="featureGoals"
       />
+
+      <AlertDialog
+        open={deletingGoal !== null}
+        onOpenChange={(open) => !open && setDeletingGoal(null)}
+      >
+        <AlertDialogContent className="bg-card border-white/10 rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tg('deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{tg('deleteConfirmDescription')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="rounded-xl border-white/10 hover:bg-white/5"
+              onClick={() => setDeletingGoal(null)}
+            >
+              {tg('cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteGoalMutation.isPending}
+              onClick={() => {
+                if (deletingGoal) {
+                  handleDeleteGoal(deletingGoal.id).then(() => setDeletingGoal(null));
+                }
+              }}
+            >
+              {tg('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

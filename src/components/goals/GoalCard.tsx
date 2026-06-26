@@ -16,10 +16,18 @@ import {
   PartyPopper,
   Timer,
   PiggyBank,
+  MoreHorizontal,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { CircularProgress } from '@/components/ui/circular-progress';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 
@@ -53,18 +61,34 @@ function formatCurrencyFull(value: number) {
 }
 
 const COLOR_MAP = {
-  primary: { iconBg: 'bg-primary/10', iconText: 'text-primary', badgeBg: 'bg-primary/10', badgeText: 'text-primary' },
-  secondary: { iconBg: 'bg-accent/10', iconText: 'text-accent', badgeBg: 'bg-accent/10', badgeText: 'text-accent' },
-  tertiary: { iconBg: 'bg-status-warning/10', iconText: 'text-status-warning', badgeBg: 'bg-status-warning/10', badgeText: 'text-status-warning' },
+  primary: {
+    iconBg: 'bg-primary/10',
+    iconText: 'text-primary',
+    badgeBg: 'bg-primary/10',
+    badgeText: 'text-primary',
+  },
+  secondary: {
+    iconBg: 'bg-accent/10',
+    iconText: 'text-accent',
+    badgeBg: 'bg-accent/10',
+    badgeText: 'text-accent',
+  },
+  tertiary: {
+    iconBg: 'bg-status-warning/10',
+    iconText: 'text-status-warning',
+    badgeBg: 'bg-status-warning/10',
+    badgeText: 'text-status-warning',
+  },
 };
 
 interface GoalCardProps {
   goal: Goal;
   onClick: () => void;
   onAddFunds: () => void;
+  onDelete: () => void;
 }
 
-export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
+export function GoalCard({ goal, onClick, onAddFunds, onDelete }: GoalCardProps) {
   const t = useTranslations('goals');
   const { locale } = useLanguage();
   const Icon = getGoalIcon(goal.icon);
@@ -127,21 +151,56 @@ export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
             </p>
           </div>
         </div>
-        <CircularProgress percent={percent} size={60} strokeWidth={8}>
-          <span className="text-xs font-bold text-white">{percent}%</span>
-        </CircularProgress>
+        <div className="flex flex-col items-end gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground/40 hover:text-foreground hover:bg-white/10 transition-all"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-40 bg-card border-white/10 rounded-xl shadow-xl"
+            >
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="gap-2 text-sm cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                {t('delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <CircularProgress percent={percent} size={60} strokeWidth={8}>
+            <span className="text-xs font-bold text-white">{percent}%</span>
+          </CircularProgress>
+        </div>
       </div>
 
       <div className="space-y-6 mt-auto">
         <div className="space-y-3">
           <div className="flex justify-between items-end">
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{t('saved')}</span>
-              <span className="text-lg font-bold text-foreground">{formatCurrencyFull(goal.savedAmount)}</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                {t('saved')}
+              </span>
+              <span className="text-lg font-bold text-foreground">
+                {formatCurrencyFull(goal.savedAmount)}
+              </span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">{t('target')}</span>
-              <span className="text-sm font-bold text-primary/80">{formatCurrency(goal.targetAmount)}</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">
+                {t('target')}
+              </span>
+              <span className="text-sm font-bold text-primary/80">
+                {formatCurrency(goal.targetAmount)}
+              </span>
             </div>
           </div>
 
@@ -154,13 +213,15 @@ export function GoalCard({ goal, onClick, onAddFunds }: GoalCardProps) {
         </div>
 
         <Button
-          onClick={(e) => { e.stopPropagation(); onAddFunds(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddFunds();
+          }}
           className="w-full h-12 bg-primary text-white font-bold transition-all duration-300 rounded-base hover:scale-[1.02] active:scale-[0.98]"
         >
-          {t('addFunds')}
+          {t('manage')}
         </Button>
       </div>
     </div>
   );
 }
-

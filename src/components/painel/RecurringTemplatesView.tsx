@@ -157,218 +157,221 @@ export function RecurringTemplatesView() {
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 pointer-events-none" />
-          <Input
-            placeholder={t('searchPlaceholder')}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 bg-white/[0.03] border-white/10 focus-visible:ring-primary/30 placeholder:text-muted-foreground/30"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          {(['all', 'income', 'expense', 'spending'] as TypeFilter[]).map((type) => (
-            <button
-              key={type}
-              onClick={() => setTypeFilter(type)}
-              className={cn(
-                'px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
-                typeFilter === type
-                  ? type === 'all'
-                    ? 'bg-primary text-white'
-                    : cn(
-                        type === 'income' &&
-                          'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
-                        type === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',
-                        type === 'spending' &&
-                          'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
-                      )
-                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
-              )}
-            >
-              {TYPE_FILTER_LABELS[type]}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {actionError && <p className="text-sm text-red-400 font-medium px-1">{actionError}</p>}
-
-      <div className="space-y-8">
-        {isError ? (
-          <ServerErrorState onRetry={refetch} />
-        ) : isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-[68px] w-full bg-card/50 animate-pulse rounded-2xl border border-white/5"
+      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="p-4 space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 pointer-events-none" />
+            <Input
+              placeholder={t('searchPlaceholder')}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="pl-9 bg-white/[0.03] border-white/10 focus-visible:ring-primary/30 placeholder:text-muted-foreground/30"
             />
-          ))
-        ) : !recurringTemplates || recurringTemplates.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t('noTemplates')}</p>
-        ) : groups.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t('noResults')}</p>
-        ) : (
-          groups.map(({ type, cfg, templates }) => {
-            const isExpanded = expandedGroups[type];
-            const total = templates.reduce((acc, tmpl) => acc + tmpl.estimatedAmount, 0);
+          </div>
 
-            return (
-              <div key={type} className="space-y-3">
-                <button
-                  onClick={() => toggleGroup(type)}
-                  className="w-full flex items-center gap-4 group/header"
-                >
-                  <div
-                    className={cn(
-                      'w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/header:scale-110',
-                      cfg.bg,
-                    )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {(['all', 'income', 'expense', 'spending'] as TypeFilter[]).map((type) => (
+              <button
+                key={type}
+                onClick={() => setTypeFilter(type)}
+                className={cn(
+                  'px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
+                  typeFilter === type
+                    ? type === 'all'
+                      ? 'bg-primary text-white'
+                      : cn(
+                          type === 'income' &&
+                            'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
+                          type === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',
+                          type === 'spending' &&
+                            'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
+                        )
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                {TYPE_FILTER_LABELS[type]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {actionError && <p className="text-sm text-red-400 font-medium px-4 pb-2">{actionError}</p>}
+
+        <div className="px-4 pb-4 space-y-8">
+          {isError ? (
+            <ServerErrorState onRetry={refetch} />
+          ) : isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-[68px] w-full bg-card/50 animate-pulse rounded-2xl border border-white/5"
+              />
+            ))
+          ) : !recurringTemplates || recurringTemplates.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t('noTemplates')}</p>
+          ) : groups.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t('noResults')}</p>
+          ) : (
+            groups.map(({ type, cfg, templates }) => {
+              const isExpanded = expandedGroups[type];
+              const total = templates.reduce((acc, tmpl) => acc + tmpl.estimatedAmount, 0);
+
+              return (
+                <div key={type} className="space-y-3">
+                  <button
+                    onClick={() => toggleGroup(type)}
+                    className="w-full flex items-center gap-4 group/header"
                   >
-                    {cfg.icon('md')}
-                  </div>
-                  <h4 className={cn('text-xs font-black uppercase tracking-[0.25em]', cfg.color)}>
-                    {typeT(type)}
-                  </h4>
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent mx-2" />
-                  <div className="flex items-center gap-3">
-                    <p className="text-sm font-black text-white font-display">
-                      {formatCurrency(total)}
-                    </p>
-                    <ChevronDown
+                    <div
                       className={cn(
-                        'w-4 h-4 text-muted-foreground/30 transition-transform duration-300',
-                        isExpanded ? 'rotate-180' : '',
+                        'w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/header:scale-110',
+                        cfg.bg,
                       )}
-                    />
-                  </div>
-                </button>
+                    >
+                      {cfg.icon('md')}
+                    </div>
+                    <h4 className={cn('text-xs font-black uppercase tracking-[0.25em]', cfg.color)}>
+                      {typeT(type)}
+                    </h4>
+                    <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent mx-2" />
+                    <div className="flex items-center gap-3">
+                      <p className="text-sm font-black text-white font-display">
+                        {formatCurrency(total)}
+                      </p>
+                      <ChevronDown
+                        className={cn(
+                          'w-4 h-4 text-muted-foreground/30 transition-transform duration-300',
+                          isExpanded ? 'rotate-180' : '',
+                        )}
+                      />
+                    </div>
+                  </button>
 
-                {isExpanded && (
-                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    {templates.map((template) => {
-                      const isArchiving =
-                        archiveMutation.isPending && archiveMutation.variables?.id === template.id;
-                      const isReactivating =
-                        reactivateMutation.isPending &&
-                        reactivateMutation.variables?.id === template.id;
-                      const isDeleting =
-                        deleteMutation.isPending && deleteMutation.variables?.id === template.id;
+                  {isExpanded && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      {templates.map((template) => {
+                        const isArchiving =
+                          archiveMutation.isPending &&
+                          archiveMutation.variables?.id === template.id;
+                        const isReactivating =
+                          reactivateMutation.isPending &&
+                          reactivateMutation.variables?.id === template.id;
+                        const isDeleting =
+                          deleteMutation.isPending && deleteMutation.variables?.id === template.id;
 
-                      return (
-                        <div
-                          key={template.id}
-                          className={cn(
-                            'relative flex items-center justify-between gap-3 p-4 rounded-2xl bg-[#1c1a24] border border-transparent hover:border-white/5 transition-all',
-                            !template.isActive && 'opacity-50',
-                          )}
-                        >
+                        return (
                           <div
+                            key={template.id}
                             className={cn(
-                              'absolute left-0 top-4 bottom-4 w-1 rounded-r-full',
-                              cfg.bar,
+                              'relative flex items-center justify-between gap-3 p-4 rounded-2xl bg-[#1c1a24] border border-transparent hover:border-white/5 transition-all',
+                              !template.isActive && 'opacity-50',
                             )}
-                          />
+                          >
+                            <div
+                              className={cn(
+                                'absolute left-0 top-4 bottom-4 w-1 rounded-r-full',
+                                cfg.bar,
+                              )}
+                            />
 
-                          <div className="flex items-center gap-3 min-w-0 pl-2">
-                            <div className="min-w-0">
-                              <p className="text-sm font-semibold truncate">
-                                {template.description}
-                              </p>
-                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                {template.category && (
-                                  <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1">
-                                    <span
-                                      className="h-1.5 w-1.5 rounded-full"
-                                      style={{ backgroundColor: template.category.color }}
-                                    />
-                                    {template.category.name}
-                                  </p>
-                                )}
-                                <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
-                                  {t('day', { day: template.dayOfMonth })} ·{' '}
-                                  {formatCurrency(template.estimatedAmount)}
-                                  {template.endDate && (
-                                    <>
-                                      {' · '}
-                                      <CalendarClock className="h-3 w-3 inline" />{' '}
-                                      {format(parseISO(template.endDate), 'MMM/yyyy')}
-                                    </>
-                                  )}
-                                  {template.totalOccurrences && (
-                                    <>
-                                      {' · '}
-                                      <Hash className="h-3 w-3 inline" />{' '}
-                                      {template.occurrenceCount ?? 0}/{template.totalOccurrences}x
-                                    </>
-                                  )}
-                                  {!template.isActive && ` · ${t('archived')}`}
+                            <div className="flex items-center gap-3 min-w-0 pl-2">
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold truncate">
+                                  {template.description}
                                 </p>
+                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                  {template.category && (
+                                    <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1">
+                                      <span
+                                        className="h-1.5 w-1.5 rounded-full"
+                                        style={{ backgroundColor: template.category.color }}
+                                      />
+                                      {template.category.name}
+                                    </p>
+                                  )}
+                                  <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
+                                    {t('day', { day: template.dayOfMonth })} ·{' '}
+                                    {formatCurrency(template.estimatedAmount)}
+                                    {template.endDate && (
+                                      <>
+                                        {' · '}
+                                        <CalendarClock className="h-3 w-3 inline" />{' '}
+                                        {format(parseISO(template.endDate), 'MMM/yyyy')}
+                                      </>
+                                    )}
+                                    {template.totalOccurrences && (
+                                      <>
+                                        {' · '}
+                                        <Hash className="h-3 w-3 inline" />{' '}
+                                        {template.occurrenceCount ?? 0}/{template.totalOccurrences}x
+                                      </>
+                                    )}
+                                    {!template.isActive && ` · ${t('archived')}`}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          <div className="flex items-center gap-1 shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditTemplate(template)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-
-                            {template.isActive ? (
+                            <div className="flex items-center gap-1 shrink-0">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setArchiveTemplateId(template.id)}
-                                disabled={isArchiving}
+                                onClick={() => handleEditTemplate(template)}
                               >
-                                {isArchiving ? (
-                                  <Loader2 className="h-4 w-4 text-amber-500/60 animate-spin" />
-                                ) : (
-                                  <Archive className="h-4 w-4 text-amber-500/60" />
-                                )}
+                                <Pencil className="h-4 w-4" />
                               </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleReactivateTemplate(template.id)}
-                                disabled={isReactivating}
-                              >
-                                {isReactivating ? (
-                                  <Loader2 className="h-4 w-4 text-emerald-500/60 animate-spin" />
-                                ) : (
-                                  <RotateCw className="h-4 w-4 text-emerald-500/60" />
-                                )}
-                              </Button>
-                            )}
 
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setDeleteTemplateId(template.id)}
-                              disabled={isDeleting}
-                            >
-                              {isDeleting ? (
-                                <Loader2 className="h-4 w-4 text-red-500/60 animate-spin" />
+                              {template.isActive ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setArchiveTemplateId(template.id)}
+                                  disabled={isArchiving}
+                                >
+                                  {isArchiving ? (
+                                    <Loader2 className="h-4 w-4 text-amber-500/60 animate-spin" />
+                                  ) : (
+                                    <Archive className="h-4 w-4 text-amber-500/60" />
+                                  )}
+                                </Button>
                               ) : (
-                                <Trash2 className="h-4 w-4 text-red-500/60" />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleReactivateTemplate(template.id)}
+                                  disabled={isReactivating}
+                                >
+                                  {isReactivating ? (
+                                    <Loader2 className="h-4 w-4 text-emerald-500/60 animate-spin" />
+                                  ) : (
+                                    <RotateCw className="h-4 w-4 text-emerald-500/60" />
+                                  )}
+                                </Button>
                               )}
-                            </Button>
+
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setDeleteTemplateId(template.id)}
+                                disabled={isDeleting}
+                              >
+                                {isDeleting ? (
+                                  <Loader2 className="h-4 w-4 text-red-500/60 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4 text-red-500/60" />
+                                )}
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       <RecurringTemplateDrawer

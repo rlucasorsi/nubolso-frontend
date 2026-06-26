@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
+import { useDeleteCreditCard } from '@/modules/credit-cards/hooks/use-delete-credit-card';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import type { CreditCard } from '@/modules/credit-cards/model/api/credit-card';
 import { CreditCardCard } from '@/components/credit-cards/CreditCardCard';
@@ -12,6 +13,16 @@ import { AddPurchaseDrawer } from '@/components/credit-cards/AddPurchaseDrawer';
 import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDrawer';
 import { CreditCardsSummary } from '@/components/credit-cards/CreditCardsSummary';
 import { AddButton } from '@/components/ui/add-button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { usePlan } from '@/modules/billing/hooks/use-plan';
@@ -19,8 +30,10 @@ import { UpgradeDrawer } from '@/components/billing/UpgradeDrawer';
 
 export function CreditCardsView() {
   const t = useTranslations('creditCardsView');
+  const td = useTranslations('creditCardDetail');
   const cardsQuery = useGetCreditCards();
   const invoicesQuery = useGetAllInvoices();
+  const deleteMutation = useDeleteCreditCard();
   const { isFree, limits } = usePlan();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -29,6 +42,7 @@ export function CreditCardsView() {
   const [addPurchaseCardId, setAddPurchaseCardId] = useState<string | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [deletingCard, setDeletingCard] = useState<CreditCard | null>(null);
 
   const cards = useMemo(() => cardsQuery.data ?? [], [cardsQuery.data]);
   const invoices = useMemo(() => invoicesQuery.data ?? [], [invoicesQuery.data]);
@@ -150,7 +164,12 @@ export function CreditCardsView() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {cards.map((card) => (
-              <CreditCardCard key={card.id} card={card} onClick={() => handleCardClick(card)} />
+              <CreditCardCard
+                key={card.id}
+                card={card}
+                onClick={() => handleCardClick(card)}
+                onDelete={() => setDeletingCard(card)}
+              />
             ))}
 
             <button
@@ -194,6 +213,38 @@ export function CreditCardsView() {
         onClose={() => setUpgradeOpen(false)}
         featureKey="featureCreditCards"
       />
+
+      <AlertDialog
+        open={deletingCard !== null}
+        onOpenChange={(open) => !open && setDeletingCard(null)}
+      >
+        <AlertDialogContent className="bg-card border-white/10 rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{td('removeConfirm')}</AlertDialogTitle>
+            <AlertDialogDescription>{td('removeDesc')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="rounded-xl border-white/10 hover:bg-white/5"
+              onClick={() => setDeletingCard(null)}
+            >
+              {td('cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteMutation.isPending}
+              onClick={async () => {
+                if (deletingCard) {
+                  await deleteMutation.mutateAsync({ id: deletingCard.id });
+                  setDeletingCard(null);
+                }
+              }}
+            >
+              {deleteMutation.isPending ? td('removing') : td('remove')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

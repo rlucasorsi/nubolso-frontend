@@ -1,6 +1,5 @@
 ﻿'use client';
 
-import { useState } from 'react';
 import type { CreditCard } from '@/modules/credit-cards/model/api/credit-card';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import {
@@ -12,12 +11,10 @@ import {
   SheetDescription,
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil } from 'lucide-react';
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
 import { MONTH_KEYS, TYPE_CONFIG } from '@/components/painel/config';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
-import { useDeleteCreditCard } from '@/modules/credit-cards/hooks/use-delete-credit-card';
-import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -45,10 +42,7 @@ export function CreditCardDetailDrawer({
 }: CreditCardDetailDrawerProps) {
   const t = useTranslations('creditCardDetail');
   const td = useTranslations('dateNames');
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { data: invoices, isLoading } = useGetCardInvoices(card?.id, open);
-  const deleteMutation = useDeleteCreditCard();
 
   if (!card) return null;
 
@@ -64,22 +58,7 @@ export function CreditCardDetailDrawer({
   const future = unpaid.slice(1);
 
   const handleOpenChange = (o: boolean) => {
-    if (!o) {
-      setConfirmDelete(false);
-      setDeleteError(null);
-      onClose();
-    }
-  };
-
-  const handleDeactivate = async () => {
-    setDeleteError(null);
-    try {
-      await deleteMutation.mutateAsync({ id: card.id });
-      setConfirmDelete(false);
-      onClose();
-    } catch (err) {
-      setDeleteError(extractErrorMessage(err, t('removeError')));
-    }
+    if (!o) onClose();
   };
 
   function InvoiceRowSkeleton() {
@@ -112,7 +91,10 @@ export function CreditCardDetailDrawer({
           <div className={cn('p-2 rounded-xl shrink-0', cfg.bg)}>{cfg.icon('sm')}</div>
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate">
-              {t('invoiceMonth', { month: td(MONTH_KEYS[invoice.referenceMonth - 1]), year: invoice.referenceYear })}
+              {t('invoiceMonth', {
+                month: td(MONTH_KEYS[invoice.referenceMonth - 1]),
+                year: invoice.referenceYear,
+              })}
             </p>
             <p className="text-xs text-muted-foreground">
               {invoice.isPaid ? t('paidOn') : t('dueOn')} {formatDateLong(invoice.paymentDate)}
@@ -122,9 +104,13 @@ export function CreditCardDetailDrawer({
         <div className="text-right shrink-0">
           <p className="text-sm font-bold">{formatCurrency(invoice.totalAmount)}</p>
           {invoice.isPaid ? (
-            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">{t('paid')}</span>
+            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
+              {t('paid')}
+            </span>
           ) : isOverdue ? (
-            <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">{t('overdue')}</span>
+            <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">
+              {t('overdue')}
+            </span>
           ) : null}
         </div>
       </button>
@@ -137,14 +123,22 @@ export function CreditCardDetailDrawer({
         <DrawerHeader
           onClose={onClose}
           actions={
-            <Button variant="ghost" size="icon-sm" onClick={() => onEdit(card)} title={t('editCardTitle')}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onEdit(card)}
+              title={t('editCardTitle')}
+            >
               <Pencil className="h-4 w-4" />
             </Button>
           }
         >
-          <SheetTitle className="text-xl font-bold font-display text-primary">{card.name}</SheetTitle>
+          <SheetTitle className="text-xl font-bold font-display text-primary">
+            {card.name}
+          </SheetTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            {t('closingDay', { day: card.closingDay })} · {t('dueDay', { day: card.dueDay })} · {t('paymentDay', { day: card.paymentDay })}
+            {t('closingDay', { day: card.closingDay })} · {t('dueDay', { day: card.dueDay })} ·{' '}
+            {t('paymentDay', { day: card.paymentDay })}
           </p>
           <SheetDescription className="sr-only">{card.name}</SheetDescription>
         </DrawerHeader>
@@ -152,7 +146,9 @@ export function CreditCardDetailDrawer({
         <div className="flex-1 px-6 pb-6 space-y-6 mt-4">
           {!card.isActive && (
             <div className="glass-card rounded-2xl p-4 text-center">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t('inactive')}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                {t('inactive')}
+              </p>
             </div>
           )}
 
@@ -191,7 +187,9 @@ export function CreditCardDetailDrawer({
               )}
 
               <div className="space-y-2">
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">{t('history')}</h3>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1">
+                  {t('history')}
+                </h3>
                 {paid.length === 0 ? (
                   <div className="glass-card rounded-2xl p-8 text-center">
                     <p className="text-sm text-muted-foreground">{t('noInvoices')}</p>
@@ -204,68 +202,17 @@ export function CreditCardDetailDrawer({
           )}
         </div>
 
-        <DrawerFooter className="flex-col sm:flex-col gap-3">
-          {confirmDelete ? (
-            <div className="glass-card rounded-2xl p-4 space-y-4 border border-destructive/30 w-full">
-              <div className="flex items-start gap-3">
-                <div className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center bg-red-500/10 text-red-500">
-                  <Trash2 className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 pt-1.5">
-                  <p className="text-sm font-bold text-white tracking-tight">{t('removeConfirm')}</p>
-                  <p className="text-xs text-muted-foreground/60 font-medium mt-1">
-                    {t('removeDesc')}
-                  </p>
-                  {deleteError && (
-                    <p className="text-xs text-red-500 font-medium mt-2">{deleteError}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  disabled={deleteMutation.isPending}
-                  className="flex-1 h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  onClick={handleDeactivate}
-                  disabled={deleteMutation.isPending}
-                  className="flex-1 h-10 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all text-xs font-bold shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {deleteMutation.isPending ? t('removing') : t('remove')}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <Button
-                onClick={() => onAddPurchase(card.id)}
-                disabled={!card.isActive}
-                className="w-full h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                <Plus className="h-5 w-5" />
-                {t('addPurchase')}
-              </Button>
-
-              {card.isActive && (
-                <button
-                  onClick={() => {
-                    setDeleteError(null);
-                    setConfirmDelete(true);
-                  }}
-                  className="w-full h-11 rounded-xl border border-destructive/20 text-destructive font-bold text-sm hover:bg-destructive/10 transition-all flex items-center justify-center gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {t('removeCard')}
-                </button>
-              )}
-            </>
-          )}
+        <DrawerFooter>
+          <Button
+            onClick={() => onAddPurchase(card.id)}
+            disabled={!card.isActive}
+            className="w-full h-11 bg-primary text-primary-foreground font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            {t('addPurchase')}
+          </Button>
         </DrawerFooter>
       </DrawerContent>
     </Sheet>
   );
 }
-
