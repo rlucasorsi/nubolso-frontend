@@ -105,7 +105,7 @@
   "dashboard": {
     "currentBalance": "Current Balance",
     "upToToday": "Up to today, {date}",
-    "monthForecast": "Month-end Forecast",
+    "monthForecast": "Period-end Forecast",
     "projectsBalance": "Projects your balance on {date}",
     "balanceProjection": "Balance Projection",
     "period": "Period",

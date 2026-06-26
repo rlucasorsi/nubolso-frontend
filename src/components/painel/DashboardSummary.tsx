@@ -14,6 +14,7 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ReferenceLine } from 'rec
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { InvoiceMonthlyChart } from '@/components/credit-cards/InvoiceMonthlyChart';
+import { DashboardAlerts } from './DashboardAlerts';
 
 interface DashboardSummaryProps {
   period: Period;
@@ -171,6 +172,8 @@ export function DashboardSummary({
 
   return (
     <div className="px-5 space-y-6 pb-4">
+      <DashboardAlerts period={period} today={today} balanceSettings={balanceSettings} />
+
       {/* Cards Row */}
       <div className="grid grid-cols-2 gap-3">
         {/* Saldo Atual */}
@@ -203,7 +206,7 @@ export function DashboardSummary({
               <TrendingUp className="w-3.5 h-3.5" />
             </div>
           </div>
-          <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[#fb923c] font-display truncate">
+          <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white font-display truncate">
             {formatCurrency(period.saldoFinal).replace('R$', 'R$ ')}
           </h3>
           <p className="text-[9px] text-muted-foreground/40 font-medium mt-0.5 truncate">

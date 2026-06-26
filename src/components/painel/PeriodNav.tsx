@@ -56,7 +56,7 @@ export function PeriodNav({
   return (
     <div className="flex items-center gap-2">
       {/* Nav group — arrows tight to label */}
-      <div className="flex items-center rounded-xl bg-white/5 border border-white/[0.08] p-1 gap-1">
+      <div className="flex items-center gap-1">
         <button
           onClick={onPrev}
           disabled={!canPrev}

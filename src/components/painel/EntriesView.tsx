@@ -287,7 +287,7 @@ export function EntriesView() {
                     return (
                       <div
                         key={entry.id}
-                        className="group bg-card/40 hover:bg-card/60 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300 flex items-center gap-4"
+                        className="group bg-[#1c1a24] border-none rounded-2xl p-4 transition-all duration-300 flex items-center gap-4"
                       >
                         <div
                           className={cn(

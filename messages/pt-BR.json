@@ -105,7 +105,7 @@
   "dashboard": {
     "currentBalance": "Saldo Atual",
     "upToToday": "Até hoje, {date}",
-    "monthForecast": "Previsão Final do Mês",
+    "monthForecast": "Previsão Final do Período",
     "projectsBalance": "Projeta seu saldo em {date}",
     "balanceProjection": "Projeção de saldo",
     "period": "Período",

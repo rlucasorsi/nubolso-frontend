@@ -5,7 +5,6 @@ import { PeriodNav } from './PeriodNav';
 import { DayList } from './DayList';
 import { DailyEntriesDrawer, DailyEntriesState } from './DailyEntriesDrawer';
 import { DashboardSummary } from './DashboardSummary';
-import { DashboardAlerts } from './DashboardAlerts';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { useCashFlow } from '@/hooks/useCashFlow';
 import { EntryFormValues } from './EntryForm';
@@ -172,24 +171,20 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
         </div>
       </div>
 
-      <div className="mt-2">
-        <DashboardAlerts period={period} today={today} balanceSettings={balanceSettings} />
-      </div>
-
-      <Tabs defaultValue="days" className="mt-2">
+      <Tabs defaultValue="overview" className="mt-2">
         <div className="px-5">
-          <TabsList className="bg-white/5 rounded-xl p-1 h-auto">
-            <TabsTrigger
-              value="days"
-              className="rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-none"
-            >
-              {t('periodDays')}
-            </TabsTrigger>
+          <TabsList className="w-full bg-transparent h-auto p-0 border-b border-white/10 rounded-none justify-start gap-0">
             <TabsTrigger
               value="overview"
-              className="rounded-lg text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-none"
+              className="relative h-11 px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
             >
               {t('overview')}
+            </TabsTrigger>
+            <TabsTrigger
+              value="days"
+              className="relative h-11 px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
+            >
+              {t('periodDays')}
             </TabsTrigger>
           </TabsList>
         </div>

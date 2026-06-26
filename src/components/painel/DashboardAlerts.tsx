@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Period, formatCurrency, formatDateLong } from '@/lib/cashflow';
 import { BalanceSettings } from '@/hooks/useCashFlow';
-import { Card } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 
@@ -24,7 +23,9 @@ export function DashboardAlerts({ period, today, balanceSettings }: DashboardAle
 
     const dangerDay = isDangerNow
       ? todayDay
-      : period.days.find((d) => d.date > today && d.saldoAcumulado < balanceSettings.yellowThreshold);
+      : period.days.find(
+          (d) => d.date > today && d.saldoAcumulado < balanceSettings.yellowThreshold,
+        );
 
     const warningDay = isWarningNow
       ? todayDay
@@ -41,37 +42,33 @@ export function DashboardAlerts({ period, today, balanceSettings }: DashboardAle
   if (!dangerDay && !warningDay) return null;
 
   return (
-    <div className="px-5 space-y-3">
+    <div className="space-y-2">
       {dangerDay && (
-        <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
-          <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-6 h-6 text-red-400" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-sm font-bold text-white">{isDangerNow ? t('alreadyRed') : t('goingRed')}</p>
-            <p className="text-xs text-red-400 font-medium tracking-wide">
-              {isDangerNow
-                ? formatCurrency(dangerDay.saldoAcumulado)
-                : `${t('onDay', { date: formatDateLong(dangerDay.date) })} | ${formatCurrency(dangerDay.saldoAcumulado)}`}
-            </p>
-          </div>
-        </Card>
+        <div className="flex items-center gap-3 rounded-xl border-l-2 border-red-500 bg-red-500/5 px-4 py-2.5">
+          <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+          <p className="text-xs font-medium text-red-400">
+            {isDangerNow ? t('alreadyRed') : t('goingRed')}
+          </p>
+          <p className="text-xs text-red-400 ml-auto">
+            {isDangerNow
+              ? formatCurrency(dangerDay.saldoAcumulado)
+              : `${formatDateLong(dangerDay.date)} · ${formatCurrency(dangerDay.saldoAcumulado)}`}
+          </p>
+        </div>
       )}
 
       {warningDay && (
-        <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-6 h-6 text-amber-400" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-sm font-bold text-white">{isWarningNow ? t('alreadyWarning') : t('warningZone')}</p>
-            <p className="text-xs text-amber-400 font-medium tracking-wide">
-              {isWarningNow
-                ? formatCurrency(warningDay.saldoAcumulado)
-                : `${t('onDay', { date: formatDateLong(warningDay.date) })} | ${formatCurrency(warningDay.saldoAcumulado)}`}
-            </p>
-          </div>
-        </Card>
+        <div className="flex items-center gap-3 rounded-xl border-l-2 border-amber-400 bg-amber-400/5 px-4 py-2.5">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <p className="text-xs font-medium text-amber-400">
+            {isWarningNow ? t('alreadyWarning') : t('warningZone')}
+          </p>
+          <p className="text-xs text-amber-400 ml-auto">
+            {isWarningNow
+              ? formatCurrency(warningDay.saldoAcumulado)
+              : `${formatDateLong(warningDay.date)} · ${formatCurrency(warningDay.saldoAcumulado)}`}
+          </p>
+        </div>
       )}
     </div>
   );
