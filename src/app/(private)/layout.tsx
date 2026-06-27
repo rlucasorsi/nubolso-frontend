@@ -99,6 +99,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
               </Button>
             );
           })}
+          <span className="hidden sm:block w-2" />
           <UserMenu name={me?.name} email={me?.email} onLogout={handleLogout} />
         </div>
       </header>
