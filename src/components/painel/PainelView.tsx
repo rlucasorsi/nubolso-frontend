@@ -179,22 +179,22 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
 
       <Tabs defaultValue="overview" className="mt-2">
         <div className="px-5">
-          <TabsList className="w-full bg-transparent h-auto p-0 border-b border-white/10 rounded-none justify-around sm:justify-start gap-0">
+          <TabsList className="w-full bg-transparent h-auto p-0 border-b border-white/10 rounded-none justify-start gap-0">
             <TabsTrigger
               value="overview"
-              className="relative h-11 px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
+              className="relative flex-1 sm:flex-none h-11 px-2 sm:px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
             >
               {t('overview')}
             </TabsTrigger>
             <TabsTrigger
               value="days"
-              className="relative h-11 px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
+              className="relative flex-1 sm:flex-none h-11 px-2 sm:px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
             >
               {t('periodDays')}
             </TabsTrigger>
             <TabsTrigger
               value="pending"
-              className="relative h-11 px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
+              className="relative flex-1 sm:flex-none h-11 px-2 sm:px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
             >
               <span className="flex items-center gap-1.5">
                 {t('pending')}
