@@ -32,6 +32,7 @@ interface AddEntryDrawerProps {
   defaultDate?: string;
   minDate?: string;
   hideTrigger?: boolean;
+  iconOnly?: boolean;
 }
 
 export function AddEntryDrawer({
@@ -43,6 +44,7 @@ export function AddEntryDrawer({
   defaultDate,
   minDate,
   hideTrigger = false,
+  iconOnly = false,
 }: AddEntryDrawerProps) {
   const t = useTranslations('entry');
   const tc = useTranslations('creditPurchase');
@@ -131,7 +133,9 @@ export function AddEntryDrawer({
 
   return (
     <>
-      {!hideTrigger && <AddButton onClick={onOpen} label={t('addButtonLabel')} />}
+      {!hideTrigger && (
+        <AddButton onClick={onOpen} label={t('addButtonLabel')} iconOnly={iconOnly} />
+      )}
 
       <Sheet open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
         <DrawerContent>

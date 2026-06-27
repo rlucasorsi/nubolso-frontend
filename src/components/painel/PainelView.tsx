@@ -171,6 +171,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
               onSave={handleHeaderAddSave}
               onCancel={() => setIsAddingInHeader(false)}
               minDate={saldoInicial.date}
+              iconOnly
             />
           </div>
         </div>
