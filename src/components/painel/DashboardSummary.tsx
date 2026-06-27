@@ -1,11 +1,5 @@
 ﻿import { useMemo, useState } from 'react';
-import {
-  Period,
-  formatCurrency,
-  formatCurrencyCompact,
-  formatDateAxis,
-  formatDateLong,
-} from '@/lib/cashflow';
+import { Period, formatCurrency, formatDateAxis, formatDateLong } from '@/lib/cashflow';
 import { BalanceSettings } from '@/hooks/useCashFlow';
 import { Card } from '@/components/ui/card';
 import { TrendingUp, Info, HelpCircle, Wallet } from 'lucide-react';
@@ -119,6 +113,18 @@ export function DashboardSummary({
     saldoFuture: { label: t('future'), color: '#7b5cff' },
   };
 
+  const formatYAxis = (value: number) => {
+    const abs = Math.abs(value);
+    const sign = value < 0 ? '-' : '';
+    if (abs >= 1000) {
+      const thousands = abs / 1000;
+      const formatted =
+        thousands >= 10 ? thousands.toFixed(0) : thousands.toFixed(1).replace('.', ',');
+      return `${sign}${formatted}k`;
+    }
+    return `${sign}${abs.toFixed(0)}`;
+  };
+
   const xTickInterval = Math.max(Math.ceil(activeChartDays.length / 6) - 1, 0);
 
   const renderTooltipContent = ({ active, payload, label }: any) => {
@@ -216,9 +222,9 @@ export function DashboardSummary({
       </div>
 
       {/* Projection Chart */}
-      <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-8">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
+      <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-2 sm:p-8">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between gap-3 px-1 sm:px-0">
             <h3 className="text-base font-bold text-white font-display">
               {t('balanceProjection')}
             </h3>
@@ -241,9 +247,12 @@ export function DashboardSummary({
             </div>
           </div>
 
-          <div className="h-[240px] w-full">
+          <div className="relative h-[240px] w-full">
+            <span className="absolute top-0 left-0 w-[36px] text-right pr-1 text-[9px] font-bold text-[#94a3b8] leading-none pointer-events-none">
+              R$
+            </span>
             <ChartContainer config={chartConfig} className="h-full w-full">
-              <AreaChart data={chartData} margin={{ top: 12, right: 12, left: 4, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 14, right: 4, left: 4, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#7b5cff" stopOpacity={0.25} />
@@ -267,11 +276,11 @@ export function DashboardSummary({
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  width={62}
+                  width={36}
                   ticks={yTicks}
                   domain={yDomain}
                   tick={{ fontSize: 9, fill: '#94a3b8' }}
-                  tickFormatter={formatCurrencyCompact}
+                  tickFormatter={formatYAxis}
                 />
                 <ChartTooltip
                   content={renderTooltipContent}
@@ -337,7 +346,7 @@ export function DashboardSummary({
             </ChartContainer>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1 sm:px-0">
             <div className="flex items-center gap-2">
               <div className="w-3 h-0.5 bg-primary rounded-full" />
               <span>{t('realized')}</span>
