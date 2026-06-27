@@ -31,6 +31,7 @@ interface AddEntryDrawerProps {
   defaultType?: FlowType;
   defaultDate?: string;
   minDate?: string;
+  hideTrigger?: boolean;
 }
 
 export function AddEntryDrawer({
@@ -41,6 +42,7 @@ export function AddEntryDrawer({
   defaultType = 'income',
   defaultDate,
   minDate,
+  hideTrigger = false,
 }: AddEntryDrawerProps) {
   const t = useTranslations('entry');
   const tc = useTranslations('creditPurchase');
@@ -59,7 +61,10 @@ export function AddEntryDrawer({
   const [entryErrors, setEntryErrors] = useState<{ date?: string; amount?: string }>({});
 
   const cardsQuery = useGetCreditCards();
-  const activeCards = useMemo(() => (cardsQuery.data ?? []).filter((c) => c.isActive), [cardsQuery.data]);
+  const activeCards = useMemo(
+    () => (cardsQuery.data ?? []).filter((c) => c.isActive),
+    [cardsQuery.data],
+  );
   const [purchaseCardId, setPurchaseCardId] = useState<string | undefined>(undefined);
 
   const isCredit = purchaseMode === 'credit';
@@ -126,7 +131,7 @@ export function AddEntryDrawer({
 
   return (
     <>
-      <AddButton onClick={onOpen} label={t('addButtonLabel')} />
+      {!hideTrigger && <AddButton onClick={onOpen} label={t('addButtonLabel')} />}
 
       <Sheet open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
         <DrawerContent>
@@ -134,9 +139,7 @@ export function AddEntryDrawer({
             <SheetTitle className="text-2xl font-bold font-display text-primary">
               {t('newEntry')}
             </SheetTitle>
-            <p className="text-sm text-muted-foreground">
-              {t('description')}
-            </p>
+            <p className="text-sm text-muted-foreground">{t('description')}</p>
           </DrawerHeader>
 
           <div className="flex-1 px-6 py-4 space-y-4">
@@ -175,7 +178,12 @@ export function AddEntryDrawer({
             </div>
 
             {mode === 'debit' ? (
-              <EntryForm values={values} onChange={setValues} errors={entryErrors} minDate={minDate} />
+              <EntryForm
+                values={values}
+                onChange={setValues}
+                errors={entryErrors}
+                minDate={minDate}
+              />
             ) : activeCards.length === 0 && !cardsQuery.isLoading ? (
               <div className="flex flex-col items-center text-center gap-3 py-8 px-5 rounded-2xl bg-white/5 border border-white/10">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">

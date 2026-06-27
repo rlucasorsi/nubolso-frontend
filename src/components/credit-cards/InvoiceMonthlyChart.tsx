@@ -151,10 +151,16 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   const maxTotal = Math.max(1, ...buckets.map((b) => b.total));
 
   useEffect(() => {
-    // Wait for ResizeObserver to measure the real itemWidth before scrolling.
-    // Without this guard the effect fires with the initial itemWidth=56 placeholder,
-    // sets scrollLeft incorrectly and locks didScrollRef before the real width arrives.
-    if (!itemWidthReadyRef.current || didScrollRef.current || !scrollRef.current || itemWidth <= 0)
+    // Wait for invoice data and real itemWidth before scrolling.
+    // Without the invoicesData guard, the effect fires while data is still loading,
+    // locks didScrollRef with the wrong anchor, and the real data never triggers a re-scroll.
+    if (
+      !invoicesData ||
+      !itemWidthReadyRef.current ||
+      didScrollRef.current ||
+      !scrollRef.current ||
+      itemWidth <= 0
+    )
       return;
     const currentIdx = buckets.findIndex((b) => b.isCurrentMonth);
     if (currentIdx < 0) return;

@@ -16,6 +16,7 @@ import { useTranslations } from '@/i18n/useTranslations';
 import { cn } from '@/lib/utils';
 
 import { MobileNav } from '@/components/layout/MobileNav';
+import { GlobalQuickAdd } from '@/components/layout/GlobalQuickAdd';
 import { SideMenuDrawer } from '@/components/layout/SideMenuDrawer';
 import { UserMenu } from '@/components/layout/UserMenu';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
@@ -103,6 +104,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
       </header>
 
       <main className="flex-1 overflow-y-auto pb-14 sm:pb-0">{children}</main>
+      <GlobalQuickAdd />
       <MobileNav />
     </div>
   );

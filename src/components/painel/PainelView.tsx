@@ -9,7 +9,6 @@ import { AddEntryDrawer } from './AddEntryDrawer';
 import { useCashFlow } from '@/hooks/useCashFlow';
 import { EntryFormValues } from './EntryForm';
 import { ChevronDown, Filter, Loader2, Plus } from 'lucide-react';
-import { setQuickAddHandler } from '@/lib/quickAdd';
 import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDrawer';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { ActionsSection } from './ActionsSection';
@@ -83,12 +82,6 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
     scrollEl.addEventListener('scroll', onScroll);
     return () => scrollEl.removeEventListener('scroll', onScroll);
   }, [mounted]);
-
-  // Let the mobile bottom nav's "+" button open this page's add-entry drawer.
-  useEffect(() => {
-    setQuickAddHandler(() => setIsAddingInHeader(true));
-    return () => setQuickAddHandler(null);
-  }, []);
 
   const period = periods[periodIdx];
 

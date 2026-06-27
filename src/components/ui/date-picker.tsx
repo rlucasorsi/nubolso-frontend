@@ -73,7 +73,9 @@ export function DatePicker({ date, onChange, placeholder, className, minDate }: 
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
         <DrawerContent className="p-0 border-none bg-card">
           <DrawerTitle className="sr-only">{resolvedPlaceholder}</DrawerTitle>
-          <div className="flex justify-center p-4 pb-10">{calendar}</div>
+          <div className="flex justify-center p-4 pb-10" data-vaul-no-drag>
+            {calendar}
+          </div>
         </DrawerContent>
       </Drawer>
     );

@@ -81,7 +81,7 @@ function Calendar({
     <div className={cn('p-3 select-none min-w-[276px]', className)}>
       {/* Header */}
       <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" data-vaul-no-drag>
           <button
             type="button"
             onClick={() => setView((v) => (v === 'months' ? 'days' : 'months'))}
@@ -103,7 +103,7 @@ function Calendar({
             />
           </button>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" data-vaul-no-drag>
           <button type="button" onClick={() => navigate(-1)} className={navBtn}>
             <ChevronLeft className="h-4 w-4" />
           </button>
