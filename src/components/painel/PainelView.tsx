@@ -149,7 +149,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   };
 
   return (
-    <div ref={rootRef} className="flex flex-col w-full pb-24 overflow-x-hidden">
+    <div ref={rootRef} className="flex flex-col w-full max-w-6xl mx-auto pb-24 overflow-x-hidden">
       {/* Header */}
       <div className="px-5 pt-10 pb-4">
         <div className="flex items-center justify-between gap-4">
