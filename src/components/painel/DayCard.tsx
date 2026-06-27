@@ -77,7 +77,7 @@ export function DayCard({
 
       <div className="p-5">
         {/* Header row: date/weekday — saldo + eye button */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center leading-none shrink-0">
               <span className="text-2xl font-black font-display text-white">
@@ -123,7 +123,7 @@ export function DayCard({
                 saldoBorderClass(saldoStatus),
               )}
             >
-              <span className="text-[8px] font-black uppercase tracking-wide text-white">
+              <span className="hidden sm:inline text-[8px] font-black uppercase tracking-wide text-white">
                 {t('balance')}
               </span>
               {isDisabled ? (
