@@ -181,7 +181,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container max-w-2xl mx-auto py-6 px-4 space-y-4">
+    <div className="container max-w-6xl mx-auto py-8 px-4 space-y-8 animate-fade-in">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/dashboard">
