@@ -14,7 +14,8 @@
     "newEntry": "New entry",
     "menu": "Menu",
     "menuDescription": "Main navigation menu",
-    "language": "Language"
+    "language": "Language",
+    "more": "More"
   },
   "auth": {
     "tagline": "Organize your finances and have clarity to make better decisions.",

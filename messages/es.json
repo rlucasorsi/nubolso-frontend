@@ -14,7 +14,8 @@
     "newEntry": "Nuevo movimiento",
     "menu": "Menú",
     "menuDescription": "Menú de navegación principal",
-    "language": "Idioma"
+    "language": "Idioma",
+    "more": "Más"
   },
   "auth": {
     "tagline": "Organiza tus finanzas y toma decisiones con claridad.",
