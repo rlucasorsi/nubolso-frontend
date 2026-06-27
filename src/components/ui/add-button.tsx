@@ -18,7 +18,7 @@ export function AddButton({ label, onClick, title, className }: AddButtonProps) 
       )}
     >
       <span className="text-white/80 text-xl font-light">+</span>
-      <span className="hidden sm:inline">{label}</span>
+      <span>{label}</span>
     </button>
   );
 }
