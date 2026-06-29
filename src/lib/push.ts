@@ -34,10 +34,7 @@ export async function subscribeToPush(): Promise<'subscribed' | 'denied' | 'unsu
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported';
 
   const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  if (!vapidKey) {
-    console.warn('[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set');
-    return 'unsupported';
-  }
+  if (!vapidKey) throw new Error('[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not configured');
 
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') return 'denied';

@@ -32,6 +32,7 @@
     "pushUnsupported": "Notificações push não estão disponíveis neste navegador.",
     "pushUnsupportedSw": "Service Workers estão desativados neste Chrome. Verifique chrome://flags ou políticas corporativas.",
     "pushUnsupportedIos": "No iOS, adicione o app à tela de início e abra-o de lá para ativar notificações.",
+    "pushUnsupportedHttps": "Notificações push requerem HTTPS. Acesse o app por uma URL segura.",
     "pushUnsupportedHint": "Funciona no Chrome, Firefox e Edge com Service Workers ativados.",
     "pushLoading": "Verificando...",
     "pushEnabling": "Ativando...",

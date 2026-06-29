@@ -379,7 +379,9 @@ export default function SettingsPage() {
                       ? tNotif('pushUnsupportedIos')
                       : pushUnsupportedReason === 'no_service_worker'
                         ? tNotif('pushUnsupportedSw')
-                        : tNotif('pushUnsupported')}
+                        : pushUnsupportedReason === 'insecure_context'
+                          ? tNotif('pushUnsupportedHttps')
+                          : tNotif('pushUnsupported')}
                   </p>
                   <p className="text-[11px] text-muted-foreground/60">
                     {tNotif('pushUnsupportedHint')}

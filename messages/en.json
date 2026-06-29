@@ -32,6 +32,7 @@
     "pushUnsupported": "Push notifications are not available in this browser.",
     "pushUnsupportedSw": "Service Workers are disabled in this Chrome. Check chrome://flags or corporate policies.",
     "pushUnsupportedIos": "On iOS, add the app to your home screen and open it from there to enable notifications.",
+    "pushUnsupportedHttps": "Push notifications require HTTPS. Access the app via a secure URL.",
     "pushUnsupportedHint": "Works in Chrome, Firefox and Edge with Service Workers enabled.",
     "pushLoading": "Checking...",
     "pushEnabling": "Enabling...",
