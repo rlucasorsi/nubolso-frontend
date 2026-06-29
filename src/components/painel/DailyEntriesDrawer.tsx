@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { EntryFormValues } from './EntryForm';
 import { AddEntryDrawer } from './AddEntryDrawer';
+import { TypeToggle } from './TypeToggle';
 import { TYPE_CONFIG, MONTH_KEYS, WEEKDAY_KEYS } from './config';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useRealizeRecurringTemplate } from '@/modules/recurring-templates/hooks/use-realize-recurring-template';
@@ -369,6 +370,19 @@ export function DailyEntriesDrawer({
                                 <>
                                   {isEditing || isRealizing ? (
                                     <div className="pl-2 space-y-3">
+                                      {isEditing && (
+                                        <div className="space-y-2">
+                                          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            {typeT('typeLabel')}
+                                          </label>
+                                          <TypeToggle
+                                            value={editValues.type}
+                                            onChange={(type) =>
+                                              setEditValues((prev) => ({ ...prev, type }))
+                                            }
+                                          />
+                                        </div>
+                                      )}
                                       <TextInputField
                                         label={typeT('descriptionLabel')}
                                         value={editValues.description}

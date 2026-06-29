@@ -10,6 +10,7 @@ import {
   SheetDescription,
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
+import { AmountInputField } from '@/components/ui/form-field';
 import { Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/cashflow';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
@@ -176,25 +177,20 @@ export function AnticipateInstallmentsDrawer({
               <span className="font-bold">{formatCurrency(selectedOption.originalAmount)}</span>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                {t('paidAmountLabel')}
-              </label>
-              <input
-                type="number"
-                inputMode="numeric"
-                value={paidAmountStr}
-                onChange={(e) => {
-                  setPaidAmountStr(e.target.value);
-                  setError(null);
-                }}
-                placeholder={t('paidAmountPlaceholder')}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-primary transition-colors"
-              />
-              {!Number.isNaN(paidAmount) && paidAmount > selectedOption.originalAmount + 0.005 && (
-                <p className="text-xs text-destructive font-medium">{t('paidExceedsOriginal')}</p>
-              )}
-            </div>
+            <AmountInputField
+              label={t('paidAmountLabel')}
+              value={paidAmountStr}
+              onChange={(value) => {
+                setPaidAmountStr(value);
+                setError(null);
+              }}
+              placeholder={t('paidAmountPlaceholder')}
+              error={
+                !Number.isNaN(paidAmount) && paidAmount > selectedOption.originalAmount + 0.005
+                  ? t('paidExceedsOriginal')
+                  : undefined
+              }
+            />
 
             {!Number.isNaN(paidAmount) &&
               paidAmount > 0 &&
