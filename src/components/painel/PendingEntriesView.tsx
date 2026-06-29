@@ -376,25 +376,23 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
                                     {cfg.icon('md')}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <p className="text-sm font-semibold truncate">
-                                        {entry.description || '—'}
-                                      </p>
-                                      {alertStatus && (
-                                        <AlertBadge
-                                          status={alertStatus}
-                                          entryDate={entry.date}
-                                          today={today}
-                                          t={t}
-                                        />
-                                      )}
-                                    </div>
-                                    <p className={cn('text-base font-bold mt-0.5', cfg.color)}>
-                                      {cfg.sign} {formatCurrency(entry.amount)}
+                                    <p className="text-sm font-semibold truncate">
+                                      {entry.description || '—'}
                                     </p>
+                                    {alertStatus && (
+                                      <AlertBadge
+                                        status={alertStatus}
+                                        entryDate={entry.date}
+                                        today={today}
+                                        t={t}
+                                      />
+                                    )}
                                   </div>
+                                  <p className={cn('text-base font-bold shrink-0', cfg.color)}>
+                                    {cfg.sign} {formatCurrency(entry.amount)}
+                                  </p>
                                   {!isConfirming && !isIgnoring && (
-                                    <div className="flex gap-1.5 shrink-0">
+                                    <div className="hidden sm:flex gap-1.5 shrink-0">
                                       <button
                                         onClick={() => startIgnore(entry)}
                                         className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/8 border border-white/15 text-white hover:bg-white/15 hover:border-white/30 transition-colors flex items-center gap-1.5"
@@ -412,6 +410,24 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
                                     </div>
                                   )}
                                 </div>
+                                {!isConfirming && !isIgnoring && (
+                                  <div className="flex sm:hidden items-center gap-2 pt-3 mt-1 border-t border-white/5">
+                                    <button
+                                      onClick={() => startIgnore(entry)}
+                                      className="flex-1 h-9 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold bg-white/8 border-white/15 text-white hover:bg-white/15 hover:border-white/30 transition-colors"
+                                    >
+                                      <Ban className="h-3.5 w-3.5" />
+                                      {td('ignore')}
+                                    </button>
+                                    <button
+                                      onClick={() => startRealize(entry)}
+                                      className="flex-1 h-9 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold bg-white/8 border-white/15 text-primary hover:bg-primary/20 hover:border-primary/40 transition-colors"
+                                    >
+                                      <RotateCw className="h-3.5 w-3.5" />
+                                      {td('apply')}
+                                    </button>
+                                  </div>
+                                )}
 
                                 {isConfirming && (
                                   <div className="mt-3 pt-3 border-t border-white/5 space-y-3">
