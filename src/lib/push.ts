@@ -41,8 +41,10 @@ export async function subscribeToPush(): Promise<'subscribed' | 'denied' | 'unsu
 
   const reg = await registerServiceWorker();
   const appServerKey = urlBase64ToUint8Array(vapidKey);
-  console.debug(
-    '[push] applicationServerKey length:',
+  console.log(
+    '[push] vapidKey chars:',
+    vapidKey.length,
+    '| decoded bytes:',
     appServerKey.length,
     '| first byte:',
     appServerKey[0],
