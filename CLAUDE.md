@@ -80,6 +80,12 @@ Custom implementation — not next-intl at runtime despite the package being pre
 
 To add a new translated string: add the key to all three JSON files, then use `useTranslations('namespace')` in the component.
 
+### Form inputs (`src/components/ui/form-field.tsx`)
+
+Always use the standardized field components — `TextInputField`, `AmountInputField`, `NumberInputField`, `DateInputField` — for any text, currency, number, or date input. Never reach for a raw `<input>` element.
+
+`AmountInputField` in particular handles cents-based currency masking (digits typed are treated as cents, e.g. `150075` → `1.500,75`) and the `R$` prefix consistently across the app. A raw `<input type="number">` does not replicate this behavior, which has caused bugs where amount fields silently dropped cents handling.
+
 ### Type convention
 
 The backend sends transaction/template types as `INCOME` / `EXPENSE` / `INVESTMENT` (uppercase). The service layer normalises them to lowercase (`FlowType`) on read and converts back to uppercase on write. Do not pass uppercase values into components or the cashflow engine.
