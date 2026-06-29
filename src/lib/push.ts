@@ -33,16 +33,23 @@ export function getPushPermission(): NotificationPermission {
 export async function subscribeToPush(): Promise<'subscribed' | 'denied' | 'unsupported'> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported';
 
-  const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
   if (!vapidKey) throw new Error('[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not configured');
 
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') return 'denied';
 
   const reg = await registerServiceWorker();
+  const appServerKey = urlBase64ToUint8Array(vapidKey);
+  console.debug(
+    '[push] applicationServerKey length:',
+    appServerKey.length,
+    '| first byte:',
+    appServerKey[0],
+  );
   const subscription = await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(vapidKey),
+    applicationServerKey: appServerKey,
   });
 
   const json = subscription.toJSON();
