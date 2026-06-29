@@ -95,14 +95,30 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
 
   useEffect(() => {
     if (!scrollRef.current) return;
-    const observer = new ResizeObserver(() => {
-      if (scrollRef.current) {
-        const visibleMonths = scrollRef.current.clientWidth < 480 ? 6 : 12;
-        setItemWidth((scrollRef.current.clientWidth - ARROW_PADDING) / visibleMonths);
-      }
+    const el = scrollRef.current;
+
+    const measure = () => {
+      if (!el || el.clientWidth <= 0) return;
+      const visibleMonths = el.clientWidth < 480 ? 6 : 12;
+      setItemWidth((el.clientWidth - ARROW_PADDING) / visibleMonths);
+    };
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+
+    // Double-RAF: Radix UI Tabs may briefly hide the active content during
+    // initialization, causing the first ResizeObserver fire to see clientWidth=0.
+    // This forces a fresh measurement after the browser has fully painted.
+    let innerRaf = 0;
+    const outerRaf = requestAnimationFrame(() => {
+      innerRaf = requestAnimationFrame(measure);
     });
-    observer.observe(scrollRef.current);
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(outerRaf);
+      cancelAnimationFrame(innerRaf);
+    };
   }, []);
 
   const buckets = useMemo(() => {
