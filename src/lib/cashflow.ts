@@ -94,7 +94,8 @@ export function formatCurrencyCompact(value: number): string {
   const sign = value < 0 ? '-' : '';
   if (abs >= 1000) {
     const thousands = abs / 1000;
-    const formatted = thousands >= 10 ? thousands.toFixed(0) : thousands.toFixed(1).replace('.', ',');
+    const formatted =
+      thousands >= 10 ? thousands.toFixed(0) : thousands.toFixed(1).replace('.', ',');
     return `${sign}R$ ${formatted}k`;
   }
   return `${sign}R$ ${abs.toFixed(0)}`;
@@ -123,9 +124,7 @@ export function formatDate(dateStr: string): string {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
-export function getBalanceStatus(
-  value: number,
-): 'positive' | 'warning' | 'danger' {
+export function getBalanceStatus(value: number): 'positive' | 'warning' | 'danger' {
   if (value > 500) return 'positive';
   if (value > 300) return 'warning';
   return 'danger';
@@ -161,7 +160,10 @@ const MONTH_SHORT = [
 ];
 
 // Periods can run from day 1 (standard month) or a custom day (e.g. 20 to 19 of next month)
-export function getPeriodForDate(dateStr: string, startDay: number = 1): {
+export function getPeriodForDate(
+  dateStr: string,
+  startDay: number = 1,
+): {
   label: string;
   startDate: string;
   endDate: string;
@@ -226,12 +228,17 @@ export function synthesizeVirtualEntry(
   year: number,
   month: number,
   existingEntries: CashFlowEntry[],
+  today?: string,
 ): CashFlowEntry | null {
   const occurrenceDate = getTemplateOccurrenceDate(year, month, template.dayOfMonth);
 
+  const todayStr = today ?? new Date().toISOString().split('T')[0];
+  if (occurrenceDate < todayStr) return null;
+
   if (template.endDate && occurrenceDate > template.endDate.slice(0, 10)) return null;
 
-  if (template.totalOccurrences && (template.occurrenceCount ?? 0) >= template.totalOccurrences) return null;
+  if (template.totalOccurrences && (template.occurrenceCount ?? 0) >= template.totalOccurrences)
+    return null;
 
   const realized = existingEntries.find(
     (e) => e.templateId === template.id && e.date === occurrenceDate,
@@ -316,7 +323,10 @@ export function generateInvoiceEntriesForRange(
 ): CashFlowEntry[] {
   return invoices
     .map(synthesizeInvoiceEntry)
-    .filter((entry): entry is CashFlowEntry => entry !== null && entry.date >= startDate && entry.date <= endDate);
+    .filter(
+      (entry): entry is CashFlowEntry =>
+        entry !== null && entry.date >= startDate && entry.date <= endDate,
+    );
 }
 
 // Computes the list of period start/end ranges covering all entries (+ saldoInicial)
@@ -350,10 +360,7 @@ export function getPeriodRanges(
     const p = getPeriodForDate(dateStr, startDay);
 
     // Avoid duplicates or infinite loops
-    if (
-      periodStarts.length === 0 ||
-      periodStarts[periodStarts.length - 1].start !== p.startDate
-    ) {
+    if (periodStarts.length === 0 || periodStarts[periodStarts.length - 1].start !== p.startDate) {
       periodStarts.push({ start: p.startDate, end: p.endDate, label: p.label });
     }
 
@@ -403,12 +410,11 @@ export function generatePeriods(
       const spending = dayEntries
         .filter((e) => e.type === 'spending' || (e.type as any) === 'gasto')
         .reduce((s, e) => s + e.amount, 0);
-      const descriptions = dayEntries
-        .map((e) => e.description || '')
-        .filter(Boolean);
+      const descriptions = dayEntries.map((e) => e.description || '').filter(Boolean);
       const entryIds = dayEntries.map((e) => e.id);
       const isBeforeStartDate = dateStr < saldoInicial.date;
-      const hasPendingRecurring = !isBeforeStartDate && dayEntries.some((e) => e.isVirtual === true);
+      const hasPendingRecurring =
+        !isBeforeStartDate && dayEntries.some((e) => e.isVirtual === true);
 
       const saldoDiario = income - expense - spending;
 
