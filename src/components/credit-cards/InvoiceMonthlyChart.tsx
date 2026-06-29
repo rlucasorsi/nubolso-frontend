@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, CreditCard as CreditCardIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import {
@@ -93,33 +93,29 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     }
   };
 
-  useEffect(() => {
-    if (!scrollRef.current) return;
+  // Both effects depend on cardsData because the component returns null while
+  // cardsData is loading (cards.length === 0), so scrollRef.current is null on
+  // the first run. Adding cardsData as a dep re-fires them once cards load and
+  // the scroll container is finally in the DOM.
+  useLayoutEffect(() => {
     const el = scrollRef.current;
+    if (!el || el.clientWidth <= 0) return;
+    const visibleMonths = el.clientWidth < 480 ? 6 : 12;
+    setItemWidth((el.clientWidth - ARROW_PADDING) / visibleMonths);
+  }, [cardsData]);
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
     const measure = () => {
-      if (!el || el.clientWidth <= 0) return;
+      if (el.clientWidth <= 0) return;
       const visibleMonths = el.clientWidth < 480 ? 6 : 12;
       setItemWidth((el.clientWidth - ARROW_PADDING) / visibleMonths);
     };
-
     const observer = new ResizeObserver(measure);
     observer.observe(el);
-
-    // Double-RAF: Radix UI Tabs may briefly hide the active content during
-    // initialization, causing the first ResizeObserver fire to see clientWidth=0.
-    // This forces a fresh measurement after the browser has fully painted.
-    let innerRaf = 0;
-    const outerRaf = requestAnimationFrame(() => {
-      innerRaf = requestAnimationFrame(measure);
-    });
-
-    return () => {
-      observer.disconnect();
-      cancelAnimationFrame(outerRaf);
-      cancelAnimationFrame(innerRaf);
-    };
-  }, []);
+    return () => observer.disconnect();
+  }, [cardsData]);
 
   const buckets = useMemo(() => {
     const invoices = invoicesData ?? [];
@@ -164,20 +160,21 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
 
   const maxTotal = Math.max(1, ...buckets.map((b) => b.total));
 
-  useEffect(() => {
+  // useLayoutEffect fires synchronously after DOM commit, before the browser
+  // paints. This guarantees the scroll is applied before the first visible
+  // frame — the user never sees the chart at scrollLeft 0. useEffect + rAF
+  // was firing after paint, which caused a visible flash on initial load.
+  useLayoutEffect(() => {
     if (!invoicesData || didScrollRef.current || !scrollRef.current || itemWidth <= 0) return;
     const currentIdx = buckets.findIndex((b) => b.isCurrentMonth);
     if (currentIdx < 0) return;
     // Scroll so the first open invoice at or after today is the leftmost visible bar.
     const openIdx = buckets.findIndex((b, i) => i >= currentIdx && b.hasOpenInvoice);
     const idx = openIdx >= 0 ? openIdx : currentIdx;
-    const frame = requestAnimationFrame(() => {
-      if (!scrollRef.current) return;
-      const SIDE_PAD = 28; // px-7 padding on each side of the scroll container
-      scrollRef.current.scrollLeft = Math.max(idx * itemWidth - SIDE_PAD, 0);
-      didScrollRef.current = true;
-    });
-    return () => cancelAnimationFrame(frame);
+    const SIDE_PAD = 28; // px-7 padding on each side of the scroll container
+    const target = Math.max(idx * itemWidth - SIDE_PAD, 0);
+    scrollRef.current.scrollLeft = target;
+    didScrollRef.current = true;
   }, [buckets, itemWidth]);
 
   const scrollByMonths = (direction: 1 | -1) => {
@@ -253,6 +250,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
 
           <div
             ref={scrollRef}
+            data-testid="invoice-chart-scroll"
             className="flex overflow-x-auto px-7 scroll-smooth cursor-grab"
             style={{ scrollbarWidth: 'none' }}
             onMouseDown={onDragStart}
