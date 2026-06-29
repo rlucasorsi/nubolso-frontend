@@ -41,14 +41,6 @@ export async function subscribeToPush(): Promise<'subscribed' | 'denied' | 'unsu
 
   const reg = await registerServiceWorker();
   const appServerKey = urlBase64ToUint8Array(vapidKey);
-  console.log(
-    '[push] vapidKey chars:',
-    vapidKey.length,
-    '| decoded bytes:',
-    appServerKey.length,
-    '| first byte:',
-    appServerKey[0],
-  );
   const subscription = await reg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: appServerKey,
