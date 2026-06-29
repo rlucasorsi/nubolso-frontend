@@ -26,6 +26,7 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
       {(['income', 'expense', 'spending'] as FlowType[]).map((type) => (
         <button
           key={type}
+          type="button"
           onClick={() => onChange(type)}
           className={`flex-1 flex items-center justify-center py-2 h-12 text-[12px] font-bold rounded-xl transition-all duration-300 border ${
             value === type
@@ -39,4 +40,3 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
     </div>
   );
 }
-

@@ -15,6 +15,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { EntryFormValues } from './EntryForm';
+import { TypeToggle } from './TypeToggle';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { TYPE_CONFIG, MONTH_KEYS, WEEKDAY_KEYS } from './config';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -116,6 +117,7 @@ export function DailyEntriesDrawer({
     if (!editingId) return;
 
     onUpdateEntry(editingId, {
+      date: editValues.date,
       amount: parseFloat(editValues.amount.replace(',', '.')) || 0,
       type: editValues.type,
       description: editValues.description || undefined,
@@ -369,6 +371,23 @@ export function DailyEntriesDrawer({
                                 <>
                                   {isEditing || isRealizing ? (
                                     <div className="pl-2 space-y-3">
+                                      {isEditing && (
+                                        <DateInputField
+                                          label={typeT('entryDate')}
+                                          value={editValues.date}
+                                          onChange={(date) =>
+                                            setEditValues((prev) => ({ ...prev, date }))
+                                          }
+                                        />
+                                      )}
+                                      {isEditing && (
+                                        <TypeToggle
+                                          value={editValues.type}
+                                          onChange={(type) =>
+                                            setEditValues((prev) => ({ ...prev, type }))
+                                          }
+                                        />
+                                      )}
                                       <TextInputField
                                         label={typeT('descriptionLabel')}
                                         value={editValues.description}

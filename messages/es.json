@@ -394,7 +394,8 @@
     "deleteConfirmDescription": "Esta acción no se puede deshacer.",
     "save": "Guardar",
     "saving": "Guardando...",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "saveError": "No fue posible guardar el movimiento"
   },
   "goalsView": {
     "title": "Metas y Objetivos",

@@ -217,7 +217,7 @@ export class HttpClient {
           continue;
         }
 
-        this.logHttpError('Unhandled request error', { url: fullUrl, method, body, params, error });
+        this.logHttpError('Unhandled request error', { url: fullUrl, method, params, error });
         throw error;
       }
     }

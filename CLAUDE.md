@@ -95,6 +95,17 @@ SENTRY_AUTH_TOKEN
 
 Copy `.env.example` to `.env.local` to get started.
 
+### Form input components (`src/components/ui/form-field.tsx`)
+
+Always use these components for form fields — never raw `<input>` elements:
+
+- `TextInputField` — text inputs
+- `AmountInputField` — currency values (formats cents automatically, stores as `"150,50"`)
+- `NumberInputField` — integer inputs with min/max clamping
+- `DateInputField` — date pickers
+
+All accept a `required` prop that renders a red `*` next to the label. Use it whenever the field is validated as required. Parse `AmountInputField` values with `parseFloat(value.replace(',', '.'))`.
+
 ### Path alias
 
 `@/` maps to `src/`. Use it for all internal imports.

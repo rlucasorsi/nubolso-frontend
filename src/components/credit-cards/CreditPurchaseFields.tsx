@@ -3,11 +3,19 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TextInputField, AmountInputField, DateInputField, NumberInputField } from '@/components/ui/form-field';
+import {
+  TextInputField,
+  AmountInputField,
+  DateInputField,
+  NumberInputField,
+} from '@/components/ui/form-field';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PurchaseSimulationPreview } from './PurchaseSimulationPreview';
 import type { SimulatePurchaseResponse } from '@/modules/credit-cards/model/api/purchase';
-import type { PurchaseInputMode, PurchaseStrategy } from '@/modules/credit-cards/hooks/use-purchase-form';
+import type {
+  PurchaseInputMode,
+  PurchaseStrategy,
+} from '@/modules/credit-cards/hooks/use-purchase-form';
 import { useTranslations } from '@/i18n/useTranslations';
 
 interface CreditPurchaseFieldsProps {
@@ -72,7 +80,10 @@ export function CreditPurchaseFields({
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => { onInputModeChange('total'); onAmountChange(''); }}
+            onClick={() => {
+              onInputModeChange('total');
+              onAmountChange('');
+            }}
             className={cn(
               'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
               inputMode === 'total'
@@ -84,7 +95,10 @@ export function CreditPurchaseFields({
           </button>
           <button
             type="button"
-            onClick={() => { onInputModeChange('installment'); onAmountChange(''); }}
+            onClick={() => {
+              onInputModeChange('installment');
+              onAmountChange('');
+            }}
             className={cn(
               'flex-1 h-10 rounded-xl text-sm font-bold transition-all',
               inputMode === 'installment'
@@ -111,7 +125,6 @@ export function CreditPurchaseFields({
         onChange={onInstallmentsCountChange}
         min={1}
         max={48}
-        suffix="x"
       />
 
       {installmentsCount > 1 && (
@@ -163,22 +176,25 @@ export function CreditPurchaseFields({
             {t('purchaseTotal')}
           </span>
           <span className="text-sm font-black font-display text-white">
-            R$ {computedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            R${' '}
+            {computedTotal.toLocaleString('pt-BR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </span>
         </div>
       )}
 
       <DateInputField
         label={t('purchaseDate')}
+        required
         value={purchaseDate}
         onChange={onPurchaseDateChange}
         minDate={minDate}
         error={purchaseDateError}
       />
 
-      {apiError && (
-        <p className="text-xs text-destructive text-center">{apiError}</p>
-      )}
+      {apiError && <p className="text-xs text-destructive text-center">{apiError}</p>}
 
       <PurchaseSimulationPreview simulation={simulation} isLoading={isSimulating} />
     </>

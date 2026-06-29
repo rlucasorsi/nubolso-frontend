@@ -394,7 +394,8 @@
     "deleteConfirmDescription": "This action cannot be undone.",
     "save": "Save",
     "saving": "Saving...",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "saveError": "Couldn't save the entry"
   },
   "goalsView": {
     "title": "Goals & Objectives",

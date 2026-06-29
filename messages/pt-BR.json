@@ -394,7 +394,8 @@
     "deleteConfirmDescription": "Esta ação não pode ser desfeita.",
     "save": "Salvar",
     "saving": "Salvando...",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "saveError": "Não foi possível salvar o lançamento"
   },
   "goalsView": {
     "title": "Metas e Objetivos",

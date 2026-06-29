@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useUpdateEntry } from '@/modules/entries/hooks/use-update-entry';
 import { CashFlowEntry, FlowType } from '@/lib/cashflow';
 import { useTranslations } from '@/i18n/useTranslations';
+import { toast } from 'sonner';
 import {
   Sheet,
   DrawerContent,
@@ -38,10 +39,10 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
     if (entry) {
       setValues({
         date: entry.date,
-        amount: String(entry.amount),
+        amount: Number(entry.amount).toFixed(2).replace('.', ','),
         type: entry.type as FlowType,
         description: entry.description ?? '',
-        categoryId: entry.categoryId,
+        categoryId: entry.categoryId ?? undefined,
       });
       setErrors({});
     }
@@ -52,6 +53,7 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
     if (!result.success) {
       const errs = result.error.flatten().fieldErrors;
       setErrors({ date: errs.date?.[0], amount: errs.amount?.[0] });
+      toast.error(errs.date?.[0] ?? errs.amount?.[0] ?? errs.type?.[0] ?? t('saveError'));
       return;
     }
     setErrors({});
@@ -59,12 +61,15 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
       {
         id: entry!.id,
         description: values.description,
-        amount: Number(values.amount),
+        amount: parseFloat(values.amount.replace(',', '.')),
         type: values.type,
         date: values.date,
         categoryId: values.categoryId,
       },
-      { onSuccess: onClose },
+      {
+        onSuccess: onClose,
+        onError: () => toast.error(t('saveError')),
+      },
     );
   }
 
@@ -91,6 +96,7 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
             {t('cancel')}
           </Button>
           <Button
+            type="button"
             className="flex-1 h-11 rounded-xl bg-primary text-white font-bold hover:scale-[1.02] transition-all"
             onClick={handleSave}
             disabled={isPending}

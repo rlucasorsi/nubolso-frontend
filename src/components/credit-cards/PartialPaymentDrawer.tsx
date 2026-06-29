@@ -78,7 +78,11 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
       const pmt = priceInstallment(remainderAmount, interestRate, remainderInstallments);
       previewTotal = pmt * remainderInstallments;
       installmentAmounts = distributeAmounts(previewTotal, remainderInstallments);
-    } else if (interestMode === 'amount' && !Number.isNaN(numericInstallmentAmount) && numericInstallmentAmount > 0) {
+    } else if (
+      interestMode === 'amount' &&
+      !Number.isNaN(numericInstallmentAmount) &&
+      numericInstallmentAmount > 0
+    ) {
       previewTotal = numericInstallmentAmount * remainderInstallments;
       installmentAmounts = Array(remainderInstallments).fill(numericInstallmentAmount);
     } else {
@@ -113,7 +117,9 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
     isPartialAmountValid &&
     (interestMode === 'none' ||
       (interestMode === 'rate' && interestRate > 0) ||
-      (interestMode === 'amount' && !Number.isNaN(numericInstallmentAmount) && numericInstallmentAmount > 0));
+      (interestMode === 'amount' &&
+        !Number.isNaN(numericInstallmentAmount) &&
+        numericInstallmentAmount > 0));
 
   function handleClose() {
     setPartialAmount('');
@@ -133,7 +139,8 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
         amount: numericPartial,
         remainderInstallments,
         ...(interestMode === 'rate' && interestRate > 0 && { interestRate }),
-        ...(interestMode === 'amount' && numericInstallmentAmount > 0 && { installmentAmount: numericInstallmentAmount }),
+        ...(interestMode === 'amount' &&
+          numericInstallmentAmount > 0 && { installmentAmount: numericInstallmentAmount }),
       });
       handleClose();
     } catch (err) {
@@ -149,8 +156,13 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
             {t('title')}
           </SheetTitle>
           <p className="text-sm text-muted-foreground">
-            {t('invoiceHeader', { month: td(MONTH_KEYS[invoice.referenceMonth - 1]), year: invoice.referenceYear })}{' '}
-            <span className="font-semibold text-foreground">{formatCurrency(invoice.totalAmount)}</span>
+            {t('invoiceHeader', {
+              month: td(MONTH_KEYS[invoice.referenceMonth - 1]),
+              year: invoice.referenceYear,
+            })}{' '}
+            <span className="font-semibold text-foreground">
+              {formatCurrency(invoice.totalAmount)}
+            </span>
           </p>
           <SheetDescription className="sr-only">{t('srDescription')}</SheetDescription>
         </DrawerHeader>
@@ -161,7 +173,11 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
             required
             value={partialAmount}
             onChange={setPartialAmount}
-            error={amountExceedsTotal ? t('amountExceeds', { amount: formatCurrency(invoice.totalAmount) }) : undefined}
+            error={
+              amountExceedsTotal
+                ? t('amountExceeds', { amount: formatCurrency(invoice.totalAmount) })
+                : undefined
+            }
           />
 
           <NumberInputField
@@ -170,7 +186,6 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
             onChange={setRemainderInstallments}
             min={1}
             max={48}
-            suffix="x"
           />
 
           <div className="space-y-2">
@@ -178,11 +193,13 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
               {t('bankInterest')}
             </label>
             <div className="flex gap-2">
-              {([
-                ['none', t('noInterest')],
-                ['rate', t('interestRate')],
-                ['amount', t('installmentValue')],
-              ] as [InterestMode, string][]).map(([mode, label]) => (
+              {(
+                [
+                  ['none', t('noInterest')],
+                  ['rate', t('interestRate')],
+                  ['amount', t('installmentValue')],
+                ] as [InterestMode, string][]
+              ).map(([mode, label]) => (
                 <button
                   key={mode}
                   type="button"
@@ -226,16 +243,22 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
             <div className="rounded-xl bg-white/5 px-4 py-3 space-y-1 text-xs">
               <div className="flex justify-between text-muted-foreground">
                 <span>{t('remainder')}</span>
-                <span className="font-semibold text-foreground">{formatCurrency(remainderAmount)}</span>
+                <span className="font-semibold text-foreground">
+                  {formatCurrency(remainderAmount)}
+                </span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>{t('total')}</span>
-                <span className="font-semibold text-foreground">{formatCurrency(previewTotal)}</span>
+                <span className="font-semibold text-foreground">
+                  {formatCurrency(previewTotal)}
+                </span>
               </div>
               {previewInterest > 0.005 && (
                 <div className="flex justify-between border-t border-white/10 pt-1 mt-1">
                   <span className="text-muted-foreground">{t('interest')}</span>
-                  <span className="font-semibold text-balance-danger">+ {formatCurrency(previewInterest)}</span>
+                  <span className="font-semibold text-balance-danger">
+                    + {formatCurrency(previewInterest)}
+                  </span>
                 </div>
               )}
             </div>
@@ -248,26 +271,28 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
                 {t('futureImpact')}
               </p>
               <div className="space-y-1.5">
-                {futureImpact.map(({ year, month, newInstallment, existingTotal, total, number }) => (
-                  <div
-                    key={number}
-                    className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {td(MONTH_KEYS[month - 1])}/{year}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {existingTotal > 0
-                          ? `${formatCurrency(existingTotal)} + ${formatCurrency(newInstallment)} (${t('installment', { n: number, total: remainderInstallments })})`
-                          : t('installment', { n: number, total: remainderInstallments })}
-                      </p>
+                {futureImpact.map(
+                  ({ year, month, newInstallment, existingTotal, total, number }) => (
+                    <div
+                      key={number}
+                      className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {td(MONTH_KEYS[month - 1])}/{year}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {existingTotal > 0
+                            ? `${formatCurrency(existingTotal)} + ${formatCurrency(newInstallment)} (${t('installment', { n: number, total: remainderInstallments })})`
+                            : t('installment', { n: number, total: remainderInstallments })}
+                        </p>
+                      </div>
+                      <span className="text-sm font-bold text-balance-danger">
+                        {formatCurrency(total)}
+                      </span>
                     </div>
-                    <span className="text-sm font-bold text-balance-danger">
-                      {formatCurrency(total)}
-                    </span>
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
             </div>
           )}
@@ -296,4 +321,3 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
     </Sheet>
   );
 }
-
