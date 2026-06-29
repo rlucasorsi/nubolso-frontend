@@ -55,10 +55,9 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     setCardFilter(next.length === 0 || next.length === cards.length ? 'all' : next);
   };
   const [openMonthKey, setOpenMonthKey] = useState<number | null>(null);
-  const [itemWidth, setItemWidth] = useState(56);
+  const [itemWidth, setItemWidth] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const didScrollRef = useRef(false);
-  const itemWidthReadyRef = useRef(false);
   const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0, hasDragged: false });
 
   const onDragStart = (e: React.MouseEvent) => {
@@ -98,7 +97,6 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     if (!scrollRef.current) return;
     const observer = new ResizeObserver(() => {
       if (scrollRef.current) {
-        itemWidthReadyRef.current = true;
         const visibleMonths = scrollRef.current.clientWidth < 480 ? 6 : 12;
         setItemWidth((scrollRef.current.clientWidth - ARROW_PADDING) / visibleMonths);
       }
@@ -151,17 +149,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   const maxTotal = Math.max(1, ...buckets.map((b) => b.total));
 
   useEffect(() => {
-    // Wait for invoice data and real itemWidth before scrolling.
-    // Without the invoicesData guard, the effect fires while data is still loading,
-    // locks didScrollRef with the wrong anchor, and the real data never triggers a re-scroll.
-    if (
-      !invoicesData ||
-      !itemWidthReadyRef.current ||
-      didScrollRef.current ||
-      !scrollRef.current ||
-      itemWidth <= 0
-    )
-      return;
+    if (!invoicesData || didScrollRef.current || !scrollRef.current || itemWidth <= 0) return;
     const currentIdx = buckets.findIndex((b) => b.isCurrentMonth);
     if (currentIdx < 0) return;
     // Scroll so the first open invoice at or after today is the leftmost visible bar.
@@ -278,7 +266,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                         'shrink-0 flex flex-col items-center justify-end gap-2 pt-2 pb-1',
                         hasInvoice ? 'cursor-pointer' : 'cursor-default opacity-50',
                       )}
-                      style={{ height: MAX_BAR_HEIGHT + 36, minWidth: itemWidth }}
+                      style={{ height: MAX_BAR_HEIGHT + 36, minWidth: itemWidth || 56 }}
                     >
                       {hasInvoice && (
                         <span className="text-[8px] font-bold text-muted-foreground/60 leading-none">
@@ -294,7 +282,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                               ? 'bg-[#7b5cff]/40'
                               : 'bg-white/10',
                         )}
-                        style={{ height: barHeight, width: Math.max(8, itemWidth * 0.55) }}
+                        style={{ height: barHeight, width: Math.max(8, (itemWidth || 56) * 0.55) }}
                       />
                       <span
                         className={cn(
