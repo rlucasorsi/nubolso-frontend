@@ -15,7 +15,27 @@
     "menu": "Menu",
     "menuDescription": "Main navigation menu",
     "language": "Language",
-    "more": "More"
+    "more": "More",
+    "notifications": "Notifications"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "emptyTitle": "All clear!",
+    "emptyHint": "Bill reminders and balance alerts will appear here.",
+    "pushTitle": "Push notifications",
+    "pushDescription": "Receive bill reminders and balance alerts even when the app is closed.",
+    "pushEnable": "Enable notifications",
+    "pushDisable": "Disable notifications",
+    "pushEnabled": "Enabled",
+    "pushDenied": "Permission denied by your browser. To enable, adjust the site permissions in your browser settings.",
+    "pushUnsupported": "Push notifications are not available in this browser.",
+    "pushUnsupportedSw": "Service Workers are disabled in this Chrome. Check chrome://flags or corporate policies.",
+    "pushUnsupportedIos": "On iOS, add the app to your home screen and open it from there to enable notifications.",
+    "pushUnsupportedHint": "Works in Chrome, Firefox and Edge with Service Workers enabled.",
+    "pushLoading": "Checking...",
+    "pushEnabling": "Enabling...",
+    "pushDisabling": "Disabling..."
   },
   "auth": {
     "tagline": "Organize your finances and have clarity to make better decisions.",
@@ -150,7 +170,17 @@
     "pendingOverdue": "Overdue",
     "pendingDueToday": "Due today",
     "pendingDueTomorrow": "Due tomorrow",
-    "pendingDueInDays": "Due in {days} days"
+    "pendingDueInDays": "Due in {days} days",
+    "pendingConfirmAll": "Confirm all ({count})",
+    "pendingConfirmOverdue": "Confirm overdue ({count})",
+    "pendingConfirmAllDialogTitle": "Confirm {count} item(s)?",
+    "pendingConfirmOverdueDialogTitle": "Confirm {count} overdue item(s)?",
+    "pendingConfirmDialogHint": "Items will be realized using their estimated values. You can edit each one afterwards.",
+    "pendingConfirmDialogCancel": "Cancel",
+    "pendingConfirmDialogConfirm": "Confirm {count}",
+    "pendingConfirmDialogConfirming": "Confirming...",
+    "pendingConfirmAllSuccess": "{count} item(s) confirmed successfully!",
+    "pendingConfirmAllError": "Could not confirm all items."
   },
   "entry": {
     "addButtonLabel": "Entry",

@@ -15,7 +15,27 @@
     "menu": "Menú",
     "menuDescription": "Menú de navegación principal",
     "language": "Idioma",
-    "more": "Más"
+    "more": "Más",
+    "notifications": "Notificaciones"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar todas como leídas",
+    "emptyTitle": "¡Todo tranquilo!",
+    "emptyHint": "Los recordatorios de vencimientos y alertas de saldo aparecerán aquí.",
+    "pushTitle": "Notificaciones push",
+    "pushDescription": "Recibe recordatorios de vencimientos y alertas de saldo incluso con la app cerrada.",
+    "pushEnable": "Activar notificaciones",
+    "pushDisable": "Desactivar notificaciones",
+    "pushEnabled": "Activadas",
+    "pushDenied": "Permiso denegado por el navegador. Para activar, ajusta los permisos del sitio en la configuración de tu navegador.",
+    "pushUnsupported": "Las notificaciones push no están disponibles en este navegador.",
+    "pushUnsupportedSw": "Los Service Workers están desactivados en este Chrome. Verifica chrome://flags o políticas corporativas.",
+    "pushUnsupportedIos": "En iOS, agrega la app a la pantalla de inicio y ábrela desde ahí para activar notificaciones.",
+    "pushUnsupportedHint": "Funciona en Chrome, Firefox y Edge con Service Workers activados.",
+    "pushLoading": "Verificando...",
+    "pushEnabling": "Activando...",
+    "pushDisabling": "Desactivando..."
   },
   "auth": {
     "tagline": "Organiza tus finanzas y toma decisiones con claridad.",
@@ -150,7 +170,17 @@
     "pendingOverdue": "Atrasada",
     "pendingDueToday": "Vence hoy",
     "pendingDueTomorrow": "Vence mañana",
-    "pendingDueInDays": "Vence en {days} días"
+    "pendingDueInDays": "Vence en {days} días",
+    "pendingConfirmAll": "Confirmar todos ({count})",
+    "pendingConfirmOverdue": "Confirmar atrasados ({count})",
+    "pendingConfirmAllDialogTitle": "¿Confirmar {count} elemento(s)?",
+    "pendingConfirmOverdueDialogTitle": "¿Confirmar {count} elemento(s) atrasado(s)?",
+    "pendingConfirmDialogHint": "Los elementos se realizarán con sus valores estimados. Podrás editar cada uno después.",
+    "pendingConfirmDialogCancel": "Cancelar",
+    "pendingConfirmDialogConfirm": "Confirmar {count}",
+    "pendingConfirmDialogConfirming": "Confirmando...",
+    "pendingConfirmAllSuccess": "¡{count} elemento(s) confirmado(s) con éxito!",
+    "pendingConfirmAllError": "No se pudieron confirmar todos los elementos."
   },
   "entry": {
     "addButtonLabel": "Movimiento",

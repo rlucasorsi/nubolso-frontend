@@ -15,7 +15,27 @@
     "menu": "Menu",
     "menuDescription": "Menu de navegação principal",
     "language": "Idioma",
-    "more": "Mais"
+    "more": "Mais",
+    "notifications": "Notificações"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "markAllRead": "Marcar todas como lidas",
+    "emptyTitle": "Tudo tranquilo por aqui!",
+    "emptyHint": "Quando houver lembretes de vencimentos ou alertas de saldo, eles aparecerão aqui.",
+    "pushTitle": "Notificações push",
+    "pushDescription": "Receba lembretes de vencimentos e alertas de saldo mesmo com o app fechado.",
+    "pushEnable": "Ativar notificações",
+    "pushDisable": "Desativar notificações",
+    "pushEnabled": "Ativadas",
+    "pushDenied": "Permissão negada pelo navegador. Para ativar, ajuste as permissões do site nas configurações do seu navegador.",
+    "pushUnsupported": "Notificações push não estão disponíveis neste navegador.",
+    "pushUnsupportedSw": "Service Workers estão desativados neste Chrome. Verifique chrome://flags ou políticas corporativas.",
+    "pushUnsupportedIos": "No iOS, adicione o app à tela de início e abra-o de lá para ativar notificações.",
+    "pushUnsupportedHint": "Funciona no Chrome, Firefox e Edge com Service Workers ativados.",
+    "pushLoading": "Verificando...",
+    "pushEnabling": "Ativando...",
+    "pushDisabling": "Desativando..."
   },
   "auth": {
     "tagline": "Organize suas finanças e tenha clareza para decidir melhor.",
@@ -150,7 +170,17 @@
     "pendingOverdue": "Atrasada",
     "pendingDueToday": "Vence hoje",
     "pendingDueTomorrow": "Vence amanhã",
-    "pendingDueInDays": "Vence em {days} dias"
+    "pendingDueInDays": "Vence em {days} dias",
+    "pendingConfirmAll": "Confirmar todos ({count})",
+    "pendingConfirmOverdue": "Confirmar atrasadas ({count})",
+    "pendingConfirmAllDialogTitle": "Confirmar {count} lançamento(s)?",
+    "pendingConfirmOverdueDialogTitle": "Confirmar {count} lançamento(s) atrasado(s)?",
+    "pendingConfirmDialogHint": "Os lançamentos serão efetivados com os valores estimados. Você pode editar cada um depois.",
+    "pendingConfirmDialogCancel": "Cancelar",
+    "pendingConfirmDialogConfirm": "Confirmar {count}",
+    "pendingConfirmDialogConfirming": "Confirmando...",
+    "pendingConfirmAllSuccess": "{count} lançamento(s) efetivado(s) com sucesso!",
+    "pendingConfirmAllError": "Não foi possível efetivar todos os lançamentos."
   },
   "entry": {
     "addButtonLabel": "Lançamento",

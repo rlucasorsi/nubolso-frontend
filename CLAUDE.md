@@ -91,6 +91,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID
 NEXT_PUBLIC_SENTRY_DSN
 SENTRY_DSN
 SENTRY_AUTH_TOKEN
+NEXT_PUBLIC_VAPID_PUBLIC_KEY  # Web Push VAPID public key (generate: npx web-push generate-vapid-keys)
 ```
 
 Copy `.env.example` to `.env.local` to get started.

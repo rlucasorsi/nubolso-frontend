@@ -43,6 +43,7 @@ import { useTranslations } from '@/i18n/useTranslations';
 import { getPeriodForDate } from '@/lib/cashflow';
 import { useEffect, useMemo, useState } from 'react';
 import { usePendingAlertDays } from '@/hooks/usePendingAlertDays';
+import { usePushSubscription } from '@/modules/notifications/hooks/use-push-subscription';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { SupportDrawer } from '@/components/support/SupportDrawer';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
@@ -109,6 +110,14 @@ export default function SettingsPage() {
   };
 
   const { alertDays, updateAlertDays } = usePendingAlertDays();
+  const tNotif = useTranslations('notifications');
+  const {
+    status: pushStatus,
+    isProcessing: isPushProcessing,
+    unsupportedReason: pushUnsupportedReason,
+    subscribe: subscribePush,
+    unsubscribe: unsubscribePush,
+  } = usePushSubscription();
   const [localAlertDays, setLocalAlertDays] = useState(alertDays);
   useEffect(() => {
     setLocalAlertDays(alertDays);
@@ -343,6 +352,72 @@ export default function SettingsPage() {
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground">{t('belowYellow')}</p>
+            </CardContent>
+          </Card>
+
+          {/* Push Notifications card */}
+          <Card className="glass-card border-none shadow-card-elegant overflow-hidden">
+            <CardHeader className="p-4 pb-2">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">{tNotif('pushTitle')}</CardTitle>
+              </div>
+              <CardDescription className="text-xs mt-1">
+                {tNotif('pushDescription')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              {pushStatus === 'loading' && (
+                <p className="text-xs text-muted-foreground flex items-center gap-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> {tNotif('pushLoading')}
+                </p>
+              )}
+              {pushStatus === 'unsupported' && (
+                <div className="space-y-1.5">
+                  <p className="text-xs text-amber-400 font-medium">
+                    {pushUnsupportedReason === 'ios_pwa_required'
+                      ? tNotif('pushUnsupportedIos')
+                      : pushUnsupportedReason === 'no_service_worker'
+                        ? tNotif('pushUnsupportedSw')
+                        : tNotif('pushUnsupported')}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground/60">
+                    {tNotif('pushUnsupportedHint')}
+                  </p>
+                </div>
+              )}
+              {pushStatus === 'denied' && (
+                <p className="text-xs text-amber-400">{tNotif('pushDenied')}</p>
+              )}
+              {(pushStatus === 'unsubscribed' || pushStatus === 'subscribed') && (
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-sm">
+                    {pushStatus === 'subscribed' ? (
+                      <span className="text-emerald-400 font-semibold">
+                        ✓ {tNotif('pushEnabled')}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">{tNotif('pushEnable')}</span>
+                    )}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0 border-white/10 hover:bg-white/5"
+                    onClick={pushStatus === 'subscribed' ? unsubscribePush : subscribePush}
+                    disabled={isPushProcessing}
+                  >
+                    {isPushProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    {isPushProcessing
+                      ? pushStatus === 'subscribed'
+                        ? tNotif('pushDisabling')
+                        : tNotif('pushEnabling')
+                      : pushStatus === 'subscribed'
+                        ? tNotif('pushDisable')
+                        : tNotif('pushEnable')}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

@@ -54,4 +54,8 @@ export const recurringTemplatesService = {
     const { id, ...rest } = params;
     return HttpClient.post<any, any>(`/recurring-templates/${id}/skip`, rest);
   },
+
+  realizeBatch: async (items: { id: string; amount: number; date: string }[]) => {
+    return HttpClient.post<any, any>('/recurring-templates/realize-batch', { items });
+  },
 };

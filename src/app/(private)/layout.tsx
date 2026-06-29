@@ -9,6 +9,7 @@ import {
   RotateCw,
   CreditCard,
   Menu,
+  Bell,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -19,10 +20,12 @@ import { MobileNav } from '@/components/layout/MobileNav';
 import { GlobalQuickAdd } from '@/components/layout/GlobalQuickAdd';
 import { SideMenuDrawer } from '@/components/layout/SideMenuDrawer';
 import { UserMenu } from '@/components/layout/UserMenu';
+import { NotificationCenter } from '@/components/layout/NotificationCenter';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
 import { useLogout } from '@/hooks/useLogout';
 import { InitialSetupDrawer } from '@/components/onboarding/InitialSetupDrawer';
 import { SentryUserContext } from '@/components/monitoring/SentryUserContext';
+import { useUnreadCount } from '@/modules/notifications/hooks/use-unread-count';
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('nav');
@@ -32,6 +35,9 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
 
   const handleLogout = useLogout();
+  const { data: unreadData } = useUnreadCount();
+  const unreadCount = unreadData?.count ?? 0;
+  const [notifOpen, setNotifOpen] = useState(false);
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
@@ -100,13 +106,32 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
             );
           })}
           <span className="hidden sm:block w-2" />
+          {/* Notification bell */}
+          <button
+            type="button"
+            onClick={() => setNotifOpen(true)}
+            aria-label="Notificações"
+            className="relative h-9 w-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+          >
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <span
+                className={cn(
+                  'absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] px-0.5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-[0_0_6px_var(--primary)]',
+                )}
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
           <UserMenu name={me?.name} email={me?.email} onLogout={handleLogout} />
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-14 sm:pb-0">{children}</main>
       <GlobalQuickAdd />
-      <MobileNav />
+      <MobileNav onOpenNotifications={() => setNotifOpen(true)} unreadCount={unreadCount} />
+      <NotificationCenter open={notifOpen} onClose={() => setNotifOpen(false)} />
     </div>
   );
 }

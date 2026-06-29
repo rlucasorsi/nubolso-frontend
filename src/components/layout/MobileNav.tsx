@@ -11,6 +11,7 @@ import {
   RotateCw,
   Target,
   Settings,
+  Bell,
   X,
 } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -19,7 +20,12 @@ import { triggerQuickAdd } from '@/lib/quickAdd';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
-export function MobileNav() {
+interface MobileNavProps {
+  onOpenNotifications?: () => void;
+  unreadCount?: number;
+}
+
+export function MobileNav({ onOpenNotifications, unreadCount = 0 }: MobileNavProps) {
   const t = useTranslations('nav');
   const pathname = usePathname();
   const router = useRouter();
@@ -116,6 +122,26 @@ export function MobileNav() {
           </div>
 
           <nav className="px-3 py-4 space-y-1">
+            {onOpenNotifications && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false);
+                  onOpenNotifications();
+                }}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium w-full transition-all duration-200 text-muted-foreground hover:bg-white/5 hover:text-foreground"
+              >
+                <span className="relative shrink-0">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[0.9rem] h-[0.9rem] px-0.5 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </span>
+                <span>{t('notifications')}</span>
+              </button>
+            )}
             {MORE_ITEMS.map(({ label, href, icon: Icon }) => {
               const isActive = pathname === href;
               return (
