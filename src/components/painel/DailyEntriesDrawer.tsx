@@ -1,5 +1,39 @@
 ﻿import { useState } from 'react';
 import { cn } from '@/lib/utils';
+
+const ACTION_VARIANTS = {
+  ghost: 'bg-white/8 border-white/15 text-white hover:bg-white/15 hover:border-white/30',
+  primary: 'bg-white/8 border-white/15 text-primary hover:bg-primary/20 hover:border-primary/40',
+  warning:
+    'bg-white/8 border-white/15 text-amber-400 hover:bg-amber-400/15 hover:border-amber-400/35',
+  danger:
+    'bg-white/8 border-white/15 text-white/40 hover:bg-red-500/15 hover:text-red-400 hover:border-red-500/30',
+} as const;
+
+function ActionButton({
+  variant,
+  icon,
+  label,
+  onClick,
+}: {
+  variant: keyof typeof ACTION_VARIANTS;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'flex-1 h-9 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all',
+        ACTION_VARIANTS[variant],
+      )}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
 import { CashFlowEntry, FlowType, formatCurrency } from '@/lib/cashflow';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -339,13 +373,13 @@ export function DailyEntriesDrawer({
                                     <div className="flex gap-2">
                                       <button
                                         onClick={() => setDeleteConfirmId(null)}
-                                        className="flex-1 h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold"
+                                        className="flex-1 h-9 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold"
                                       >
                                         {t('cancel')}
                                       </button>
                                       <button
                                         onClick={handlePermanentSkip}
-                                        className="flex-1 h-10 rounded-xl bg-amber-400 text-[#1c1a24] hover:bg-amber-300 transition-all text-xs font-bold shadow-lg shadow-amber-400/20"
+                                        className="flex-1 h-9 rounded-xl bg-amber-400 text-[#1c1a24] hover:bg-amber-300 transition-all text-xs font-bold shadow-lg shadow-amber-400/20"
                                       >
                                         {t('ignore')}
                                       </button>
@@ -354,13 +388,13 @@ export function DailyEntriesDrawer({
                                     <div className="flex gap-2">
                                       <button
                                         onClick={() => setDeleteConfirmId(null)}
-                                        className="flex-1 h-10 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold"
+                                        className="flex-1 h-9 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-bold"
                                       >
                                         {t('cancel')}
                                       </button>
                                       <button
                                         onClick={handleDelete}
-                                        className="flex-1 h-10 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all text-xs font-bold shadow-lg shadow-red-500/20"
+                                        className="flex-1 h-9 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all text-xs font-bold shadow-lg shadow-red-500/20"
                                       >
                                         {t('delete')}
                                       </button>
@@ -439,129 +473,127 @@ export function DailyEntriesDrawer({
                                       </div>
                                     </div>
                                   ) : (
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 pl-2">
-                                      <div className="flex-1">
-                                        <div className="flex items-center justify-between gap-2">
-                                          <div>
-                                            <p className="text-sm font-bold text-white tracking-tight">
-                                              {entry.description || typeT(entry.type)}
-                                            </p>
-                                            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                                              {entry.category && (
-                                                <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1.5">
-                                                  <span
-                                                    className="h-1.5 w-1.5 rounded-full"
-                                                    style={{
-                                                      backgroundColor: entry.category.color,
-                                                    }}
-                                                  />
-                                                  {entry.category.name}
-                                                </p>
-                                              )}
-                                              {entry.templateId && (
-                                                <Badge
-                                                  variant="outline"
-                                                  className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]"
-                                                >
-                                                  <RotateCw className="h-2.5 w-2.5" />
-                                                  {t('recurring')}
-                                                </Badge>
-                                              )}
-                                              {entry.creditCardInvoiceId && (
-                                                <Badge
-                                                  variant="outline"
-                                                  className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]"
-                                                >
-                                                  <CreditCard className="h-2.5 w-2.5" />
-                                                  {t('invoice')}
-                                                </Badge>
-                                              )}
-                                              {entry.isSkipped ? (
-                                                <Badge
-                                                  variant="outline"
-                                                  className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/50 bg-white/[0.02]"
-                                                >
-                                                  <Ban className="h-2.5 w-2.5" />
-                                                  {t('skipped')}
-                                                </Badge>
-                                              ) : entry.isVirtual ? (
-                                                <Badge
-                                                  variant="outline"
-                                                  className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10"
-                                                >
-                                                  {t('estimated')}
-                                                </Badge>
-                                              ) : entry.templateId ? (
-                                                <Badge
-                                                  variant="outline"
-                                                  className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10"
-                                                >
-                                                  {t('confirmed')}
-                                                </Badge>
-                                              ) : null}
-                                            </div>
-                                          </div>
-                                          <div className="text-right">
-                                            <div
-                                              className={cn(
-                                                'px-3 py-1.5 rounded-xl border bg-white/[0.02] transition-all duration-300',
-                                                type === 'income'
-                                                  ? 'border-emerald-500/20'
-                                                  : type === 'expense'
-                                                    ? 'border-red-500/20'
-                                                    : 'border-orange-400/20',
-                                              )}
-                                            >
-                                              <p className="text-sm font-black font-display text-white">
-                                                <span className="text-[10px] font-black opacity-40 mr-1">
-                                                  {cfg.sign} R$
-                                                </span>
-                                                {formatCurrency(entry.amount)
-                                                  .replace('R$', '')
-                                                  .trim()}
+                                    <div className="pl-2 space-y-3">
+                                      <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0 flex-1">
+                                          <p className="text-sm font-bold text-white tracking-tight">
+                                            {entry.description || typeT(entry.type)}
+                                          </p>
+                                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                            {entry.category && (
+                                              <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1.5">
+                                                <span
+                                                  className="h-1.5 w-1.5 rounded-full"
+                                                  style={{
+                                                    backgroundColor: entry.category.color,
+                                                  }}
+                                                />
+                                                {entry.category.name}
                                               </p>
-                                            </div>
+                                            )}
+                                            {entry.templateId && (
+                                              <Badge
+                                                variant="outline"
+                                                className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]"
+                                              >
+                                                <RotateCw className="h-2.5 w-2.5" />
+                                                {t('recurring')}
+                                              </Badge>
+                                            )}
+                                            {entry.creditCardInvoiceId && (
+                                              <Badge
+                                                variant="outline"
+                                                className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02]"
+                                              >
+                                                <CreditCard className="h-2.5 w-2.5" />
+                                                {t('invoice')}
+                                              </Badge>
+                                            )}
+                                            {entry.isSkipped ? (
+                                              <Badge
+                                                variant="outline"
+                                                className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/50 bg-white/[0.02]"
+                                              >
+                                                <Ban className="h-2.5 w-2.5" />
+                                                {t('skipped')}
+                                              </Badge>
+                                            ) : entry.isVirtual ? (
+                                              <Badge
+                                                variant="outline"
+                                                className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10"
+                                              >
+                                                {t('estimated')}
+                                              </Badge>
+                                            ) : entry.templateId ? (
+                                              <Badge
+                                                variant="outline"
+                                                className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10"
+                                              >
+                                                {t('confirmed')}
+                                              </Badge>
+                                            ) : null}
+                                          </div>
+                                        </div>
+                                        <div className="shrink-0">
+                                          <div
+                                            className={cn(
+                                              'px-3 py-1.5 rounded-xl border bg-white/[0.02] transition-all duration-300',
+                                              type === 'income'
+                                                ? 'border-emerald-500/20'
+                                                : type === 'expense'
+                                                  ? 'border-red-500/20'
+                                                  : 'border-orange-400/20',
+                                            )}
+                                          >
+                                            <p className="text-sm font-black font-display text-white">
+                                              <span className="text-[10px] font-black opacity-40 mr-1">
+                                                {cfg.sign} R$
+                                              </span>
+                                              {formatCurrency(entry.amount)
+                                                .replace('R$', '')
+                                                .trim()}
+                                            </p>
                                           </div>
                                         </div>
                                       </div>
 
-                                      <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t border-white/5 sm:border-0">
+                                      <div className="flex items-center gap-2 pt-1 border-t border-white/5">
                                         {entry.isSkipped ? (
-                                          <button
+                                          <ActionButton
+                                            variant="ghost"
+                                            icon={<RotateCcw className="h-4 w-4" />}
+                                            label={t('reactivate')}
                                             onClick={() => onDeleteEntry(entry.id)}
-                                            className="flex-1 h-10 rounded-xl bg-white/5 text-muted-foreground/60 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
-                                          >
-                                            <RotateCcw className="h-4 w-4" />
-                                            {t('reactivate')}
-                                          </button>
+                                          />
                                         ) : isPendingInvoice ? (
-                                          <button
+                                          <ActionButton
+                                            variant="warning"
+                                            icon={<CreditCard className="h-4 w-4" />}
+                                            label={t('payInvoice')}
                                             onClick={() =>
                                               onPayInvoice?.(entry.creditCardInvoiceId as string)
                                             }
-                                            className="flex-1 h-10 rounded-xl bg-amber-400/10 text-amber-400 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
-                                          >
-                                            <CreditCard className="h-4 w-4" />
-                                            {t('payInvoice')}
-                                          </button>
+                                          />
                                         ) : entry.isVirtual ? (
                                           <>
-                                            <button
-                                              onClick={() => startRealize(entry)}
-                                              className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors flex items-center gap-1.5"
-                                            >
-                                              <RotateCw className="h-3.5 w-3.5" />
-                                              {t('apply')}
-                                            </button>
-                                            <button
+                                            <ActionButton
+                                              variant="ghost"
+                                              icon={<Ban className="h-4 w-4" />}
+                                              label={t('ignore')}
                                               onClick={() => setDeleteConfirmId(entry.id)}
-                                              className="shrink-0 w-10 h-10 rounded-xl bg-red-500/5 text-red-500/40 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
-                                            >
-                                              <Trash2 className="h-4 w-4" />
-                                            </button>
+                                            />
+                                            <ActionButton
+                                              variant="primary"
+                                              icon={<RotateCw className="h-4 w-4" />}
+                                              label={t('apply')}
+                                              onClick={() => startRealize(entry)}
+                                            />
                                           </>
                                         ) : isPaidInvoice ? (
-                                          <button
+                                          <ActionButton
+                                            variant="ghost"
+                                            icon={<RotateCcw className="h-4 w-4" />}
+                                            label={t('reopenInvoice')}
                                             onClick={() => {
                                               setReopenError(null);
                                               setReopenInvoiceId(
@@ -569,25 +601,21 @@ export function DailyEntriesDrawer({
                                               );
                                               setReopenDialogOpen(true);
                                             }}
-                                            className="flex-1 h-10 rounded-xl bg-white/5 text-muted-foreground/60 hover:bg-amber-400 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm text-xs font-bold px-4"
-                                          >
-                                            <RotateCcw className="h-4 w-4" />
-                                            {t('reopenInvoice')}
-                                          </button>
+                                          />
                                         ) : (
                                           <>
-                                            <button
-                                              onClick={() => startEdit(entry)}
-                                              className="flex-1 sm:w-10 h-10 rounded-xl bg-white/5 text-muted-foreground/40 hover:bg-primary/20 hover:text-primary transition-all flex items-center justify-center shadow-sm"
-                                            >
-                                              <Pencil className="h-4 w-4" />
-                                            </button>
-                                            <button
+                                            <ActionButton
+                                              variant="danger"
+                                              icon={<Trash2 className="h-4 w-4" />}
+                                              label={t('delete')}
                                               onClick={() => setDeleteConfirmId(entry.id)}
-                                              className="flex-1 sm:w-10 h-10 rounded-xl bg-red-500/5 text-red-500/40 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
-                                            >
-                                              <Trash2 className="h-4 w-4" />
-                                            </button>
+                                            />
+                                            <ActionButton
+                                              variant="ghost"
+                                              icon={<Pencil className="h-4 w-4" />}
+                                              label={t('edit')}
+                                              onClick={() => startEdit(entry)}
+                                            />
                                           </>
                                         )}
                                       </div>

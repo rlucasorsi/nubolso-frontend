@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Input } from '@/components/ui/input';
 import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Search, X, CheckCircle2, RotateCw } from 'lucide-react';
+import { ChevronDown, Search, X, CheckCircle2, RotateCw, Ban } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { useRealizeRecurringTemplate } from '@/modules/recurring-templates/hooks/use-realize-recurring-template';
 import { useRealizeAllRecurringTemplates } from '@/modules/recurring-templates/hooks/use-realize-all-recurring-templates';
+import { useSkipRecurringTemplate } from '@/modules/recurring-templates/hooks/use-skip-recurring-template';
 import {
   usePendingAlertDays,
   getPendingAlertStatus,
@@ -95,11 +96,13 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [alertOnly, setAlertOnly] = useState(false);
   const [realizingId, setRealizingId] = useState<string | null>(null);
+  const [ignoringId, setIgnoringId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState({ amount: '', date: '', description: '' });
   const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
 
   const { mutate: realize, isPending: isSubmitting } = useRealizeRecurringTemplate();
   const { mutate: realizeAll, isPending: isRealizingAll } = useRealizeAllRecurringTemplates();
+  const { mutate: skip, isPending: isSkipping } = useSkipRecurringTemplate();
 
   const [confirmAllDialogOpen, setConfirmAllDialogOpen] = useState(false);
   const [confirmAllMode, setConfirmAllMode] = useState<'all' | 'overdue'>('all');
@@ -186,6 +189,7 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
 
   const startRealize = (entry: CashFlowEntry) => {
     setRealizingId(entry.id);
+    setIgnoringId(null);
     setEditValues({
       amount: entry.amount.toFixed(2).replace('.', ','),
       date: entry.date,
@@ -194,6 +198,18 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
   };
 
   const cancelRealize = () => setRealizingId(null);
+
+  const startIgnore = (entry: CashFlowEntry) => {
+    setIgnoringId(entry.id);
+    setRealizingId(null);
+  };
+
+  const cancelIgnore = () => setIgnoringId(null);
+
+  const confirmIgnore = (entry: CashFlowEntry) => {
+    if (!entry.templateId) return;
+    skip({ id: entry.templateId, date: entry.date }, { onSuccess: () => setIgnoringId(null) });
+  };
 
   const confirmRealize = (entry: CashFlowEntry) => {
     if (!entry.templateId) return;
@@ -340,6 +356,7 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
                               TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] ||
                               TYPE_CONFIG.spending;
                             const isConfirming = realizingId === entry.id;
+                            const isIgnoring = ignoringId === entry.id;
                             const alertStatus = getPendingAlertStatus(entry.date, today, alertDays);
 
                             return (
@@ -347,7 +364,11 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
                                 key={entry.id}
                                 className={cn(
                                   'bg-[#1c1a24] border rounded-2xl p-4 transition-all duration-200',
-                                  isConfirming ? 'border-primary/30' : 'border-transparent',
+                                  isConfirming
+                                    ? 'border-primary/30'
+                                    : isIgnoring
+                                      ? 'border-white/15'
+                                      : 'border-transparent',
                                 )}
                               >
                                 <div className="flex items-center gap-3">
@@ -372,14 +393,23 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
                                       {cfg.sign} {formatCurrency(entry.amount)}
                                     </p>
                                   </div>
-                                  {!isConfirming && (
-                                    <button
-                                      onClick={() => startRealize(entry)}
-                                      className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 transition-colors flex items-center gap-1.5"
-                                    >
-                                      <RotateCw className="h-3.5 w-3.5" />
-                                      {td('apply')}
-                                    </button>
+                                  {!isConfirming && !isIgnoring && (
+                                    <div className="flex gap-1.5 shrink-0">
+                                      <button
+                                        onClick={() => startIgnore(entry)}
+                                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/8 border border-white/15 text-white hover:bg-white/15 hover:border-white/30 transition-colors flex items-center gap-1.5"
+                                      >
+                                        <Ban className="h-3.5 w-3.5" />
+                                        {td('ignore')}
+                                      </button>
+                                      <button
+                                        onClick={() => startRealize(entry)}
+                                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/8 border border-white/15 text-primary hover:bg-primary/20 hover:border-primary/40 transition-colors flex items-center gap-1.5"
+                                      >
+                                        <RotateCw className="h-3.5 w-3.5" />
+                                        {td('apply')}
+                                      </button>
+                                    </div>
                                   )}
                                 </div>
 
@@ -425,6 +455,30 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
                                         className="h-9 px-4 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-xs font-bold disabled:opacity-50"
                                       >
                                         {td('confirm')}
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {isIgnoring && (
+                                  <div className="mt-3 pt-3 border-t border-white/5 space-y-3">
+                                    <p className="text-xs text-muted-foreground/70">
+                                      {td('ignoreDescription')}
+                                    </p>
+                                    <div className="flex gap-2 justify-end">
+                                      <button
+                                        onClick={cancelIgnore}
+                                        disabled={isSkipping}
+                                        className="h-9 px-4 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-semibold"
+                                      >
+                                        {td('cancel')}
+                                      </button>
+                                      <button
+                                        onClick={() => confirmIgnore(entry)}
+                                        disabled={isSkipping}
+                                        className="h-9 px-4 rounded-xl bg-amber-500 text-white hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20 text-xs font-bold disabled:opacity-50"
+                                      >
+                                        {td('ignore')}
                                       </button>
                                     </div>
                                   </div>

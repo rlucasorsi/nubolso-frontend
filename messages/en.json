@@ -395,6 +395,7 @@
     "ignoreDescription": "This bill won't appear as an estimate this month. You can reactivate it later using the \"Reactivate\" button.",
     "deleteRecurringDescription": "Return to template estimate (and apply again later) or permanently delete, marking this month as \"Skipped\".",
     "deleteDescription": "This action cannot be undone.",
+    "edit": "Edit",
     "cancel": "Cancel",
     "delete": "Delete",
     "ignore": "Ignore",

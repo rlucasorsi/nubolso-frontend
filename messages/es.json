@@ -395,6 +395,7 @@
     "ignoreDescription": "Esta cuenta no aparecerá como estimación este mes. Puedes reactivarla después con el botón \"Reactivar\".",
     "deleteRecurringDescription": "Vuelve a la estimación de la plantilla (y aplica de nuevo después) o elimina permanentemente, marcando este mes como \"Ignorado\".",
     "deleteDescription": "Esta acción no se puede deshacer.",
+    "edit": "Editar",
     "cancel": "Cancelar",
     "delete": "Eliminar",
     "ignore": "Ignorar",
