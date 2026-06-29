@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
+import { TextInputField } from '@/components/ui/form-field';
 import { CheckCircle2, HelpCircle } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { HttpClient } from '@/network/http-client';
@@ -24,7 +25,12 @@ interface SupportDrawerProps {
 
 const SUBJECTS = ['subjectQuestion', 'subjectBug', 'subjectSuggestion', 'subjectOther'] as const;
 
-export function SupportDrawer({ open, onClose, defaultName = '', defaultEmail = '' }: SupportDrawerProps) {
+export function SupportDrawer({
+  open,
+  onClose,
+  defaultName = '',
+  defaultEmail = '',
+}: SupportDrawerProps) {
   const t = useTranslations('support');
 
   const [name, setName] = useState(defaultName);
@@ -51,12 +57,16 @@ export function SupportDrawer({ open, onClose, defaultName = '', defaultEmail = 
     setError(null);
     setSending(true);
     try {
-      await HttpClient.post('/support', {
-        name,
-        email,
-        subject: t(subject as typeof SUBJECTS[number]),
-        message,
-      }, { includeToken: false });
+      await HttpClient.post(
+        '/support',
+        {
+          name,
+          email,
+          subject: t(subject as (typeof SUBJECTS)[number]),
+          message,
+        },
+        { includeToken: false },
+      );
       setSuccess(true);
     } catch (err) {
       setError(extractErrorMessage(err, t('errorMessage')));
@@ -67,10 +77,16 @@ export function SupportDrawer({ open, onClose, defaultName = '', defaultEmail = 
 
   const isValid = name.trim().length > 0 && email.includes('@') && message.trim().length >= 10;
 
-  const inputClass = 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/50 transition-all';
+  const inputClass =
+    'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/50 transition-all';
 
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Sheet
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DrawerContent>
         <DrawerHeader onClose={onClose}>
           <SheetTitle className="text-2xl font-bold font-display text-primary">
@@ -97,28 +113,14 @@ export function SupportDrawer({ open, onClose, defaultName = '', defaultEmail = 
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-                    {t('nameLabel')}
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-                    {t('emailLabel')}
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
+                <TextInputField label={t('nameLabel')} required value={name} onChange={setName} />
+                <TextInputField
+                  label={t('emailLabel')}
+                  required
+                  type="email"
+                  value={email}
+                  onChange={setEmail}
+                />
               </div>
 
               <div className="space-y-1.5">

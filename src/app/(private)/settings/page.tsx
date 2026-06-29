@@ -5,8 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { AmountInputField, NumberInputField } from '@/components/ui/form-field';
-import { DatePicker } from '@/components/ui/date-picker';
+import {
+  AmountInputField,
+  NumberInputField,
+  TextInputField,
+  DateInputField,
+} from '@/components/ui/form-field';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -237,16 +241,12 @@ export default function SettingsPage() {
                   onChange={setBalanceValue}
                   inputClassName="h-10 text-sm"
                 />
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-                    {t('referenceDate')}
-                  </label>
-                  <DatePicker
-                    date={balanceDate}
-                    onChange={setBalanceDate}
-                    className="h-10 text-sm px-3"
-                  />
-                </div>
+                <DateInputField
+                  label={t('referenceDate')}
+                  required
+                  value={balanceDate}
+                  onChange={setBalanceDate}
+                />
               </div>
             </CardContent>
           </Card>
@@ -416,17 +416,11 @@ export default function SettingsPage() {
               </Button>
             </CardHeader>
             <CardContent className="p-4 pt-0 space-y-3">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-                  {t('profileName')}
-                </label>
-                <input
-                  type="text"
-                  value={profileName}
-                  onChange={(e) => setProfileName(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 h-10 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary/40 transition-all"
-                />
-              </div>
+              <TextInputField
+                label={t('profileName')}
+                value={profileName}
+                onChange={setProfileName}
+              />
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
                   {t('profileEmail')}

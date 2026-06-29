@@ -11,9 +11,8 @@ import {
 } from '@/components/ui/app-drawer';
 import { createGoalSchema } from '@/lib/schemas/goals';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AmountInputField } from '@/components/ui/form-field';
+import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
 import {
   X,
   ArrowRight,
@@ -29,7 +28,6 @@ import {
   PiggyBank,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { DatePicker } from '@/components/ui/date-picker';
 import { useTranslations } from '@/i18n/useTranslations';
 
 const ICON_OPTIONS = [
@@ -58,12 +56,7 @@ interface CreateGoalDrawerProps {
   isLoading: boolean;
 }
 
-export function CreateGoalDrawer({
-  open,
-  onClose,
-  onSubmit,
-  isLoading,
-}: CreateGoalDrawerProps) {
+export function CreateGoalDrawer({ open, onClose, onSubmit, isLoading }: CreateGoalDrawerProps) {
   const t = useTranslations('createGoal');
   const tCommon = useTranslations('common');
   const [name, setName] = useState('');
@@ -106,7 +99,8 @@ export function CreateGoalDrawer({
     resetForm();
   };
 
-  const isFormValid = name.trim() && targetAmount && parseFloat(targetAmount.replace(',', '.')) > 0 && deadline;
+  const isFormValid =
+    name.trim() && targetAmount && parseFloat(targetAmount.replace(',', '.')) > 0 && deadline;
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -121,46 +115,29 @@ export function CreateGoalDrawer({
         </DrawerHeader>
 
         <div className="flex-1 px-6 pb-6 space-y-6">
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              {t('goalName')}
-            </Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('goalNamePlaceholder')}
-              className="glass-input h-12 rounded-xl"
-            />
-          </div>
+          <TextInputField
+            label={t('goalName')}
+            required
+            value={name}
+            onChange={setName}
+            placeholder={t('goalNamePlaceholder')}
+          />
 
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              {t('description')}
-            </Label>
-            <Input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('descriptionPlaceholder')}
-              className="glass-input h-12 rounded-xl"
-            />
-          </div>
+          <TextInputField
+            label={t('description')}
+            value={description}
+            onChange={setDescription}
+            placeholder={t('descriptionPlaceholder')}
+          />
 
           <AmountInputField
             label={t('targetAmount')}
+            required
             value={targetAmount}
             onChange={setTargetAmount}
           />
 
-          <div className="space-y-2">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              {t('deadline')}
-            </Label>
-            <DatePicker
-              date={deadline}
-              onChange={setDeadline}
-              className="h-12"
-            />
-          </div>
+          <DateInputField label={t('deadline')} required value={deadline} onChange={setDeadline} />
 
           <div className="space-y-3">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -178,7 +155,7 @@ export function CreateGoalDrawer({
                       'flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-all active:scale-90',
                       isActive
                         ? 'bg-primary text-white ring-1 ring-white/10'
-                        : 'glass-card text-muted-foreground hover:bg-white/5 border-border/20'
+                        : 'glass-card text-muted-foreground hover:bg-white/5 border-border/20',
                     )}
                   >
                     <opt.Icon className="h-6 w-6" />
@@ -187,13 +164,10 @@ export function CreateGoalDrawer({
               })}
             </div>
           </div>
-
         </div>
 
         <DrawerFooter>
-          {formError && (
-            <p className="text-xs text-destructive text-center pb-1">{formError}</p>
-          )}
+          {formError && <p className="text-xs text-destructive text-center pb-1">{formError}</p>}
           <Button
             onClick={handleSubmit}
             disabled={!isFormValid || isLoading}
@@ -209,5 +183,3 @@ export function CreateGoalDrawer({
     </Sheet>
   );
 }
-
-
