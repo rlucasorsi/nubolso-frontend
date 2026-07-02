@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { localDateStr } from '@/lib/utils';
 import {
   CashFlowEntry,
   CreditCardInvoiceLike,
@@ -39,7 +40,7 @@ export function useCashFlow() {
       value: me?.currentBalance ?? 0,
       date: me?.balanceStartDate
         ? me.balanceStartDate.split('T')[0]
-        : new Date().toISOString().split('T')[0],
+        : localDateStr(),
     }),
     [me],
   );
@@ -209,7 +210,7 @@ export function useCashFlow() {
   );
 
   // Current balance: last historical day
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   const currentBalance = useMemo(() => {
     for (const p of periods) {
       for (const d of p.days) {

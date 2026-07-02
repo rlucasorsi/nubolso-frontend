@@ -15,7 +15,7 @@ import { Plus, Pencil } from 'lucide-react';
 import { formatCurrency, formatDateLong } from '@/lib/cashflow';
 import { MONTH_KEYS, TYPE_CONFIG } from '@/components/painel/config';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
-import { cn } from '@/lib/utils';
+import { cn, localDateStr } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from '@/i18n/useTranslations';
 
@@ -29,7 +29,7 @@ interface CreditCardDetailDrawerProps {
 }
 
 function getTodayDateString() {
-  return new Date().toISOString().split('T')[0];
+  return localDateStr();
 }
 
 export function CreditCardDetailDrawer({

@@ -7,7 +7,7 @@ import { TYPE_CONFIG } from './config';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
-import { cn } from '@/lib/utils';
+import { cn, localDateStr } from '@/lib/utils';
 import { ChevronDown, Search, X, CheckCircle2, RotateCw, Ban } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
@@ -89,7 +89,7 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
   const { virtualEntries } = useCashFlow();
   const { alertDays } = usePendingAlertDays();
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');

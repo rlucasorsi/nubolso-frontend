@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
 import { AmountInputField, DateInputField } from '@/components/ui/form-field';
+import { localDateStr } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
@@ -23,7 +24,7 @@ export function InitialSetupDrawer({ open }: InitialSetupDrawerProps) {
   const t = useTranslations('onboarding');
   const updateMeMutation = useUpdateMe();
   const [value, setValue] = useState('');
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => localDateStr());
 
   const parsedValue = parseFloat(value.replace(',', '.'));
   const isFormValid = value !== '' && !Number.isNaN(parsedValue) && Boolean(date);

@@ -1,5 +1,6 @@
 'use client';
 
+import { localDateStr } from '@/lib/utils';
 import { useCashFlow } from '@/hooks/useCashFlow';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -101,7 +102,7 @@ export default function SettingsPage() {
   const hasStartDayChanges = localStartDay !== startDay;
 
   const periodPreview = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = localDateStr();
     return getPeriodForDate(today, localStartDay);
   }, [localStartDay]);
 
@@ -172,7 +173,7 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `nubolso-dados-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `nubolso-dados-${localDateStr()}.json`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {

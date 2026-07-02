@@ -4,7 +4,7 @@ import { entryFormSchema } from '@/lib/schemas/transactions';
 import { Button } from '@/components/ui/button';
 import { AddButton } from '@/components/ui/add-button';
 import { FlowType } from '@/lib/cashflow';
-import { cn } from '@/lib/utils';
+import { cn, localDateStr } from '@/lib/utils';
 import { Wallet, CreditCard as CreditCardIcon } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import {
@@ -48,7 +48,7 @@ export function AddEntryDrawer({
 }: AddEntryDrawerProps) {
   const t = useTranslations('entry');
   const tc = useTranslations('creditPurchase');
-  const getInitialDate = () => defaultDate || new Date().toISOString().split('T')[0];
+  const getInitialDate = () => defaultDate || localDateStr();
 
   const [mode, setMode] = useState<EntryMode>('debit');
   const [purchaseMode, setPurchaseMode] = useState<PurchaseMode>('purchase');

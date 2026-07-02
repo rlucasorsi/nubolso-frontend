@@ -1,3 +1,5 @@
+import { localDateStr } from '@/lib/utils';
+
 export type FlowType = 'income' | 'expense' | 'spending';
 
 export interface CashFlowEntry {
@@ -232,7 +234,7 @@ export function synthesizeVirtualEntry(
 ): CashFlowEntry | null {
   const occurrenceDate = getTemplateOccurrenceDate(year, month, template.dayOfMonth);
 
-  const todayStr = today ?? new Date().toISOString().split('T')[0];
+  const todayStr = today ?? localDateStr();
   if (occurrenceDate < todayStr) return null;
 
   if (template.endDate && occurrenceDate > template.endDate.slice(0, 10)) return null;
@@ -341,12 +343,12 @@ export function getPeriodRanges(
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
 
   // Determine start period
-  const entryDate = sorted.length > 0 ? sorted[0].date : new Date().toISOString().split('T')[0];
+  const entryDate = sorted.length > 0 ? sorted[0].date : localDateStr();
   const firstDate = entryDate < saldoInicial.date ? entryDate : saldoInicial.date;
   const firstPeriod = getPeriodForDate(firstDate, startDay);
 
   // Determine how many periods to show (historical + future)
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   const todayPeriod = getPeriodForDate(today, startDay);
 
   // Generate period start dates

@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef, useState } from 'react';
 import { CashFlowEntry, FlowType } from '@/lib/cashflow';
-import { cn } from '@/lib/utils';
+import { cn, localDateStr } from '@/lib/utils';
 import { PeriodNav } from './PeriodNav';
 import { DayList } from './DayList';
 import { DailyEntriesDrawer, DailyEntriesState } from './DailyEntriesDrawer';
@@ -53,7 +53,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   const rootRef = useRef<HTMLDivElement>(null);
 
   const findTodayPeriodIdx = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = localDateStr();
     const idx = periods.findIndex((p) => p.startDate <= today && p.endDate >= today);
     return idx >= 0 ? idx : 0;
   };
@@ -100,7 +100,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
     );
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   const isCurrentPeriod = period.startDate <= today && period.endDate >= today;
 
   const pendingAlertCount = virtualEntries.filter(
