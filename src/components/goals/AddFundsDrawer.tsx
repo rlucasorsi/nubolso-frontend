@@ -15,7 +15,15 @@ import { AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { useGoalContributions } from '@/modules/goals/hooks/use-goal-contributions';
 import type { Goal } from '@/modules/goals/model/api/goal';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
-import { ArrowDownLeft, ArrowUpRight, Check, CheckCircle2, Loader2, Minus, Plus } from 'lucide-react';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Check,
+  CheckCircle2,
+  Loader2,
+  Minus,
+  Plus,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { MONTH_KEYS } from '@/components/painel/config';
@@ -50,13 +58,7 @@ function formatDate(dateStr: string, td: (key: string) => string) {
   return `${date.getDate().toString().padStart(2, '0')} ${td(MONTH_KEYS[date.getMonth()])}, ${date.getFullYear()}`;
 }
 
-export function AddFundsDrawer({
-  open,
-  goal,
-  onClose,
-  onSubmit,
-  isLoading,
-}: AddFundsDrawerProps) {
+export function AddFundsDrawer({ open, goal, onClose, onSubmit, isLoading }: AddFundsDrawerProps) {
   const t = useTranslations('addFunds');
   const tCommon = useTranslations('common');
   const td = useTranslations('dateNames');
@@ -98,7 +100,8 @@ export function AddFundsDrawer({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, contributions.length]);
 
   const numericAmount = parseFloat(amount.replace(',', '.'));
-  const isFormValid = amount !== '' && !Number.isNaN(numericAmount) && numericAmount > 0 && date !== '';
+  const isFormValid =
+    amount !== '' && !Number.isNaN(numericAmount) && numericAmount > 0 && date !== '';
 
   const handleConfirm = async () => {
     if (!goal) return;
@@ -106,6 +109,12 @@ export function AddFundsDrawer({
     const result = addFundsSchema.safeParse({ amount, date });
     if (!result.success) {
       setError(result.error.errors[0]?.message ?? tCommon('invalidData'));
+      return;
+    }
+
+    // Retirada não pode exceder o saldo da meta (o backend também valida)
+    if (operationType === 'withdrawal' && numericAmount > goal.savedAmount) {
+      setError(t('insufficientBalance'));
       return;
     }
 
@@ -149,25 +158,29 @@ export function AddFundsDrawer({
           <SheetTitle className="text-xl font-bold font-display text-primary">
             {isWithdrawal ? t('withdrawTitle') : t('depositTitle')}
           </SheetTitle>
-          <SheetDescription className="text-sm text-muted-foreground">
-            {goal.name}
-          </SheetDescription>
+          <SheetDescription className="text-sm text-muted-foreground">{goal.name}</SheetDescription>
         </DrawerHeader>
 
         {showSuccess ? (
           <div className="flex-1 flex flex-col items-center justify-center px-6 pb-6 animate-fade-in">
-            <div className={cn(
-              "w-20 h-20 rounded-full border-2 flex items-center justify-center mb-4",
-              isWithdrawal
-                ? "bg-destructive/10 border-destructive/20"
-                : "bg-primary/10 border-primary/20"
-            )}>
-              <Check className={cn("h-10 w-10", isWithdrawal ? "text-destructive" : "text-primary")} />
+            <div
+              className={cn(
+                'w-20 h-20 rounded-full border-2 flex items-center justify-center mb-4',
+                isWithdrawal
+                  ? 'bg-destructive/10 border-destructive/20'
+                  : 'bg-primary/10 border-primary/20',
+              )}
+            >
+              <Check
+                className={cn('h-10 w-10', isWithdrawal ? 'text-destructive' : 'text-primary')}
+              />
             </div>
-            <h2 className={cn(
-              "text-xl font-bold font-display mb-1",
-              isWithdrawal ? "text-destructive" : "text-primary"
-            )}>
+            <h2
+              className={cn(
+                'text-xl font-bold font-display mb-1',
+                isWithdrawal ? 'text-destructive' : 'text-primary',
+              )}
+            >
               {isWithdrawal ? t('withdrawDone') : t('depositDone')}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -182,10 +195,10 @@ export function AddFundsDrawer({
                 <button
                   onClick={() => setOperationType('deposit')}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-bold transition-all",
+                    'flex-1 flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-bold transition-all',
                     operationType === 'deposit'
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -194,10 +207,10 @@ export function AddFundsDrawer({
                 <button
                   onClick={() => setOperationType('withdrawal')}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-bold transition-all",
+                    'flex-1 flex items-center justify-center gap-2 h-9 rounded-lg text-xs font-bold transition-all',
                     operationType === 'withdrawal'
-                      ? "bg-destructive text-white shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? 'bg-destructive text-white shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
                   <ArrowDownLeft className="h-3.5 w-3.5" />
@@ -218,9 +231,7 @@ export function AddFundsDrawer({
                 autoFocus
               />
 
-              {error && (
-                <p className="text-xs text-destructive text-center">{error}</p>
-              )}
+              {error && <p className="text-xs text-destructive text-center">{error}</p>}
 
               {/* History */}
               <div className="pt-2">
@@ -247,25 +258,33 @@ export function AddFundsDrawer({
                             className="glass-card rounded-2xl p-3 flex items-center justify-between gap-3"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className={cn(
-                                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                                isNegative ? "bg-destructive/10" : "bg-primary/10"
-                              )}>
-                                {isNegative
-                                  ? <Minus className="h-4 w-4 text-destructive" />
-                                  : <CheckCircle2 className="h-4 w-4 text-primary" />
-                                }
+                              <div
+                                className={cn(
+                                  'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
+                                  isNegative ? 'bg-destructive/10' : 'bg-primary/10',
+                                )}
+                              >
+                                {isNegative ? (
+                                  <Minus className="h-4 w-4 text-destructive" />
+                                ) : (
+                                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                                )}
                               </div>
                               <div className="min-w-0">
                                 <p className="text-sm font-bold truncate">{c.description}</p>
-                                <p className="text-[11px] text-muted-foreground">{formatDate(c.date, td)}</p>
+                                <p className="text-[11px] text-muted-foreground">
+                                  {formatDate(c.date, td)}
+                                </p>
                               </div>
                             </div>
-                            <p className={cn(
-                              "text-sm font-bold shrink-0",
-                              isNegative ? "text-destructive" : "text-primary"
-                            )}>
-                              {isNegative ? '-' : '+'}{formatCurrency(c.amount)}
+                            <p
+                              className={cn(
+                                'text-sm font-bold shrink-0',
+                                isNegative ? 'text-destructive' : 'text-primary',
+                              )}
+                            >
+                              {isNegative ? '-' : '+'}
+                              {formatCurrency(c.amount)}
                             </p>
                           </div>
                         );
@@ -289,20 +308,22 @@ export function AddFundsDrawer({
                 onClick={handleConfirm}
                 disabled={!isFormValid || isLoading}
                 className={cn(
-                  "w-full h-11 text-white font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2",
+                  'w-full h-11 text-white font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2',
                   isWithdrawal
-                    ? "bg-destructive hover:bg-red-600 shadow-lg shadow-destructive/20"
-                    : "bg-primary"
+                    ? 'bg-destructive hover:bg-red-600 shadow-lg shadow-destructive/20'
+                    : 'bg-primary',
                 )}
               >
-                {isWithdrawal
-                  ? <ArrowDownLeft className="h-5 w-5" />
-                  : <Plus className="h-5 w-5" />
-                }
+                {isWithdrawal ? (
+                  <ArrowDownLeft className="h-5 w-5" />
+                ) : (
+                  <Plus className="h-5 w-5" />
+                )}
                 {isLoading
                   ? t('processing')
-                  : isWithdrawal ? t('confirmWithdraw') : t('confirmDeposit')
-                }
+                  : isWithdrawal
+                    ? t('confirmWithdraw')
+                    : t('confirmDeposit')}
               </Button>
             </DrawerFooter>
           </>
@@ -311,4 +332,3 @@ export function AddFundsDrawer({
     </Sheet>
   );
 }
-

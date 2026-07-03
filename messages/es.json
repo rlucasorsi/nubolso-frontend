@@ -497,7 +497,8 @@
     "processing": "Procesando...",
     "confirmDeposit": "Confirmar Aporte",
     "confirmWithdraw": "Confirmar Retiro",
-    "operationError": "No fue posible registrar la operación"
+    "operationError": "No fue posible registrar la operación",
+    "insufficientBalance": "El valor del retiro no puede ser mayor que el saldo de la meta"
   },
   "creditCardsView": {
     "title": "Tarjetas de Crédito",

@@ -497,7 +497,8 @@
     "processing": "Processing...",
     "confirmDeposit": "Confirm Contribution",
     "confirmWithdraw": "Confirm Withdrawal",
-    "operationError": "Couldn't register the operation"
+    "operationError": "Couldn't register the operation",
+    "insufficientBalance": "The withdrawal amount can't be greater than the goal balance"
   },
   "creditCardsView": {
     "title": "Credit Cards",
