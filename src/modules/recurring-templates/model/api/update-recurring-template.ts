@@ -7,7 +7,11 @@ export interface UpdateRecurringTemplateRequest {
   type?: FlowType | string;
   dayOfMonth?: number;
   categoryId?: string;
+  // null desvincula o cartão; undefined mantém o vínculo atual
+  creditCardId?: string | null;
   isActive?: boolean;
+  endDate?: string | null;
+  totalOccurrences?: number | null;
 }
 
 export interface UpdateRecurringTemplateResponse {

@@ -18,6 +18,8 @@ export interface CreditCardInvoice {
   transactionId?: string;
   installments: CreditCardInstallmentLite[];
   advances: InstallmentAdvance[];
+  // templateIds dos recorrentes de cartão já materializados como compra nesta fatura
+  purchaseTemplateIds: string[];
 }
 
 export type GetCardInvoicesResponse = CreditCardInvoice[];

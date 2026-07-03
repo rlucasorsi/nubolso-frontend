@@ -13,6 +13,7 @@ import { DashboardAlerts } from './DashboardAlerts';
 interface DashboardSummaryProps {
   period: Period;
   allDays: Period['days'];
+  allDaysProjected: Period['days'];
   currentBalance: number;
   today: string;
   balanceSettings: BalanceSettings;
@@ -26,10 +27,12 @@ const ZONE_COLORS = {
 };
 
 type ChartView = 'period' | '60' | '90';
+type ProjectionMode = 'current' | 'projected';
 
 export function DashboardSummary({
   period,
   allDays,
+  allDaysProjected,
   currentBalance,
   today,
   balanceSettings,
@@ -37,16 +40,25 @@ export function DashboardSummary({
 }: DashboardSummaryProps) {
   const t = useTranslations('dashboard');
   const [chartView, setChartView] = useState<ChartView>('period');
+  const [projectionMode, setProjectionMode] = useState<ProjectionMode>('projected');
+
+  // useCashFlow returns the same array reference when there are no card-linked
+  // recurring templates — in that case the toggle would be a no-op, so hide it.
+  const hasCardProjections = allDaysProjected !== allDays;
+  const sourceDays =
+    hasCardProjections && projectionMode === 'projected' ? allDaysProjected : allDays;
 
   const activeChartDays = useMemo(() => {
-    if (chartView === 'period') return period.days;
-    const n = chartView === '60' ? 60 : 90;
     const start = period.startDate;
-    const endDate = new Date(start + 'T00:00:00');
-    endDate.setDate(endDate.getDate() + n - 1);
-    const endStr = endDate.toISOString().split('T')[0];
-    return allDays.filter((d) => d.date >= start && d.date <= endStr);
-  }, [chartView, period, allDays]);
+    let endStr = period.endDate;
+    if (chartView !== 'period') {
+      const n = chartView === '60' ? 60 : 90;
+      const endDate = new Date(start + 'T00:00:00');
+      endDate.setDate(endDate.getDate() + n - 1);
+      endStr = endDate.toISOString().split('T')[0];
+    }
+    return sourceDays.filter((d) => d.date >= start && d.date <= endStr);
+  }, [chartView, period, sourceDays]);
 
   const { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, chartData, yDomain, yTicks } =
     useMemo(() => {
@@ -246,6 +258,36 @@ export function DashboardSummary({
               ))}
             </div>
           </div>
+
+          {hasCardProjections && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-1 sm:px-0">
+              <div className="flex gap-0.5 bg-white/5 rounded-xl p-1">
+                {(['current', 'projected'] as ProjectionMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setProjectionMode(mode)}
+                    className={cn(
+                      'px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all',
+                      projectionMode === mode
+                        ? 'bg-primary text-white'
+                        : 'text-muted-foreground hover:text-white',
+                    )}
+                  >
+                    {mode === 'current' ? t('chartModeCurrent') : t('chartModeProjected')}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
+                <HelpCircle className="w-3 h-3 shrink-0" />
+                <span>
+                  {projectionMode === 'projected'
+                    ? t('chartModeProjectedHint')
+                    : t('chartModeCurrentHint')}
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="relative h-[240px] w-full">
             <span className="absolute top-0 left-0 w-[36px] text-right pr-1 text-[9px] font-bold text-[#94a3b8] leading-none pointer-events-none">

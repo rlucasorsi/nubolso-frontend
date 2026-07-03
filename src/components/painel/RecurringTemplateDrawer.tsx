@@ -30,16 +30,27 @@ const DEFAULT_VALUES: RecurringTemplateFormValues = {
   type: 'expense',
   dayOfMonth: 10,
   categoryId: undefined,
+  paymentMode: 'debit',
+  creditCardId: undefined,
   endType: 'none',
   endDate: undefined,
   totalOccurrences: undefined,
 };
 
-export function RecurringTemplateDrawer({ open, onOpenChange, template }: RecurringTemplateDrawerProps) {
+export function RecurringTemplateDrawer({
+  open,
+  onOpenChange,
+  template,
+}: RecurringTemplateDrawerProps) {
   const t = useTranslations('recurringDrawer');
   const tCommon = useTranslations('common');
   const [values, setValues] = useState<RecurringTemplateFormValues>(DEFAULT_VALUES);
-  const [errors, setErrors] = useState<{ estimatedAmount?: string; endDate?: string; totalOccurrences?: string }>({});
+  const [errors, setErrors] = useState<{
+    estimatedAmount?: string;
+    endDate?: string;
+    totalOccurrences?: string;
+    creditCardId?: string;
+  }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const createMutation = useCreateRecurringTemplate();
@@ -59,6 +70,8 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
             type: template.type.toLowerCase() as FlowType,
             dayOfMonth: template.dayOfMonth,
             categoryId: template.categoryId ?? undefined,
+            paymentMode: template.creditCardId ? 'credit' : 'debit',
+            creditCardId: template.creditCardId ?? undefined,
             endType: template.endDate ? 'date' : template.totalOccurrences ? 'count' : 'none',
             endDate: template.endDate ? template.endDate.slice(0, 10) : undefined,
             totalOccurrences: template.totalOccurrences ?? undefined,
@@ -78,6 +91,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
         if (path === 'estimatedAmount') fieldErrors.estimatedAmount = issue.message;
         if (path === 'endDate') fieldErrors.endDate = issue.message;
         if (path === 'totalOccurrences') fieldErrors.totalOccurrences = issue.message;
+        if (path === 'creditCardId') fieldErrors.creditCardId = issue.message;
       }
       setErrors(fieldErrors);
       if (Object.keys(fieldErrors).length === 0) {
@@ -90,6 +104,10 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
     setSubmitError(null);
 
     const numAmount = parseFloat(values.estimatedAmount.replace(',', '.'));
+    const creditCardId =
+      values.type !== 'income' && values.paymentMode === 'credit'
+        ? values.creditCardId || undefined
+        : undefined;
     const payload = {
       description: values.description,
       estimatedAmount: numAmount,
@@ -102,9 +120,14 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
 
     try {
       if (template) {
-        await updateMutation.mutateAsync({ id: template.id, ...payload });
+        // null desvincula o cartão no backend (undefined manteria o atual)
+        await updateMutation.mutateAsync({
+          id: template.id,
+          ...payload,
+          creditCardId: creditCardId ?? null,
+        });
       } else {
-        await createMutation.mutateAsync(payload);
+        await createMutation.mutateAsync({ ...payload, creditCardId });
       }
       onOpenChange(false);
     } catch (err) {
@@ -119,9 +142,7 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
           <SheetTitle className="text-2xl font-bold font-display text-primary">
             {template ? t('editTitle') : t('newTitle')}
           </SheetTitle>
-          <p className="text-sm text-muted-foreground">
-            {t('subtitle')}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </DrawerHeader>
 
         <div className="flex-1 px-6 py-4">
@@ -153,4 +174,3 @@ export function RecurringTemplateDrawer({ open, onOpenChange, template }: Recurr
     </Sheet>
   );
 }
-

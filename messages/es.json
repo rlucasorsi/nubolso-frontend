@@ -130,6 +130,10 @@
     "monthForecast": "Pronóstico de Fin de Período",
     "projectsBalance": "Proyecta tu saldo en {date}",
     "balanceProjection": "Proyección de saldo",
+    "chartModeCurrent": "Actual",
+    "chartModeProjected": "Proyectado",
+    "chartModeCurrentHint": "Facturas de tarjeta solo con cargos ya registrados",
+    "chartModeProjectedHint": "Incluye recurrencias futuras de la tarjeta en la factura del ciclo",
     "period": "Período",
     "realized": "Realizado",
     "future": "Futuro",
@@ -645,7 +649,12 @@
     "byDate": "Por fecha",
     "byOccurrences": "Por ocurrencias",
     "endDate": "Fecha Final",
-    "occurrences": "Número de Ocurrencias"
+    "occurrences": "Número de Ocurrencias",
+    "paymentMethod": "Forma de Pago",
+    "debit": "Débito",
+    "credit": "Crédito",
+    "noCardsHint": "Aún no tienes una tarjeta registrada. Agrega una en Tarjetas para usar esta opción.",
+    "creditCardHint": "Las ocurrencias confirmadas se agregan como compra en la factura de esta tarjeta"
   },
   "importReview": {
     "transactions": "{n} transacciones",

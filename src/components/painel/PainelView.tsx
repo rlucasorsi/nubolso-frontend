@@ -30,11 +30,13 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   const {
     periods,
     allDays,
+    allDaysProjected,
     currentBalance,
     balanceSettings,
     saldoInicial,
     allEntries,
     virtualEntries,
+    cardPendingEntries,
     isLoading,
     isError,
     refetchAll,
@@ -103,7 +105,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   const today = localDateStr();
   const isCurrentPeriod = period.startDate <= today && period.endDate >= today;
 
-  const pendingAlertCount = virtualEntries.filter(
+  const pendingAlertCount = [...virtualEntries, ...cardPendingEntries].filter(
     (e) =>
       e.isVirtual &&
       e.templateId &&
@@ -212,6 +214,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
           <DashboardSummary
             period={period}
             allDays={allDays}
+            allDaysProjected={allDaysProjected}
             currentBalance={currentBalance}
             today={today}
             balanceSettings={balanceSettings}

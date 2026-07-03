@@ -6,6 +6,9 @@ export interface CreateRecurringTemplateRequest {
   type: FlowType | string;
   dayOfMonth: number;
   categoryId?: string;
+  creditCardId?: string;
+  endDate?: string;
+  totalOccurrences?: number;
 }
 
 export interface CreateRecurringTemplateResponse {

@@ -130,6 +130,10 @@
     "monthForecast": "Period-end Forecast",
     "projectsBalance": "Projects your balance on {date}",
     "balanceProjection": "Balance Projection",
+    "chartModeCurrent": "Current",
+    "chartModeProjected": "Projected",
+    "chartModeCurrentHint": "Card invoices with already-posted charges only",
+    "chartModeProjectedHint": "Includes upcoming card recurrences in each cycle's invoice",
     "period": "Period",
     "realized": "Realized",
     "future": "Future",
@@ -645,7 +649,12 @@
     "byDate": "By date",
     "byOccurrences": "By occurrences",
     "endDate": "End Date",
-    "occurrences": "Number of Occurrences"
+    "occurrences": "Number of Occurrences",
+    "paymentMethod": "Payment Method",
+    "debit": "Debit",
+    "credit": "Credit",
+    "noCardsHint": "You don't have any card registered yet. Add one under Cards to use this option.",
+    "creditCardHint": "Confirmed occurrences are added as purchases on this card's invoice"
   },
   "importReview": {
     "transactions": "{n} transactions",

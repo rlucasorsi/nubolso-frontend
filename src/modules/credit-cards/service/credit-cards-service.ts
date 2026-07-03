@@ -53,6 +53,7 @@ interface CreditCardPurchaseApi {
   purchaseDate: string;
   cardId: string;
   originInvoiceId: string | null;
+  templateId?: string | null;
   installments?: CreditCardInstallmentApi[];
   isCredit?: boolean;
 }
@@ -184,8 +185,17 @@ function mapInvoice(invoice: CreditCardInvoiceApi): CreditCardInvoice {
     paidAmount: invoice.paidAmount ?? undefined,
     totalAmount: invoice.totalAmount ?? 0,
     transactionId: invoice.transactionId ?? undefined,
-    installments: (invoice.installments ?? []).map((installment) => mapInstallment(installment, invoiceContext)),
+    installments: (invoice.installments ?? []).map((installment) =>
+      mapInstallment(installment, invoiceContext),
+    ),
     advances: (invoice.advances ?? []).map(mapAdvance),
+    purchaseTemplateIds: [
+      ...new Set(
+        (invoice.installments ?? [])
+          .map((installment) => installment.purchase?.templateId)
+          .filter((templateId): templateId is string => !!templateId),
+      ),
+    ],
   };
 }
 
@@ -196,13 +206,19 @@ export const creditCardsService = {
   },
 
   create: async (params: CreateCreditCardRequest) => {
-    const data = await HttpClient.post<CreditCardApi, CreateCreditCardRequest>('/credit-cards', params);
+    const data = await HttpClient.post<CreditCardApi, CreateCreditCardRequest>(
+      '/credit-cards',
+      params,
+    );
     return mapCreditCard(data) as CreateCreditCardResponse;
   },
 
   update: async (params: UpdateCreditCardRequest) => {
     const { id, ...rest } = params;
-    const data = await HttpClient.patch<CreditCardApi, Omit<UpdateCreditCardRequest, 'id'>>(`/credit-cards/${id}`, rest);
+    const data = await HttpClient.patch<CreditCardApi, Omit<UpdateCreditCardRequest, 'id'>>(
+      `/credit-cards/${id}`,
+      rest,
+    );
     return mapCreditCard(data) as UpdateCreditCardResponse;
   },
 
@@ -211,59 +227,84 @@ export const creditCardsService = {
   },
 
   createPurchase: async (params: CreatePurchaseRequest) => {
-    const data = await HttpClient.post<CreditCardPurchaseApi, CreatePurchaseRequest>('/credit-cards/purchases', params);
+    const data = await HttpClient.post<CreditCardPurchaseApi, CreatePurchaseRequest>(
+      '/credit-cards/purchases',
+      params,
+    );
     return mapPurchase(data) as CreatePurchaseResponse;
   },
 
   simulatePurchase: async (params: SimulatePurchaseRequest) => {
-    return HttpClient.post<SimulatePurchaseResponse, SimulatePurchaseRequest>('/credit-cards/purchases/simulate', params);
+    return HttpClient.post<SimulatePurchaseResponse, SimulatePurchaseRequest>(
+      '/credit-cards/purchases/simulate',
+      params,
+    );
   },
 
   getCardInvoices: async (cardId: string) => {
-    const data = await HttpClient.get<CreditCardInvoiceApi[], undefined>(`/credit-cards/${cardId}/invoices`);
+    const data = await HttpClient.get<CreditCardInvoiceApi[], undefined>(
+      `/credit-cards/${cardId}/invoices`,
+    );
     return data.map((invoice) => mapInvoice(invoice)) as GetCardInvoicesResponse;
   },
 
   getAllInvoices: async (filters?: GetAllInvoicesFilters) => {
-    const data = await HttpClient.get<CreditCardInvoiceApi[], GetAllInvoicesFilters>('/credit-cards/invoices', {
-      params: filters ?? {},
-    });
+    const data = await HttpClient.get<CreditCardInvoiceApi[], GetAllInvoicesFilters>(
+      '/credit-cards/invoices',
+      {
+        params: filters ?? {},
+      },
+    );
     return data.map((invoice) => mapInvoice(invoice)) as GetAllInvoicesResponse;
   },
 
   getInvoice: async (id: string) => {
-    const data = await HttpClient.get<CreditCardInvoiceApi, undefined>(`/credit-cards/invoices/${id}`);
+    const data = await HttpClient.get<CreditCardInvoiceApi, undefined>(
+      `/credit-cards/invoices/${id}`,
+    );
     return mapInvoice(data) as GetInvoiceResponse;
   },
 
   updateInvoicePaymentDate: async (params: UpdateInvoicePaymentDateRequest) => {
     const { id, ...rest } = params;
-    const data = await HttpClient.patch<CreditCardInvoiceApi, Omit<UpdateInvoicePaymentDateRequest, 'id'>>(
-      `/credit-cards/invoices/${id}`,
-      rest,
-    );
+    const data = await HttpClient.patch<
+      CreditCardInvoiceApi,
+      Omit<UpdateInvoicePaymentDateRequest, 'id'>
+    >(`/credit-cards/invoices/${id}`, rest);
     return mapInvoice(data) as UpdateInvoicePaymentDateResponse;
   },
 
   payInvoice: async (params: PayInvoiceRequest) => {
     const { id, ...rest } = params;
-    const data = await HttpClient.post<CreditCardInvoiceApi, Omit<PayInvoiceRequest, 'id'>>(`/credit-cards/invoices/${id}/pay`, rest);
+    const data = await HttpClient.post<CreditCardInvoiceApi, Omit<PayInvoiceRequest, 'id'>>(
+      `/credit-cards/invoices/${id}/pay`,
+      rest,
+    );
     return mapInvoice(data) as PayInvoiceResponse;
   },
 
   reopenInvoice: async (id: string) => {
-    const data = await HttpClient.post<CreditCardInvoiceApi, undefined>(`/credit-cards/invoices/${id}/reopen`, undefined);
+    const data = await HttpClient.post<CreditCardInvoiceApi, undefined>(
+      `/credit-cards/invoices/${id}/reopen`,
+      undefined,
+    );
     return mapInvoice(data) as ReopenInvoiceResponse;
   },
 
   createCredit: async (params: CreatePurchaseRequest) => {
-    const data = await HttpClient.post<CreditCardPurchaseApi, CreatePurchaseRequest>('/credit-cards/purchases/credit', params);
+    const data = await HttpClient.post<CreditCardPurchaseApi, CreatePurchaseRequest>(
+      '/credit-cards/purchases/credit',
+      params,
+    );
     return mapPurchase(data) as CreatePurchaseResponse;
   },
 
   advanceInstallments: async (params: AdvanceInstallmentsRequest) => {
     const { purchaseId, ...rest } = params;
-    return HttpClient.post<unknown, typeof rest>(`/credit-cards/purchases/${purchaseId}/advance-installments`, rest);
+    return HttpClient.post<unknown, typeof rest>(
+      `/credit-cards/purchases/${purchaseId}/advance-installments`,
+      rest,
+    );
   },
 
   anticipateInstallments: async (cardId: string, params: AnticipateInstallmentsRequest) => {

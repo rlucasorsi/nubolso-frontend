@@ -7,11 +7,13 @@ export const useSkipRecurringTemplate = () => {
 
   return useMutation({
     mutationKey: ['skip_recurring_template'],
-    mutationFn: async (data: SkipRecurringTemplateRequest) => await skipRecurringTemplateAction(data),
+    mutationFn: async (data: SkipRecurringTemplateRequest) =>
+      await skipRecurringTemplateAction(data),
     onSuccess: async () => {
       await Promise.all([
         client.invalidateQueries({ queryKey: ['list_entries'] }),
         client.invalidateQueries({ queryKey: ['list_recurring_templates'] }),
+        client.invalidateQueries({ queryKey: ['all_credit_card_invoices'] }),
       ]);
     },
   });

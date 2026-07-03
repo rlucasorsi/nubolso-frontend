@@ -16,6 +16,12 @@ export interface RecurringTemplate {
   endDate?: string;
   totalOccurrences?: number;
   occurrenceCount?: number;
+  creditCardId?: string | null;
+  creditCard?: {
+    id: string;
+    name: string;
+    isActive: boolean;
+  };
 }
 
 export const recurringTemplatesService = {

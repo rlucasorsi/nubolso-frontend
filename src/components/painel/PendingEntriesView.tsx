@@ -8,7 +8,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Input } from '@/components/ui/input';
 import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { cn, localDateStr } from '@/lib/utils';
-import { ChevronDown, Search, X, CheckCircle2, RotateCw, Ban } from 'lucide-react';
+import {
+  ChevronDown,
+  Search,
+  X,
+  CheckCircle2,
+  RotateCw,
+  Ban,
+  CreditCard,
+} from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
@@ -86,7 +94,7 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
   const typeT = useTranslations('entry');
   const { locale } = useLanguage();
   const dateFnsLocale = getDateFnsLocale(locale);
-  const { virtualEntries } = useCashFlow();
+  const { virtualEntries, cardPendingEntries } = useCashFlow();
   const { alertDays } = usePendingAlertDays();
 
   const today = localDateStr();
@@ -112,14 +120,17 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // All pending entries for the period
+  // All pending entries for the period (recurring templates + card-linked
+  // recurring templates, whose confirmation lands on the card invoice)
   const allPendingEntries = useMemo(
     () =>
-      virtualEntries.filter((e) => {
-        if (!e.isVirtual || !e.templateId) return false;
-        return e.date >= period.startDate && e.date <= period.endDate;
-      }),
-    [virtualEntries, period],
+      [...virtualEntries, ...cardPendingEntries]
+        .filter((e) => {
+          if (!e.isVirtual || !e.templateId) return false;
+          return e.date >= period.startDate && e.date <= period.endDate;
+        })
+        .sort((a, b) => a.date.localeCompare(b.date)),
+    [virtualEntries, cardPendingEntries, period],
   );
 
   const filteredEntries = useMemo(() => {
@@ -379,14 +390,22 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
                                     <p className="text-sm font-semibold truncate">
                                       {entry.description || '—'}
                                     </p>
-                                    {alertStatus && (
-                                      <AlertBadge
-                                        status={alertStatus}
-                                        entryDate={entry.date}
-                                        today={today}
-                                        t={t}
-                                      />
-                                    )}
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      {entry.isCardBilled && (
+                                        <span className="inline-flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/15 text-violet-300 border border-violet-500/20">
+                                          <CreditCard className="h-3 w-3" />
+                                          {entry.creditCardName}
+                                        </span>
+                                      )}
+                                      {alertStatus && (
+                                        <AlertBadge
+                                          status={alertStatus}
+                                          entryDate={entry.date}
+                                          today={today}
+                                          t={t}
+                                        />
+                                      )}
+                                    </div>
                                   </div>
                                   <p className={cn('text-base font-bold shrink-0', cfg.color)}>
                                     {cfg.sign} {formatCurrency(entry.amount)}

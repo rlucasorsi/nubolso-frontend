@@ -15,6 +15,7 @@ import {
   ChevronDown,
   CalendarClock,
   Hash,
+  CreditCard,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -306,6 +307,13 @@ export function RecurringTemplatesView() {
                                         {' · '}
                                         <Hash className="h-3 w-3 inline" />{' '}
                                         {template.occurrenceCount ?? 0}/{template.totalOccurrences}x
+                                      </>
+                                    )}
+                                    {template.creditCard && (
+                                      <>
+                                        {' · '}
+                                        <CreditCard className="h-3 w-3 inline" />{' '}
+                                        {template.creditCard.name}
                                       </>
                                     )}
                                     {!template.isActive && ` · ${t('archived')}`}

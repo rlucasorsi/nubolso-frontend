@@ -3,8 +3,10 @@ import { localDateStr } from '@/lib/utils';
 import {
   CashFlowEntry,
   CreditCardInvoiceLike,
+  CreditCardLike,
   FlowType,
   RecurringTemplateLike,
+  generateCardTemplateEntriesForRange,
   generateInvoiceEntriesForRange,
   generatePeriods,
   generateVirtualEntriesForRange,
@@ -18,6 +20,7 @@ import { useGetMe } from '@/modules/users/hooks/use-get-me';
 import { useUpdateMe } from '@/modules/users/hooks/use-update-me';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
+import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
 import { logger } from '@/lib/logger';
 
 export interface BalanceSettings {
@@ -34,6 +37,7 @@ export function useCashFlow() {
   const updateMeMutation = useUpdateMe();
   const recurringTemplatesQuery = useGetRecurringTemplates();
   const creditCardInvoicesQuery = useGetAllInvoices();
+  const creditCardsQuery = useGetCreditCards();
 
   const saldoInicial = useMemo(
     () => ({
@@ -104,8 +108,22 @@ export function useCashFlow() {
       endDate: t.endDate,
       totalOccurrences: t.totalOccurrences,
       occurrenceCount: t.occurrenceCount,
+      creditCardId: t.creditCardId,
     }));
   }, [recurringTemplatesQuery.data]);
+
+  const creditCards = useMemo<CreditCardLike[]>(
+    () =>
+      (creditCardsQuery.data ?? []).map((card) => ({
+        id: card.id,
+        name: card.name,
+        closingDay: card.closingDay,
+        dueDay: card.dueDay,
+        paymentDay: card.paymentDay,
+        isActive: card.isActive,
+      })),
+    [creditCardsQuery.data],
+  );
 
   const addEntry = useCallback(
     (entry: Omit<CashFlowEntry, 'id'>) => {
@@ -178,6 +196,7 @@ export function useCashFlow() {
       totalAmount: invoice.totalAmount,
       isPaid: invoice.isPaid,
       transactionId: invoice.transactionId,
+      purchaseTemplateIds: invoice.purchaseTemplateIds,
     }));
   }, [creditCardInvoicesQuery.data]);
 
@@ -187,8 +206,10 @@ export function useCashFlow() {
     const lastEnd = periodRanges[periodRanges.length - 1].end;
     // Uses rawEntries so a skipped ("ignorado") instance also blocks regenerating
     // the virtual estimate for that month.
+    // Templates linked to a credit card are excluded here: their impact reaches
+    // the cashflow via the invoice (see cardProjectionEntries below).
     const recurringEntries = generateVirtualEntriesForRange(
-      recurringTemplates,
+      recurringTemplates.filter((t) => !t.creditCardId),
       rawEntries,
       firstStart,
       lastEnd,
@@ -197,9 +218,40 @@ export function useCashFlow() {
     return [...recurringEntries, ...invoiceEntries];
   }, [recurringTemplates, rawEntries, creditCardInvoices, periodRanges]);
 
+  // Future occurrences of card-linked recurring templates: pending confirmations
+  // (occurrence date) and projected invoice charges (invoice payment date).
+  const { pendingEntries: cardPendingEntries, projectionEntries: cardProjectionEntries } =
+    useMemo(() => {
+      if (periodRanges.length === 0) return { pendingEntries: [], projectionEntries: [] };
+      return generateCardTemplateEntriesForRange(
+        recurringTemplates,
+        creditCards,
+        creditCardInvoices,
+        rawEntries,
+        periodRanges[0].start,
+        periodRanges[periodRanges.length - 1].end,
+      );
+    }, [recurringTemplates, creditCards, creditCardInvoices, rawEntries, periodRanges]);
+
   const periods = useMemo(
     () => generatePeriods(entries, virtualEntries, saldoInicial, 60, startDay),
     [entries, virtualEntries, saldoInicial, startDay],
+  );
+
+  // "Projetado": também compromete as ocorrências futuras de recorrentes de
+  // cartão, lançadas na data de pagamento da fatura do ciclo correspondente.
+  const periodsProjected = useMemo(
+    () =>
+      cardProjectionEntries.length === 0
+        ? null
+        : generatePeriods(
+            entries,
+            [...virtualEntries, ...cardProjectionEntries],
+            saldoInicial,
+            60,
+            startDay,
+          ),
+    [entries, virtualEntries, cardProjectionEntries, saldoInicial, startDay],
   );
 
   // Includes skipped entries so the drawer can show them as "Ignorado" with a
@@ -245,6 +297,10 @@ export function useCashFlow() {
 
   // Chart data from all periods
   const allDays = useMemo(() => periods.flatMap((p) => p.days), [periods]);
+  const allDaysProjected = useMemo(
+    () => (periodsProjected ? periodsProjected.flatMap((p) => p.days) : allDays),
+    [periodsProjected, allDays],
+  );
 
   // Alerts
   const alerts = useMemo(() => {
@@ -277,13 +333,15 @@ export function useCashFlow() {
     entriesQuery.isLoading ||
     isMeLoading ||
     recurringTemplatesQuery.isLoading ||
-    creditCardInvoicesQuery.isLoading;
+    creditCardInvoicesQuery.isLoading ||
+    creditCardsQuery.isLoading;
 
   const isError =
     entriesQuery.isError ||
     isMeError ||
     recurringTemplatesQuery.isError ||
-    creditCardInvoicesQuery.isError;
+    creditCardInvoicesQuery.isError ||
+    creditCardsQuery.isError;
 
   useEffect(() => {
     if (!isLoading && !isError && !hasLoggedLoad.current) {
@@ -302,17 +360,20 @@ export function useCashFlow() {
       refetchMe(),
       recurringTemplatesQuery.refetch(),
       creditCardInvoicesQuery.refetch(),
+      creditCardsQuery.refetch(),
     ]);
-  }, [entriesQuery, refetchMe, recurringTemplatesQuery, creditCardInvoicesQuery]);
+  }, [entriesQuery, refetchMe, recurringTemplatesQuery, creditCardInvoicesQuery, creditCardsQuery]);
 
   return {
     entries,
     allEntries,
     virtualEntries,
+    cardPendingEntries,
     recurringTemplates,
     saldoInicial,
     periods,
     allDays,
+    allDaysProjected,
     currentBalance,
     monthlySummary,
     alerts,

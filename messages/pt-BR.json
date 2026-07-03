@@ -130,6 +130,10 @@
     "monthForecast": "Previsão Final do Período",
     "projectsBalance": "Projeta seu saldo em {date}",
     "balanceProjection": "Projeção de saldo",
+    "chartModeCurrent": "Atual",
+    "chartModeProjected": "Projetado",
+    "chartModeCurrentHint": "Faturas de cartão com o valor já lançado",
+    "chartModeProjectedHint": "Inclui recorrências futuras do cartão na fatura do ciclo",
     "period": "Período",
     "realized": "Realizado",
     "future": "Futuro real",
@@ -645,7 +649,12 @@
     "byDate": "Por data",
     "byOccurrences": "Por ocorrências",
     "endDate": "Data Final",
-    "occurrences": "Número de Ocorrências"
+    "occurrences": "Número de Ocorrências",
+    "paymentMethod": "Forma de Pagamento",
+    "debit": "Débito",
+    "credit": "Crédito",
+    "noCardsHint": "Você ainda não tem um cartão cadastrado. Cadastre um em Cartões para usar esta opção.",
+    "creditCardHint": "As ocorrências confirmadas entram como compra na fatura deste cartão"
   },
   "importReview": {
     "transactions": "{n} transações",

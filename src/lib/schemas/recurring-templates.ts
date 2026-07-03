@@ -12,6 +12,7 @@ const positiveAmount = z
   );
 
 export type EndType = 'none' | 'date' | 'count';
+export type PaymentMode = 'debit' | 'credit';
 
 export const recurringTemplateFormSchema = z
   .object({
@@ -20,6 +21,8 @@ export const recurringTemplateFormSchema = z
     type: z.enum(['income', 'expense', 'spending']),
     dayOfMonth: z.number().int().min(1).max(31),
     categoryId: z.string().nullish(),
+    paymentMode: z.enum(['debit', 'credit']),
+    creditCardId: z.string().nullish(),
     endType: z.enum(['none', 'date', 'count']),
     endDate: z.string().optional(),
     totalOccurrences: z.number().int().min(1).optional(),
@@ -37,6 +40,13 @@ export const recurringTemplateFormSchema = z
         code: z.ZodIssueCode.custom,
         message: 'Informe o número de ocorrências',
         path: ['totalOccurrences'],
+      });
+    }
+    if (data.paymentMode === 'credit' && !data.creditCardId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Selecione um cartão',
+        path: ['creditCardId'],
       });
     }
   });
