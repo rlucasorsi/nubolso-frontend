@@ -211,7 +211,10 @@
     "expenseTypeLabel": "Tipo de despesa",
     "expenseTypeFixed": "Fixa",
     "expenseTypeVariable": "Variável",
-    "expenseTypeNone": "Sem tipo"
+    "expenseTypeNone": "Sem tipo",
+    "expenseTypeFixedHint": "Recorrente e previsível — aluguel, contas e assinaturas.",
+    "expenseTypeVariableHint": "Varia ou pode ser evitada — lazer, mercado e restaurantes.",
+    "expenseTypeHelpTitle": "O que é despesa fixa e variável?"
   },
   "category": {
     "label": "Categoria",

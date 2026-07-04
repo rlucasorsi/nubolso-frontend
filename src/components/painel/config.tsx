@@ -26,14 +26,14 @@ export const TYPE_CONFIG = {
     sign: '-',
   },
   investment: {
-    color: 'text-orange-400',
-    bar: 'bg-orange-400',
-    bg: 'bg-orange-400/10',
+    color: 'text-blue-500',
+    bar: 'bg-blue-500',
+    bg: 'bg-blue-500/10',
     icon: (size: 'sm' | 'md') =>
       size === 'md' ? (
-        <PiggyBank className="h-4 w-4 text-orange-400" />
+        <PiggyBank className="h-4 w-4 text-blue-500" />
       ) : (
-        <PiggyBank className="h-3.5 w-3.5 text-orange-400" />
+        <PiggyBank className="h-3.5 w-3.5 text-blue-500" />
       ),
     sign: '-',
   },

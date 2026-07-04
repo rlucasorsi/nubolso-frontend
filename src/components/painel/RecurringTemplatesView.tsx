@@ -187,7 +187,7 @@ export function RecurringTemplatesView() {
                             'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
                           type === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',
                           type === 'investment' &&
-                            'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
+                            'bg-blue-500 text-white shadow-lg shadow-blue-500/20',
                         )
                     : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
                 )}

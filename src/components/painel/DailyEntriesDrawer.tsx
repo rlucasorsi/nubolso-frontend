@@ -49,6 +49,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { EntryFormValues, resolveTipoDespesa } from './EntryForm';
+import { ExpenseTypeHint } from './ExpenseTypeHelp';
 import { TypeToggle } from './TypeToggle';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { TYPE_CONFIG, MONTH_KEYS, WEEKDAY_KEYS } from './config';
@@ -150,6 +151,8 @@ export function DailyEntriesDrawer({
 
   function handleSaveEdit() {
     if (!editingId) return;
+    // Classificação obrigatória para despesas.
+    if (editValues.type === 'expense' && !editValues.tipoDespesa) return;
 
     onUpdateEntry(editingId, {
       date: editValues.date,
@@ -420,9 +423,46 @@ export function DailyEntriesDrawer({
                                         <TypeToggle
                                           value={editValues.type}
                                           onChange={(type) =>
-                                            setEditValues((prev) => ({ ...prev, type }))
+                                            setEditValues((prev) => ({
+                                              ...prev,
+                                              type,
+                                              tipoDespesa:
+                                                type === 'expense' ? prev.tipoDespesa : null,
+                                            }))
                                           }
                                         />
+                                      )}
+                                      {isEditing && editValues.type === 'expense' && (
+                                        <div className="space-y-1.5">
+                                          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            {typeT('expenseTypeLabel')}{' '}
+                                            <span className="text-balance-danger">*</span>
+                                          </label>
+                                          <div className="flex gap-2">
+                                            {(['fixa', 'variavel'] as const).map((opt) => (
+                                              <button
+                                                key={opt}
+                                                type="button"
+                                                onClick={() =>
+                                                  setEditValues((prev) => ({
+                                                    ...prev,
+                                                    tipoDespesa: opt,
+                                                  }))
+                                                }
+                                                className={`flex-1 py-2 h-10 text-[11px] font-bold rounded-xl border transition-all ${
+                                                  editValues.tipoDespesa === opt
+                                                    ? 'bg-primary/20 text-primary border-primary/50'
+                                                    : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                                                }`}
+                                              >
+                                                {opt === 'fixa'
+                                                  ? typeT('expenseTypeFixed')
+                                                  : typeT('expenseTypeVariable')}
+                                              </button>
+                                            ))}
+                                          </div>
+                                          <ExpenseTypeHint />
+                                        </div>
                                       )}
                                       <TextInputField
                                         label={typeT('descriptionLabel')}
@@ -468,7 +508,12 @@ export function DailyEntriesDrawer({
                                               ? handleSaveEdit()
                                               : handleConfirmRealize(entry)
                                           }
-                                          className="h-9 px-4 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-xs font-bold"
+                                          disabled={
+                                            isEditing &&
+                                            editValues.type === 'expense' &&
+                                            !editValues.tipoDespesa
+                                          }
+                                          className="h-9 px-4 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-emerald-500"
                                         >
                                           {t('confirm')}
                                         </button>

@@ -194,7 +194,7 @@ export function DayCard({
             <p className="text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.15em]">
               {t('investment')}
             </p>
-            <p className="text-xs font-bold font-display text-orange-400">
+            <p className="text-xs font-bold font-display text-blue-500">
               <span className="text-[8px] font-black mr-0.5">-</span>
               {day.investment.toLocaleString('pt-BR', {
                 minimumFractionDigits: 2,

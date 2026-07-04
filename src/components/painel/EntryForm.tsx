@@ -3,6 +3,7 @@ import { TypeToggle } from './TypeToggle';
 import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { useTranslations } from '@/i18n/useTranslations';
 import { cn } from '@/lib/utils';
+import { ExpenseTypeHint } from './ExpenseTypeHelp';
 
 export interface EntryFormValues {
   date: string;
@@ -23,17 +24,16 @@ export function resolveTipoDespesa(
 interface EntryFormProps {
   values: EntryFormValues;
   onChange: (values: EntryFormValues) => void;
-  errors?: { date?: string; amount?: string };
+  errors?: { date?: string; amount?: string; tipoDespesa?: string };
   minDate?: string;
 }
 
 export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps) {
   const t = useTranslations('entry');
 
-  const expenseTypeOptions: { value: ExpenseType; label: string }[] = [
+  const expenseTypeOptions: { value: 'fixa' | 'variavel'; label: string }[] = [
     { value: 'fixa', label: t('expenseTypeFixed') },
     { value: 'variavel', label: t('expenseTypeVariable') },
-    { value: null, label: t('expenseTypeNone') },
   ];
 
   return (
@@ -67,14 +67,14 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
       {values.type === 'expense' && (
         <div className="space-y-2">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            {t('expenseTypeLabel')}
+            {t('expenseTypeLabel')} <span className="text-balance-danger">*</span>
           </label>
           <div className="flex gap-2">
             {expenseTypeOptions.map((opt) => {
-              const active = (values.tipoDespesa ?? null) === opt.value;
+              const active = values.tipoDespesa === opt.value;
               return (
                 <button
-                  key={opt.label}
+                  key={opt.value}
                   type="button"
                   onClick={() => onChange({ ...values, tipoDespesa: opt.value })}
                   className={cn(
@@ -88,6 +88,12 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
                 </button>
               );
             })}
+          </div>
+          {errors?.tipoDespesa && (
+            <p className="text-xs text-balance-danger">{errors.tipoDespesa}</p>
+          )}
+          <div className="pt-0.5">
+            <ExpenseTypeHint />
           </div>
         </div>
       )}

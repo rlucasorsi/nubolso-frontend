@@ -60,7 +60,11 @@ export function AddEntryDrawer({
     type: defaultType,
     description: '',
   });
-  const [entryErrors, setEntryErrors] = useState<{ date?: string; amount?: string }>({});
+  const [entryErrors, setEntryErrors] = useState<{
+    date?: string;
+    amount?: string;
+    tipoDespesa?: string;
+  }>({});
 
   const cardsQuery = useGetCreditCards();
   const activeCards = useMemo(
@@ -104,7 +108,11 @@ export function AddEntryDrawer({
     const result = entryFormSchema.safeParse(values);
     if (!result.success) {
       const errs = result.error.flatten().fieldErrors;
-      setEntryErrors({ date: errs.date?.[0], amount: errs.amount?.[0] });
+      setEntryErrors({
+        date: errs.date?.[0],
+        amount: errs.amount?.[0],
+        tipoDespesa: errs.tipoDespesa?.[0],
+      });
       return;
     }
 

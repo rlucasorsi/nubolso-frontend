@@ -211,7 +211,10 @@
     "expenseTypeLabel": "Expense type",
     "expenseTypeFixed": "Fixed",
     "expenseTypeVariable": "Variable",
-    "expenseTypeNone": "No type"
+    "expenseTypeNone": "No type",
+    "expenseTypeFixedHint": "Recurring and predictable — rent, utilities, subscriptions.",
+    "expenseTypeVariableHint": "Varies or can be avoided — dining out, groceries, leisure.",
+    "expenseTypeHelpTitle": "What are fixed and variable expenses?"
   },
   "category": {
     "label": "Category",

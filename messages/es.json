@@ -211,7 +211,10 @@
     "expenseTypeLabel": "Tipo de gasto",
     "expenseTypeFixed": "Fija",
     "expenseTypeVariable": "Variable",
-    "expenseTypeNone": "Sin tipo"
+    "expenseTypeNone": "Sin tipo",
+    "expenseTypeFixedHint": "Recurrente y previsible — alquiler, servicios y suscripciones.",
+    "expenseTypeVariableHint": "Varía o puede evitarse — ocio, mercado y restaurantes.",
+    "expenseTypeHelpTitle": "¿Qué son gastos fijos y variables?"
   },
   "category": {
     "label": "Categoría",

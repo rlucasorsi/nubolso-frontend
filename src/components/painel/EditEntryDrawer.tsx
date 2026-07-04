@@ -33,7 +33,11 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
     type: 'income',
     description: '',
   });
-  const [errors, setErrors] = useState<{ date?: string; amount?: string }>({});
+  const [errors, setErrors] = useState<{
+    date?: string;
+    amount?: string;
+    tipoDespesa?: string;
+  }>({});
 
   useEffect(() => {
     if (entry) {
@@ -53,8 +57,18 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
     const result = entryFormSchema.safeParse(values);
     if (!result.success) {
       const errs = result.error.flatten().fieldErrors;
-      setErrors({ date: errs.date?.[0], amount: errs.amount?.[0] });
-      toast.error(errs.date?.[0] ?? errs.amount?.[0] ?? errs.type?.[0] ?? t('saveError'));
+      setErrors({
+        date: errs.date?.[0],
+        amount: errs.amount?.[0],
+        tipoDespesa: errs.tipoDespesa?.[0],
+      });
+      toast.error(
+        errs.date?.[0] ??
+          errs.amount?.[0] ??
+          errs.tipoDespesa?.[0] ??
+          errs.type?.[0] ??
+          t('saveError'),
+      );
       return;
     }
     setErrors({});

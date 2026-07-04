@@ -49,6 +49,7 @@ import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 import { EditEntryDrawer } from './EditEntryDrawer';
+import { ExpenseTypeHelp } from './ExpenseTypeHelp';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
@@ -75,9 +76,7 @@ export function EntriesView() {
   const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
-  const [expenseTypeFilter, setExpenseTypeFilter] = useState<'all' | 'fixa' | 'variavel' | 'none'>(
-    'all',
-  );
+  const [expenseTypeFilter, setExpenseTypeFilter] = useState<'all' | 'fixa' | 'variavel'>('all');
   const [editingEntry, setEditingEntry] = useState<CashFlowEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<CashFlowEntry | null>(null);
   const { mutate: deleteEntry, isPending: isDeleting } = useDeleteEntry();
@@ -165,7 +164,6 @@ export function EntriesView() {
         ? dateFiltered
         : dateFiltered.filter((e) => {
             if (e.type !== 'expense') return false;
-            if (expenseTypeFilter === 'none') return !e.tipoDespesa;
             return e.tipoDespesa === expenseTypeFilter;
           });
 
@@ -290,12 +288,15 @@ export function EntriesView() {
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60 mr-1">
+              {t('filterExpenseType')}
+              <ExpenseTypeHelp />
+            </span>
             {(
               [
                 { value: 'all', label: t('filterAll') },
                 { value: 'fixa', label: t('filterFixed') },
                 { value: 'variavel', label: t('filterVariable') },
-                { value: 'none', label: t('filterNoType') },
               ] as { value: typeof expenseTypeFilter; label: string }[]
             ).map((opt) => (
               <button
