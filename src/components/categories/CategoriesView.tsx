@@ -27,14 +27,26 @@ function isProtected(c: Category) {
   return c.isDefault && c.name === 'Outros';
 }
 
+const TYPE_BADGE: Record<string, string> = {
+  income: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10',
+  expense: 'border-red-500/30 text-red-500 bg-red-500/10',
+  investment: 'border-blue-500/30 text-blue-500 bg-blue-500/10',
+};
+
+type TypeFilter = 'all' | 'income' | 'expense' | 'investment';
+
 export function CategoriesView() {
   const t = useTranslations('categories');
+  const typeT = useTranslations('entry');
   const { data: categories, isLoading, isError, refetch } = useGetCategories();
   const { mutate: deleteCategory, isPending: isDeleting } = useDeleteCategory();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [deleting, setDeleting] = useState<Category | null>(null);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+
+  const filtered = (categories ?? []).filter((c) => typeFilter === 'all' || c.type === typeFilter);
 
   const openCreate = () => {
     setEditing(null);
@@ -61,6 +73,31 @@ export function CategoriesView() {
         </Button>
       </div>
 
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {(
+          [
+            { value: 'all', label: t('filterAll') },
+            { value: 'income', label: typeT('income') },
+            { value: 'expense', label: typeT('expense') },
+            { value: 'investment', label: typeT('investment') },
+          ] as { value: TypeFilter; label: string }[]
+        ).map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setTypeFilter(opt.value)}
+            className={
+              'px-3 py-1.5 rounded-xl text-xs font-bold transition-all ' +
+              (typeFilter === opt.value
+                ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white')
+            }
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="p-4 space-y-2">
@@ -72,14 +109,14 @@ export function CategoriesView() {
           <div className="p-6">
             <ServerErrorState onRetry={refetch} />
           </div>
-        ) : !categories || categories.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
             <h3 className="text-lg font-medium">{t('empty')}</h3>
             <p className="text-sm text-muted-foreground mt-1">{t('emptyHint')}</p>
           </div>
         ) : (
           <div className="p-3 space-y-2">
-            {categories.map((c) => {
+            {filtered.map((c) => {
               const locked = isProtected(c);
               return (
                 <div
@@ -99,6 +136,12 @@ export function CategoriesView() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{c.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                      <Badge
+                        variant="outline"
+                        className={`h-4 px-1.5 text-[8px] font-bold ${TYPE_BADGE[c.type] ?? ''}`}
+                      >
+                        {typeT(c.type)}
+                      </Badge>
                       {c.isDefault && (
                         <Badge
                           variant="outline"
@@ -107,7 +150,7 @@ export function CategoriesView() {
                           {t('defaultBadge')}
                         </Badge>
                       )}
-                      {c.includeInBalanceBase && (
+                      {c.type === 'income' && c.includeInBalanceBase && (
                         <Badge
                           variant="outline"
                           className="h-4 px-1.5 text-[8px] font-bold border-emerald-500/30 text-emerald-500 bg-emerald-500/10"

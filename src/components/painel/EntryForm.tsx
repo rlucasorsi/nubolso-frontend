@@ -60,6 +60,8 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
               type,
               // Ao sair de "despesa", zera a classificação (regra: null para outros tipos).
               tipoDespesa: type === 'expense' ? values.tipoDespesa : null,
+              // Categorias são por tipo: ao trocar o tipo, limpa a categoria selecionada.
+              categoryId: type === values.type ? values.categoryId : undefined,
             })
           }
         />
@@ -107,6 +109,7 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
       />
 
       <CategorySelect
+        type={values.type}
         value={values.categoryId}
         onChange={(categoryId) => onChange({ ...values, categoryId })}
       />

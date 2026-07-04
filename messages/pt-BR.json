@@ -229,6 +229,8 @@
     "subtitle": "Organize seus lançamentos por categoria.",
     "newCategory": "Nova categoria",
     "editCategory": "Editar categoria",
+    "typeLabel": "Tipo",
+    "filterAll": "Todas",
     "nameLabel": "Nome",
     "namePlaceholder": "Ex: Mercado",
     "nameRequired": "Nome é obrigatório",

@@ -12,8 +12,10 @@ import {
   SheetTitle,
 } from '@/components/ui/app-drawer';
 import { cn } from '@/lib/utils';
+import { FlowType } from '@/lib/cashflow';
 import { useTranslations } from '@/i18n/useTranslations';
 import { toast } from 'sonner';
+import { TypeToggle } from '@/components/painel/TypeToggle';
 import { Category } from '@/modules/categories/service/categories-service';
 import { useCreateCategory } from '@/modules/categories/hooks/use-create-category';
 import { useUpdateCategory } from '@/modules/categories/hooks/use-update-category';
@@ -35,6 +37,7 @@ export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps)
   const isEdit = !!category;
 
   const [name, setName] = useState('');
+  const [type, setType] = useState<FlowType>('expense');
   const [icon, setIcon] = useState<string>('Tag');
   const [color, setColor] = useState<string>(DEFAULT_CATEGORY_COLOR);
   const [includeInBalanceBase, setIncludeInBalanceBase] = useState(true);
@@ -47,6 +50,7 @@ export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps)
   useEffect(() => {
     if (!open) return;
     setName(category?.name ?? '');
+    setType(category?.type ?? 'expense');
     setIcon(category?.icon ?? 'Tag');
     setColor(category?.color ?? DEFAULT_CATEGORY_COLOR);
     setIncludeInBalanceBase(category?.includeInBalanceBase ?? true);
@@ -67,7 +71,7 @@ export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps)
     }
     setNameError(undefined);
 
-    const payload = { name: trimmed, icon, color, includeInBalanceBase };
+    const payload = { name: trimmed, type, icon, color, includeInBalanceBase };
     const onSuccess = () => onClose();
     const onError = (e: Error) => toast.error(e.message || t('saveError'));
 
@@ -99,6 +103,13 @@ export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps)
             <p className="text-sm font-semibold text-foreground truncate">
               {name.trim() || t('namePlaceholder')}
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {t('typeLabel')} <span className="text-balance-danger">*</span>
+            </label>
+            <TypeToggle value={type} onChange={setType} />
           </div>
 
           <TextInputField
@@ -170,20 +181,24 @@ export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps)
             </div>
           </div>
 
-          {/* Considerar como entrada válida */}
-          <div className="flex items-start justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">{t('includeInBalanceLabel')}</p>
-              <p className="text-[11px] leading-snug text-muted-foreground/70 mt-0.5">
-                {t('includeInBalanceHint')}
-              </p>
+          {/* Considerar como entrada válida — só faz sentido para categorias de receita */}
+          {type === 'income' && (
+            <div className="flex items-start justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  {t('includeInBalanceLabel')}
+                </p>
+                <p className="text-[11px] leading-snug text-muted-foreground/70 mt-0.5">
+                  {t('includeInBalanceHint')}
+                </p>
+              </div>
+              <Switch
+                checked={includeInBalanceBase}
+                onCheckedChange={setIncludeInBalanceBase}
+                className="mt-0.5 shrink-0"
+              />
             </div>
-            <Switch
-              checked={includeInBalanceBase}
-              onCheckedChange={setIncludeInBalanceBase}
-              className="mt-0.5 shrink-0"
-            />
-          </div>
+          )}
         </div>
 
         <DrawerFooter>

@@ -229,6 +229,8 @@
     "subtitle": "Organiza tus movimientos por categoría.",
     "newCategory": "Nueva categoría",
     "editCategory": "Editar categoría",
+    "typeLabel": "Tipo",
+    "filterAll": "Todas",
     "nameLabel": "Nombre",
     "namePlaceholder": "Ej: Mercado",
     "nameRequired": "El nombre es obligatorio",

@@ -229,6 +229,8 @@
     "subtitle": "Organize your entries by category.",
     "newCategory": "New category",
     "editCategory": "Edit category",
+    "typeLabel": "Type",
+    "filterAll": "All",
     "nameLabel": "Name",
     "namePlaceholder": "e.g. Groceries",
     "nameRequired": "Name is required",

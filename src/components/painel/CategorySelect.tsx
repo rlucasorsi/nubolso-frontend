@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CategoryIcon } from '@/components/categories/category-icons';
+import { FlowType } from '@/lib/cashflow';
 import { useTranslations } from '@/i18n/useTranslations';
 
 const NONE_VALUE = '__none__';
@@ -15,12 +16,14 @@ const NONE_VALUE = '__none__';
 interface CategorySelectProps {
   value?: string;
   onChange: (value?: string) => void;
+  // Categorias são escopadas por tipo: só as do mesmo tipo do lançamento aparecem.
+  type: FlowType;
 }
 
-// Categorias são globais (não dependem do tipo do lançamento). A associação é opcional.
-export function CategorySelect({ value, onChange }: CategorySelectProps) {
+export function CategorySelect({ value, onChange, type }: CategorySelectProps) {
   const t = useTranslations('category');
   const { data: categories, isLoading } = useGetCategories();
+  const filtered = (categories ?? []).filter((c) => c.type === type);
 
   return (
     <div className="space-y-2">
@@ -39,7 +42,7 @@ export function CategorySelect({ value, onChange }: CategorySelectProps) {
           <SelectItem value={NONE_VALUE} className="focus:bg-white/10 focus:text-foreground">
             <span className="text-muted-foreground">{t('none')}</span>
           </SelectItem>
-          {(categories ?? []).map((category) => (
+          {filtered.map((category) => (
             <SelectItem
               key={category.id}
               value={category.id}
