@@ -68,7 +68,7 @@ export function DashboardSummary({
       let bestDayAmount = -Infinity;
 
       period.days.forEach((day) => {
-        const totalExp = day.expense + day.spending;
+        const totalExp = day.expense + day.investment;
         if (totalExp > maxExpenseAmount) {
           maxExpenseAmount = totalExp;
           maxExpenseDay = day;
@@ -84,7 +84,7 @@ export function DashboardSummary({
         saldoPast: d.date <= today ? d.saldoAcumulado : null,
         saldoFuture: d.date >= today ? d.saldoAcumulado : null,
         income: d.income,
-        totalExpense: d.expense + d.spending,
+        totalExpense: d.expense + d.investment,
       }));
 
       const saldoValues = activeChartDays.map((d) => d.saldoAcumulado);

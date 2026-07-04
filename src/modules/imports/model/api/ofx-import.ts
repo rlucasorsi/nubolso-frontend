@@ -23,7 +23,7 @@ export interface ImportBatchItem {
   fitId: string | null;
   description: string;
   amount: number;
-  type: 'INCOME' | 'EXPENSE' | 'SPENDING';
+  type: 'INCOME' | 'EXPENSE' | 'INVESTMENT';
   date: string;
   status: ImportItemStatus;
   matchedTransactionId: string | null;

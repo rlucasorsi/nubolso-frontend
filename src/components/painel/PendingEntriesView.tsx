@@ -8,15 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Input } from '@/components/ui/input';
 import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { cn, localDateStr } from '@/lib/utils';
-import {
-  ChevronDown,
-  Search,
-  X,
-  CheckCircle2,
-  RotateCw,
-  Ban,
-  CreditCard,
-} from 'lucide-react';
+import { ChevronDown, Search, X, CheckCircle2, RotateCw, Ban, CreditCard } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
@@ -238,7 +230,7 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
     { value: 'all', label: t('pendingFilterAll') },
     { value: 'income', label: typeT('income') },
     { value: 'expense', label: typeT('expense') },
-    { value: 'spending', label: typeT('spending') },
+    { value: 'investment', label: typeT('investment') },
   ];
 
   return (
@@ -365,7 +357,7 @@ export function PendingEntriesView({ period }: PendingEntriesViewProps) {
                           {dayEntries.map((entry) => {
                             const cfg =
                               TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] ||
-                              TYPE_CONFIG.spending;
+                              TYPE_CONFIG.investment;
                             const isConfirming = realizingId === entry.id;
                             const isIgnoring = ignoringId === entry.id;
                             const alertStatus = getPendingAlertStatus(entry.date, today, alertDays);

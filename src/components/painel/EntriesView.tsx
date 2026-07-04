@@ -75,6 +75,9 @@ export function EntriesView() {
   const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
+  const [expenseTypeFilter, setExpenseTypeFilter] = useState<'all' | 'fixa' | 'variavel' | 'none'>(
+    'all',
+  );
   const [editingEntry, setEditingEntry] = useState<CashFlowEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<CashFlowEntry | null>(null);
   const { mutate: deleteEntry, isPending: isDeleting } = useDeleteEntry();
@@ -86,17 +89,28 @@ export function EntriesView() {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, dateRange, pageSize]);
+  }, [debouncedSearch, dateRange, pageSize, expenseTypeFilter]);
 
   const filters = useMemo(() => {
-    const params: { startDate?: string; endDate?: string; page: number; limit: number } = {
+    const params: {
+      startDate?: string;
+      endDate?: string;
+      tipoDespesa?: 'fixa' | 'variavel';
+      page: number;
+      limit: number;
+    } = {
       page,
       limit: pageSize,
     };
     if (dateRange?.from) params.startDate = format(dateRange.from, 'yyyy-MM-dd');
     if (dateRange?.to) params.endDate = format(dateRange.to, 'yyyy-MM-dd');
+    // Envia ao backend quando aplicável (ignorado até o backend suportar). O filtro
+    // client-side abaixo garante feedback imediato sobre a página carregada.
+    if (expenseTypeFilter === 'fixa' || expenseTypeFilter === 'variavel') {
+      params.tipoDespesa = expenseTypeFilter;
+    }
     return params;
-  }, [dateRange, page, pageSize]);
+  }, [dateRange, page, pageSize, expenseTypeFilter]);
 
   const { data, isLoading, isError, refetch } = useGetEntries(filters);
 
@@ -125,6 +139,7 @@ export function EntriesView() {
       categoryId: item.categoryId,
       category: item.category,
       isPaid: item.isPaid,
+      tipoDespesa: item.tipoDespesa,
       templateId: item.templateId,
     }));
 
@@ -141,9 +156,21 @@ export function EntriesView() {
       list.push(...generateVirtualEntriesForRange(recurringTemplates, list, effStart, effEnd));
     }
 
+    const dateFiltered = minDate ? list.filter((e) => e.date >= minDate) : list;
+
+    // Filtro "Tipo de Despesa" — só se aplica a despesas; qualquer opção diferente de
+    // "Todas" oculta lançamentos que não são despesa.
+    const typeFiltered =
+      expenseTypeFilter === 'all'
+        ? dateFiltered
+        : dateFiltered.filter((e) => {
+            if (e.type !== 'expense') return false;
+            if (expenseTypeFilter === 'none') return !e.tipoDespesa;
+            return e.tipoDespesa === expenseTypeFilter;
+          });
+
     // Ordena do mais recente para o mais antigo
-    const filtered = minDate ? list.filter((e) => e.date >= minDate) : list;
-    const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
+    const sorted = [...typeFiltered].sort((a, b) => b.date.localeCompare(a.date));
 
     if (!debouncedSearch) return sorted;
 
@@ -153,7 +180,15 @@ export function EntriesView() {
       const amountMatch = String(entry.amount).includes(search);
       return descMatch || amountMatch;
     });
-  }, [data, debouncedSearch, showRecurring, recurringTemplates, filters]);
+  }, [
+    data,
+    debouncedSearch,
+    showRecurring,
+    recurringTemplates,
+    filters,
+    expenseTypeFilter,
+    minDate,
+  ]);
 
   const groupedByDay = useMemo(() => {
     const map = new Map<string, CashFlowEntry[]>();
@@ -253,6 +288,31 @@ export function EntriesView() {
               </PopoverContent>
             </Popover>
           </div>
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {(
+              [
+                { value: 'all', label: t('filterAll') },
+                { value: 'fixa', label: t('filterFixed') },
+                { value: 'variavel', label: t('filterVariable') },
+                { value: 'none', label: t('filterNoType') },
+              ] as { value: typeof expenseTypeFilter; label: string }[]
+            ).map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setExpenseTypeFilter(opt.value)}
+                className={cn(
+                  'px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
+                  expenseTypeFilter === opt.value
+                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="px-4 pb-4 space-y-1">
           {isLoading ? (
@@ -296,7 +356,8 @@ export function EntriesView() {
                   <CollapsibleContent className="space-y-3 pb-3">
                     {dayEntries.map((entry) => {
                       const cfg =
-                        TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.spending;
+                        TYPE_CONFIG[entry.type as keyof typeof TYPE_CONFIG] ||
+                        TYPE_CONFIG.investment;
 
                       return (
                         <div
@@ -335,6 +396,23 @@ export function EntriesView() {
                               <span className="text-[9px] uppercase tracking-wider text-muted-foreground/60 font-bold whitespace-nowrap">
                                 {typeT(entry.type)}
                               </span>
+                              {entry.type === 'expense' && entry.tipoDespesa && (
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    'h-4 px-1.5 text-[8px] font-bold whitespace-nowrap',
+                                    entry.tipoDespesa === 'fixa'
+                                      ? 'border-sky-400/30 text-sky-400 bg-sky-400/10'
+                                      : 'border-fuchsia-400/30 text-fuchsia-400 bg-fuchsia-400/10',
+                                  )}
+                                >
+                                  {typeT(
+                                    entry.tipoDespesa === 'fixa'
+                                      ? 'expenseTypeFixed'
+                                      : 'expenseTypeVariable',
+                                  )}
+                                </Badge>
+                              )}
                               {entry.templateId && (
                                 <Badge
                                   variant="outline"
@@ -368,6 +446,23 @@ export function EntriesView() {
                               {typeT(entry.type)}
                             </span>
                             <div className="flex items-center gap-1">
+                              {entry.type === 'expense' && entry.tipoDespesa && (
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    'h-5 px-1.5 text-[9px] font-bold whitespace-nowrap',
+                                    entry.tipoDespesa === 'fixa'
+                                      ? 'border-sky-400/30 text-sky-400 bg-sky-400/10'
+                                      : 'border-fuchsia-400/30 text-fuchsia-400 bg-fuchsia-400/10',
+                                  )}
+                                >
+                                  {typeT(
+                                    entry.tipoDespesa === 'fixa'
+                                      ? 'expenseTypeFixed'
+                                      : 'expenseTypeVariable',
+                                  )}
+                                </Badge>
+                              )}
                               {entry.templateId && (
                                 <Badge
                                   variant="outline"

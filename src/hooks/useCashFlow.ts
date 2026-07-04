@@ -42,9 +42,7 @@ export function useCashFlow() {
   const saldoInicial = useMemo(
     () => ({
       value: me?.currentBalance ?? 0,
-      date: me?.balanceStartDate
-        ? me.balanceStartDate.split('T')[0]
-        : localDateStr(),
+      date: me?.balanceStartDate ? me.balanceStartDate.split('T')[0] : localDateStr(),
     }),
     [me],
   );
@@ -82,6 +80,7 @@ export function useCashFlow() {
       categoryId: item.categoryId,
       category: item.category,
       isPaid: item.isPaid,
+      tipoDespesa: item.tipoDespesa,
       templateId: item.templateId,
       isSkipped: item.isSkipped,
       creditCardInvoiceId: transactionToInvoiceId.get(item.id),
@@ -289,8 +288,8 @@ export function useCashFlow() {
       totalExpense: monthEntries
         .filter((e) => e.type === 'expense')
         .reduce((s, e) => s + e.amount, 0),
-      totalSpending: monthEntries
-        .filter((e) => e.type === 'spending')
+      totalInvestment: monthEntries
+        .filter((e) => e.type === 'investment')
         .reduce((s, e) => s + e.amount, 0),
     };
   }, [entries]);

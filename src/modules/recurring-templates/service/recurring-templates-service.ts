@@ -4,7 +4,7 @@ export interface RecurringTemplate {
   id: string;
   description: string;
   estimatedAmount: number;
-  type: 'INCOME' | 'EXPENSE' | 'SPENDING';
+  type: 'INCOME' | 'EXPENSE' | 'INVESTMENT';
   dayOfMonth: number;
   isActive: boolean;
   categoryId?: string;

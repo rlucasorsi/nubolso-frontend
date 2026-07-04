@@ -14,9 +14,10 @@ const positiveAmount = z
 export const entryFormSchema = z.object({
   date: z.string().min(1, 'Data é obrigatória'),
   amount: positiveAmount,
-  type: z.enum(['income', 'expense', 'spending']),
+  type: z.enum(['income', 'expense', 'investment']),
   description: z.string().optional(),
   categoryId: z.string().optional(),
+  tipoDespesa: z.enum(['fixa', 'variavel']).nullish(),
 });
 
 export type EntryFormSchema = z.infer<typeof entryFormSchema>;

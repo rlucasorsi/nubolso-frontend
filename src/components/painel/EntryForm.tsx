@@ -1,7 +1,8 @@
-﻿import { FlowType } from '@/lib/cashflow';
+import { ExpenseType, FlowType } from '@/lib/cashflow';
 import { TypeToggle } from './TypeToggle';
 import { TextInputField, AmountInputField, DateInputField } from '@/components/ui/form-field';
 import { useTranslations } from '@/i18n/useTranslations';
+import { cn } from '@/lib/utils';
 
 export interface EntryFormValues {
   date: string;
@@ -9,6 +10,14 @@ export interface EntryFormValues {
   type: FlowType;
   description: string;
   categoryId?: string;
+  tipoDespesa?: ExpenseType;
+}
+
+// tipoDespesa só existe para despesas — para receita/investimento é sempre null.
+export function resolveTipoDespesa(
+  values: Pick<EntryFormValues, 'type' | 'tipoDespesa'>,
+): ExpenseType {
+  return values.type === 'expense' ? (values.tipoDespesa ?? null) : null;
 }
 
 interface EntryFormProps {
@@ -20,6 +29,12 @@ interface EntryFormProps {
 
 export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps) {
   const t = useTranslations('entry');
+
+  const expenseTypeOptions: { value: ExpenseType; label: string }[] = [
+    { value: 'fixa', label: t('expenseTypeFixed') },
+    { value: 'variavel', label: t('expenseTypeVariable') },
+    { value: null, label: t('expenseTypeNone') },
+  ];
 
   return (
     <div className="space-y-4">
@@ -38,9 +53,44 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
         </label>
         <TypeToggle
           value={values.type}
-          onChange={(type) => onChange({ ...values, type })}
+          onChange={(type) =>
+            onChange({
+              ...values,
+              type,
+              // Ao sair de "despesa", zera a classificação (regra: null para outros tipos).
+              tipoDespesa: type === 'expense' ? values.tipoDespesa : null,
+            })
+          }
         />
       </div>
+
+      {values.type === 'expense' && (
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            {t('expenseTypeLabel')}
+          </label>
+          <div className="flex gap-2">
+            {expenseTypeOptions.map((opt) => {
+              const active = (values.tipoDespesa ?? null) === opt.value;
+              return (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={() => onChange({ ...values, tipoDespesa: opt.value })}
+                  className={cn(
+                    'flex-1 flex items-center justify-center py-2 h-11 text-[12px] font-bold rounded-xl transition-all duration-300 border',
+                    active
+                      ? 'bg-primary/20 text-primary border-primary/50'
+                      : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                  )}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <TextInputField
         label={t('descriptionLabel')}
@@ -59,4 +109,3 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
     </div>
   );
 }
-

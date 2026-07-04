@@ -5,7 +5,7 @@ import { setQuickAddHandler } from '@/lib/quickAdd';
 import { AddEntryDrawer } from '@/components/painel/AddEntryDrawer';
 import { useGetMe } from '@/modules/users/hooks/use-get-me';
 import { useCreateEntry } from '@/modules/entries/hooks/use-create-entry';
-import type { EntryFormValues } from '@/components/painel/EntryForm';
+import { resolveTipoDespesa, type EntryFormValues } from '@/components/painel/EntryForm';
 
 export function GlobalQuickAdd() {
   const [open, setOpen] = useState(false);
@@ -26,6 +26,7 @@ export function GlobalQuickAdd() {
       type: values.type,
       description: values.description ?? '',
       categoryId: values.categoryId,
+      tipoDespesa: resolveTipoDespesa(values),
     });
     setOpen(false);
   };

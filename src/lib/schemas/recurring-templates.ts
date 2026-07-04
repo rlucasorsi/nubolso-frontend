@@ -18,7 +18,7 @@ export const recurringTemplateFormSchema = z
   .object({
     description: z.string().min(1, 'Descrição é obrigatória'),
     estimatedAmount: positiveAmount,
-    type: z.enum(['income', 'expense', 'spending']),
+    type: z.enum(['income', 'expense', 'investment']),
     dayOfMonth: z.number().int().min(1).max(31),
     categoryId: z.string().nullish(),
     paymentMode: z.enum(['debit', 'credit']),

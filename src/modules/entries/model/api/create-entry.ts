@@ -1,4 +1,4 @@
-import { FlowType } from "@/lib/cashflow";
+import { ExpenseType, FlowType } from '@/lib/cashflow';
 
 export interface CreateEntryRequest {
   description: string;
@@ -7,6 +7,7 @@ export interface CreateEntryRequest {
   date: string;
   categoryId?: string;
   isPaid?: boolean;
+  tipoDespesa?: ExpenseType;
 }
 
 export interface CreateEntryResponse {

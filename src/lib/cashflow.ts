@@ -1,6 +1,9 @@
 import { localDateStr } from '@/lib/utils';
 
-export type FlowType = 'income' | 'expense' | 'spending';
+export type FlowType = 'income' | 'expense' | 'investment';
+
+// Classificação adicional de despesas (só se aplica quando type === 'expense').
+export type ExpenseType = 'fixa' | 'variavel' | null;
 
 export interface CashFlowEntry {
   id: string;
@@ -15,6 +18,7 @@ export interface CashFlowEntry {
     color?: string;
   };
   isPaid?: boolean;
+  tipoDespesa?: ExpenseType;
   templateId?: string | null;
   isVirtual?: boolean;
   isSkipped?: boolean;
@@ -29,7 +33,7 @@ export interface DayData {
   date: string;
   income: number;
   expense: number;
-  spending: number;
+  investment: number;
   saldoDiario: number;
   saldoAcumulado: number;
   descriptions: string[];
@@ -46,7 +50,7 @@ export interface Period {
   days: DayData[];
   totalIncome: number;
   totalExpense: number;
-  totalSpending: number;
+  totalInvestment: number;
   saldoFinal: number;
 }
 
@@ -705,7 +709,7 @@ export function generatePeriods(
     let acumulado = runningBalance;
     let totalIncome = 0;
     let totalExpense = 0;
-    let totalSpending = 0;
+    let totalInvestment = 0;
 
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const dateStr = d.toISOString().split('T')[0];
@@ -717,8 +721,14 @@ export function generatePeriods(
       const expense = dayEntries
         .filter((e) => e.type === 'expense' || (e.type as any) === 'despesa')
         .reduce((s, e) => s + e.amount, 0);
-      const spending = dayEntries
-        .filter((e) => e.type === 'spending' || (e.type as any) === 'gasto')
+      // Reconhece valores legados ('spending'/'gasto') durante o rollout do rename.
+      const investment = dayEntries
+        .filter(
+          (e) =>
+            e.type === 'investment' ||
+            (e.type as any) === 'spending' ||
+            (e.type as any) === 'gasto',
+        )
         .reduce((s, e) => s + e.amount, 0);
       const descriptions = dayEntries.map((e) => e.description || '').filter(Boolean);
       const entryIds = dayEntries.map((e) => e.id);
@@ -726,7 +736,7 @@ export function generatePeriods(
       const hasPendingRecurring =
         !isBeforeStartDate && dayEntries.some((e) => e.isVirtual === true);
 
-      const saldoDiario = income - expense - spending;
+      const saldoDiario = income - expense - investment;
 
       if (isBeforeStartDate) {
         acumulado = 0;
@@ -740,13 +750,13 @@ export function generatePeriods(
       }
       totalIncome += income;
       totalExpense += expense;
-      totalSpending += spending;
+      totalInvestment += investment;
 
       days.push({
         date: dateStr,
         income,
         expense,
-        spending,
+        investment,
         saldoDiario,
         saldoAcumulado: acumulado,
         descriptions,
@@ -764,7 +774,7 @@ export function generatePeriods(
       days,
       totalIncome,
       totalExpense,
-      totalSpending,
+      totalInvestment,
       saldoFinal: acumulado,
     });
 

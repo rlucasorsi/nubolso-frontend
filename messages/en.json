@@ -207,7 +207,11 @@
     "amount": "Amount",
     "income": "Income",
     "expense": "Expense",
-    "spending": "Spending"
+    "investment": "Investment",
+    "expenseTypeLabel": "Expense type",
+    "expenseTypeFixed": "Fixed",
+    "expenseTypeVariable": "Variable",
+    "expenseTypeNone": "No type"
   },
   "category": {
     "label": "Category",
@@ -292,7 +296,7 @@
     "filterAll": "All",
     "filterIncome": "Income",
     "filterExpense": "Expense",
-    "filterSpending": "Spending",
+    "filterInvestment": "Investment",
     "noTemplates": "No recurring accounts registered. Use the button above to add water, electricity, condo fees, etc.",
     "noResults": "No accounts found with the selected filters.",
     "day": "Day {day}",
@@ -373,7 +377,7 @@
     "balance": "Balance",
     "income": "Income",
     "expense": "Expense",
-    "spending": "Spending",
+    "investment": "Investment",
     "recurringPending": "Recurring estimated entries pending on this day"
   },
   "dailyEntries": {
@@ -418,6 +422,11 @@
     "searchPlaceholder": "Search by description or amount...",
     "filterPeriod": "Filter by period",
     "clearFilter": "Clear Filter",
+    "filterExpenseType": "Expense type",
+    "filterAll": "All",
+    "filterFixed": "Fixed",
+    "filterVariable": "Variable",
+    "filterNoType": "No type",
     "showEstimated": "Show estimated recurrences",
     "noResults": "No entries found",
     "noResultsHint": "Try adjusting your search filters",

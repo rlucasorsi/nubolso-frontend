@@ -207,7 +207,11 @@
     "amount": "Valor",
     "income": "Receita",
     "expense": "Despesa",
-    "spending": "Gasto"
+    "investment": "Investimento",
+    "expenseTypeLabel": "Tipo de despesa",
+    "expenseTypeFixed": "Fixa",
+    "expenseTypeVariable": "Variável",
+    "expenseTypeNone": "Sem tipo"
   },
   "category": {
     "label": "Categoria",
@@ -292,7 +296,7 @@
     "filterAll": "Todos",
     "filterIncome": "Receita",
     "filterExpense": "Despesa",
-    "filterSpending": "Gasto",
+    "filterInvestment": "Investimento",
     "noTemplates": "Nenhuma conta recorrente cadastrada. Use o botão acima para adicionar água, luz, condomínio, etc.",
     "noResults": "Nenhuma conta encontrada com os filtros selecionados.",
     "day": "Dia {day}",
@@ -373,7 +377,7 @@
     "balance": "Saldo",
     "income": "Entradas",
     "expense": "Despesas",
-    "spending": "Gastos",
+    "investment": "Investimentos",
     "recurringPending": "Lançamentos estimados recorrentes pendentes neste dia"
   },
   "dailyEntries": {
@@ -418,6 +422,11 @@
     "searchPlaceholder": "Buscar por descrição ou valor...",
     "filterPeriod": "Filtrar por período",
     "clearFilter": "Limpar Filtro",
+    "filterExpenseType": "Tipo de despesa",
+    "filterAll": "Todas",
+    "filterFixed": "Fixas",
+    "filterVariable": "Variáveis",
+    "filterNoType": "Sem tipo",
     "showEstimated": "Mostrar recorrências estimadas",
     "noResults": "Nenhum lançamento encontrado",
     "noResultsHint": "Tente ajustar seus filtros de busca",

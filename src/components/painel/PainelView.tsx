@@ -7,7 +7,7 @@ import { DailyEntriesDrawer, DailyEntriesState } from './DailyEntriesDrawer';
 import { DashboardSummary } from './DashboardSummary';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { useCashFlow } from '@/hooks/useCashFlow';
-import { EntryFormValues } from './EntryForm';
+import { EntryFormValues, resolveTipoDespesa } from './EntryForm';
 import { ChevronDown, Filter, Loader2, Plus } from 'lucide-react';
 import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDrawer';
 import { ServerErrorState } from '@/components/ui/server-error-state';
@@ -130,6 +130,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
       type: values.type,
       description: values.description,
       categoryId: values.categoryId,
+      tipoDespesa: resolveTipoDespesa(values),
     });
     setIsAddingInHeader(false);
   };

@@ -4,6 +4,7 @@ export interface TransactionFromApi {
   amount: number;
   type: string;
   date: string;
+  tipoDespesa?: 'fixa' | 'variavel' | null;
   categoryId?: string;
   category?: {
     id: string;

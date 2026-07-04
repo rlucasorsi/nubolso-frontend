@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { EntryForm, EntryFormValues } from './EntryForm';
+import { EntryForm, EntryFormValues, resolveTipoDespesa } from './EntryForm';
 import { entryFormSchema } from '@/lib/schemas/transactions';
 import { Button } from '@/components/ui/button';
 import { useUpdateEntry } from '@/modules/entries/hooks/use-update-entry';
@@ -43,6 +43,7 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
         type: entry.type as FlowType,
         description: entry.description ?? '',
         categoryId: entry.categoryId ?? undefined,
+        tipoDespesa: entry.tipoDespesa ?? null,
       });
       setErrors({});
     }
@@ -65,6 +66,7 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
         type: values.type,
         date: values.date,
         categoryId: values.categoryId,
+        tipoDespesa: resolveTipoDespesa(values),
       },
       {
         onSuccess: onClose,

@@ -206,8 +206,12 @@
     "descriptionLabel": "Descripción",
     "amount": "Monto",
     "income": "Ingreso",
-    "expense": "Gasto fijo",
-    "spending": "Gasto"
+    "expense": "Gasto",
+    "investment": "Inversión",
+    "expenseTypeLabel": "Tipo de gasto",
+    "expenseTypeFixed": "Fija",
+    "expenseTypeVariable": "Variable",
+    "expenseTypeNone": "Sin tipo"
   },
   "category": {
     "label": "Categoría",
@@ -292,7 +296,7 @@
     "filterAll": "Todos",
     "filterIncome": "Ingreso",
     "filterExpense": "Gasto fijo",
-    "filterSpending": "Gasto",
+    "filterInvestment": "Inversión",
     "noTemplates": "No hay cuentas recurrentes registradas. Usa el botón de arriba para agregar agua, luz, condominio, etc.",
     "noResults": "No se encontraron cuentas con los filtros seleccionados.",
     "day": "Día {day}",
@@ -372,8 +376,8 @@
     "goesNegative": "Se pone negativo",
     "balance": "Saldo",
     "income": "Ingresos",
-    "expense": "Gastos fijos",
-    "spending": "Gastos",
+    "expense": "Gastos",
+    "investment": "Inversiones",
     "recurringPending": "Movimientos estimados recurrentes pendientes este día"
   },
   "dailyEntries": {
@@ -418,6 +422,11 @@
     "searchPlaceholder": "Buscar por descripción o monto...",
     "filterPeriod": "Filtrar por período",
     "clearFilter": "Limpiar Filtro",
+    "filterExpenseType": "Tipo de gasto",
+    "filterAll": "Todas",
+    "filterFixed": "Fijas",
+    "filterVariable": "Variables",
+    "filterNoType": "Sin tipo",
     "showEstimated": "Mostrar recurrencias estimadas",
     "noResults": "No se encontraron movimientos",
     "noResultsHint": "Intenta ajustar tus filtros de búsqueda",

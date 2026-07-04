@@ -48,7 +48,7 @@ import {
   Ban,
   CreditCard,
 } from 'lucide-react';
-import { EntryFormValues } from './EntryForm';
+import { EntryFormValues, resolveTipoDespesa } from './EntryForm';
 import { TypeToggle } from './TypeToggle';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { TYPE_CONFIG, MONTH_KEYS, WEEKDAY_KEYS } from './config';
@@ -69,7 +69,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 const TYPE_ORDER: Record<FlowType, number> = {
   income: 0,
   expense: 1,
-  spending: 2,
+  investment: 2,
 };
 
 function parseLocal(dateStr: string): Date {
@@ -111,7 +111,7 @@ export function DailyEntriesDrawer({
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     income: true,
     expense: true,
-    spending: true,
+    investment: true,
   });
 
   const t = useTranslations('dailyEntries');
@@ -144,6 +144,7 @@ export function DailyEntriesDrawer({
       amount: entry.amount.toFixed(2).replace('.', ','),
       type: entry.type,
       description: entry.description || '',
+      tipoDespesa: entry.tipoDespesa ?? null,
     });
   }
 
@@ -155,6 +156,7 @@ export function DailyEntriesDrawer({
       amount: parseFloat(editValues.amount.replace(',', '.')) || 0,
       type: editValues.type,
       description: editValues.description || undefined,
+      tipoDespesa: resolveTipoDespesa(editValues),
     });
 
     setEditingId(null);
@@ -245,7 +247,7 @@ export function DailyEntriesDrawer({
               </div>
             )}
 
-            {(['income', 'expense', 'spending'] as FlowType[]).map((type) => {
+            {(['income', 'expense', 'investment'] as FlowType[]).map((type) => {
               const typeEntries = sheetEntries.filter((e) => e.type === type);
               if (typeEntries.length === 0) return null;
 
@@ -672,6 +674,7 @@ export function DailyEntriesDrawer({
             type: values.type,
             description: values.description || undefined,
             categoryId: values.categoryId,
+            tipoDespesa: resolveTipoDespesa(values),
           });
           setIsAdding(false);
         }}

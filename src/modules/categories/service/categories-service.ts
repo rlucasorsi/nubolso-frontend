@@ -8,7 +8,7 @@ export interface Category {
 }
 
 export interface GetCategoriesFilters {
-  type?: 'INCOME' | 'EXPENSE' | 'SPENDING';
+  type?: 'INCOME' | 'EXPENSE' | 'INVESTMENT';
 }
 
 export interface CreateCategoryRequest {

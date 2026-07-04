@@ -4,10 +4,11 @@ export interface Transaction {
   id: string;
   description: string;
   amount: number;
-  type: 'INCOME' | 'EXPENSE' | 'SPENDING';
+  type: 'INCOME' | 'EXPENSE' | 'INVESTMENT';
   date: string;
   isPaid: boolean;
   isSkipped?: boolean;
+  tipoDespesa?: 'fixa' | 'variavel' | null;
   templateId?: string | null;
   categoryId?: string;
   category?: {
@@ -20,7 +21,8 @@ export interface Transaction {
 export interface GetEntriesFilters {
   startDate?: string;
   endDate?: string;
-  type?: 'income' | 'expense' | 'spending';
+  type?: 'income' | 'expense' | 'investment';
+  tipoDespesa?: 'fixa' | 'variavel' | null;
   categoryId?: string;
   isPaid?: boolean;
   page?: number;
@@ -52,7 +54,7 @@ export const entriesService = {
     return {
       data: response.data.map((t) => ({
         ...t,
-        type: t.type.toLowerCase() as 'income' | 'expense' | 'spending',
+        type: t.type.toLowerCase() as 'income' | 'expense' | 'investment',
       })),
       total: response.total,
       page: response.page,

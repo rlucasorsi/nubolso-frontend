@@ -4,7 +4,7 @@ import { useTranslations } from '@/i18n/useTranslations';
 const ACTIVE_STYLES: Record<FlowType, string> = {
   income: 'bg-success/20 text-success border-success/50 shadow-[0_0_10px_rgba(74,222,128,0.2)]',
   expense: 'bg-error/20 text-error border-error/50 shadow-[0_0_10px_rgba(248,113,113,0.2)]',
-  spending: 'bg-warning/20 text-warning border-warning/50 shadow-[0_0_10px_rgba(251,146,60,0.2)]',
+  investment: 'bg-warning/20 text-warning border-warning/50 shadow-[0_0_10px_rgba(251,146,60,0.2)]',
 };
 
 interface TypeToggleProps {
@@ -18,12 +18,12 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
   const TYPE_LABELS: Record<FlowType, string> = {
     income: t('income'),
     expense: t('expense'),
-    spending: t('spending'),
+    investment: t('investment'),
   };
 
   return (
     <div className="flex gap-2">
-      {(['income', 'expense', 'spending'] as FlowType[]).map((type) => (
+      {(['income', 'expense', 'investment'] as FlowType[]).map((type) => (
         <button
           key={type}
           type="button"

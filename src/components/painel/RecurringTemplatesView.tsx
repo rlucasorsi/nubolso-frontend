@@ -31,9 +31,9 @@ import { RecurringTemplate } from '@/modules/recurring-templates/service/recurri
 import { usePlan } from '@/modules/billing/hooks/use-plan';
 import { UpgradeDrawer } from '@/components/billing/UpgradeDrawer';
 
-type TypeFilter = 'all' | 'income' | 'expense' | 'spending';
+type TypeFilter = 'all' | 'income' | 'expense' | 'investment';
 
-const TYPE_ORDER = ['income', 'expense', 'spending'] as const;
+const TYPE_ORDER = ['income', 'expense', 'investment'] as const;
 
 export function RecurringTemplatesView() {
   const t = useTranslations('recurring');
@@ -55,14 +55,14 @@ export function RecurringTemplatesView() {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     income: true,
     expense: true,
-    spending: true,
+    investment: true,
   });
 
   const TYPE_FILTER_LABELS: Record<TypeFilter, string> = {
     all: t('filterAll'),
     income: t('filterIncome'),
     expense: t('filterExpense'),
-    spending: t('filterSpending'),
+    investment: t('filterInvestment'),
   };
 
   const activeTemplatesCount = recurringTemplates?.filter((t) => t.isActive).length ?? 0;
@@ -173,7 +173,7 @@ export function RecurringTemplatesView() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {(['all', 'income', 'expense', 'spending'] as TypeFilter[]).map((type) => (
+            {(['all', 'income', 'expense', 'investment'] as TypeFilter[]).map((type) => (
               <button
                 key={type}
                 onClick={() => setTypeFilter(type)}
@@ -186,7 +186,7 @@ export function RecurringTemplatesView() {
                           type === 'income' &&
                             'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20',
                           type === 'expense' && 'bg-red-500 text-white shadow-lg shadow-red-500/20',
-                          type === 'spending' &&
+                          type === 'investment' &&
                             'bg-orange-400 text-white shadow-lg shadow-orange-400/20',
                         )
                     : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
