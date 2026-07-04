@@ -639,7 +639,8 @@
     "advancePaid": "Pagado",
     "revertAdvance": "Revertir",
     "reverting": "Revirtiendo...",
-    "revertError": "No fue posible revertir la anticipación"
+    "revertError": "No fue posible revertir la anticipación",
+    "projectedNote": "Este mes aún no tiene factura — el monto mostrado es el compromiso previsto de las recurrencias vinculadas. Agrega un gasto para abrir una factura real."
   },
   "recurringDrawer": {
     "editTitle": "Editar Cuenta Recurrente",

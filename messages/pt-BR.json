@@ -639,7 +639,8 @@
     "advancePaid": "Pago",
     "revertAdvance": "Reverter",
     "reverting": "Revertendo...",
-    "revertError": "Não foi possível reverter a antecipação"
+    "revertError": "Não foi possível reverter a antecipação",
+    "projectedNote": "Este mês ainda não tem fatura — o valor exibido é o comprometimento previsto das recorrências vinculadas. Faça um lançamento para abrir uma fatura real."
   },
   "recurringDrawer": {
     "editTitle": "Editar Conta Recorrente",

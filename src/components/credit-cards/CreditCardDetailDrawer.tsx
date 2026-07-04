@@ -17,6 +17,9 @@ import {
   formatCurrency,
   formatDateLong,
   getProjectedCardTemplatesForInvoiceCycle,
+  generateVirtualCardInvoiceCycles,
+  isVirtualInvoiceId,
+  VIRTUAL_INVOICE_PREFIX,
   type RecurringTemplateLike,
   type FlowType,
 } from '@/lib/cashflow';
@@ -34,7 +37,7 @@ interface CreditCardDetailDrawerProps {
   onClose: () => void;
   onEdit: (card: CreditCard) => void;
   onAddPurchase: (cardId: string) => void;
-  onSelectInvoice: (invoiceId: string) => void;
+  onSelectInvoice: (invoice: CreditCardInvoice) => void;
 }
 
 function getTodayDateString() {
@@ -94,8 +97,37 @@ export function CreditCardDetailDrawer({
   const sorted = [...(invoices ?? [])].sort(
     (a, b) => a.referenceYear - b.referenceYear || a.referenceMonth - b.referenceMonth,
   );
-  const unpaid = sorted.filter((invoice) => !invoice.isPaid);
   const paid = sorted.filter((invoice) => invoice.isPaid).reverse();
+  const realUnpaid = sorted.filter((invoice) => !invoice.isPaid);
+
+  // For a card whose only future activity is a linked recurrence, no real invoice
+  // exists yet. Synthesize month cards so the projected commitment is visible.
+  const virtualInvoices: CreditCardInvoice[] = generateVirtualCardInvoiceCycles(
+    card,
+    templates,
+    existingEntries,
+    invoices ?? [],
+  ).map((cycle) => ({
+    id: `${VIRTUAL_INVOICE_PREFIX}${card.id}:${cycle.referenceYear}-${cycle.referenceMonth}`,
+    cardId: card.id,
+    cardName: card.name,
+    cardIsActive: card.isActive,
+    referenceMonth: cycle.referenceMonth,
+    referenceYear: cycle.referenceYear,
+    closingDate: cycle.closingDate,
+    dueDate: cycle.dueDate,
+    paymentDate: cycle.paymentDate,
+    paymentDateOverridden: false,
+    isPaid: false,
+    totalAmount: 0,
+    installments: [],
+    advances: [],
+    purchaseTemplateIds: [],
+  }));
+
+  const unpaid = [...realUnpaid, ...virtualInvoices].sort(
+    (a, b) => a.referenceYear - b.referenceYear || a.referenceMonth - b.referenceMonth,
+  );
   const current = unpaid[0];
   const future = unpaid.slice(1);
 
@@ -122,7 +154,8 @@ export function CreditCardDetailDrawer({
   }
 
   function renderInvoiceRow(invoice: CreditCardInvoice) {
-    const isOverdue = !invoice.isPaid && invoice.paymentDate < today;
+    const isVirtual = isVirtualInvoiceId(invoice.id);
+    const isOverdue = !invoice.isPaid && !isVirtual && invoice.paymentDate < today;
     const projected = invoice.isPaid
       ? []
       : getProjectedCardTemplatesForInvoiceCycle(
@@ -139,7 +172,7 @@ export function CreditCardDetailDrawer({
     return (
       <button
         key={invoice.id}
-        onClick={() => onSelectInvoice(invoice.id)}
+        onClick={() => onSelectInvoice(invoice)}
         className="w-full flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/30 transition-all text-left"
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -157,12 +190,18 @@ export function CreditCardDetailDrawer({
           </div>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-sm font-bold">{formatCurrency(invoice.totalAmount)}</p>
-          {hasProjection && (
+          <p className="text-sm font-bold">
+            {formatCurrency(isVirtual ? projectedTotal : invoice.totalAmount)}
+          </p>
+          {isVirtual ? (
+            <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+              {t('projected')}
+            </span>
+          ) : hasProjection ? (
             <p className="text-[11px] font-semibold text-primary">
               {t('projected')} {formatCurrency(projectedTotal)}
             </p>
-          )}
+          ) : null}
           {invoice.isPaid ? (
             <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
               {t('paid')}

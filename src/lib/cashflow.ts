@@ -361,19 +361,30 @@ export function getInvoiceCycleForDate(
   return month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
 }
 
+// Port of the backend's computeInvoiceDates rolling rule: a target day that is at
+// or before the closing day belongs to the month AFTER the reference month.
+export function getCycleDateForDay(
+  card: CreditCardLike,
+  year: number,
+  month: number,
+  day: number,
+): string {
+  let y = year;
+  let m = month;
+  if (day <= card.closingDay) {
+    m += 1;
+    if (m > 12) {
+      m = 1;
+      y += 1;
+    }
+  }
+  return getTemplateOccurrenceDate(y, m, day);
+}
+
 // Port of the paymentDate branch of the backend's computeInvoiceDates:
 // paymentDay <= closingDay rolls the payment to the month after closing.
 export function getCyclePaymentDate(card: CreditCardLike, year: number, month: number): string {
-  let payYear = year;
-  let payMonth = month;
-  if (card.paymentDay <= card.closingDay) {
-    payMonth += 1;
-    if (payMonth > 12) {
-      payMonth = 1;
-      payYear += 1;
-    }
-  }
-  return getTemplateOccurrenceDate(payYear, payMonth, card.paymentDay);
+  return getCycleDateForDay(card, year, month, card.paymentDay);
 }
 
 // For templates linked to a credit card, one monthly occurrence yields two views:
@@ -419,7 +430,6 @@ export function generateCardTemplateEntriesForRange(
       const occurrenceDate = getTemplateOccurrenceDate(year, month, template.dayOfMonth);
 
       // Same guards as synthesizeVirtualEntry
-      if (occurrenceDate < todayStr) continue;
       if (template.endDate && occurrenceDate > template.endDate.slice(0, 10)) continue;
       if (template.totalOccurrences && (template.occurrenceCount ?? 0) >= template.totalOccurrences)
         continue;
@@ -432,7 +442,13 @@ export function generateCardTemplateEntriesForRange(
       // Already materialized as a purchase in this cycle's invoice
       if (invoice?.purchaseTemplateIds?.includes(template.id)) continue;
 
-      if (occurrenceDate >= startDate && occurrenceDate <= endDate) {
+      // The invoice absorbing this charge closes on the cycle's closing day; once
+      // that date passes the invoice is final and the charge no longer projects.
+      const cycleClosingDate = getTemplateOccurrenceDate(cycle.year, cycle.month, card.closingDay);
+      if (cycleClosingDate < todayStr) continue;
+
+      // Pending-confirmation list only shows genuinely upcoming occurrences.
+      if (occurrenceDate >= todayStr && occurrenceDate >= startDate && occurrenceDate <= endDate) {
         pendingEntries.push({
           id: `cardpending_${template.id}_${occurrenceDate}`,
           date: occurrenceDate,
@@ -506,6 +522,13 @@ export function getProjectedCardTemplatesForInvoiceCycle(
   const todayStr = today ?? localDateStr();
   const result: ProjectedCardTemplate[] = [];
 
+  // Once the cycle has closed the invoice is final and no longer accepts projected
+  // commitments. Until then it stays open even for occurrences already in the past
+  // (e.g. closingDay 1 + recurrence on day 2: the day-2 charge lands in an invoice
+  // that only closes a month later, so it must project even a few days after it).
+  const cycleClosingDate = getTemplateOccurrenceDate(refYear, refMonth, card.closingDay);
+  if (cycleClosingDate < todayStr) return result;
+
   const activeTemplates = templates.filter((t) => t.isActive && t.creditCardId === card.id);
 
   // A monthly occurrence reaches this invoice from either the reference month
@@ -522,7 +545,6 @@ export function getProjectedCardTemplatesForInvoiceCycle(
       if (cycle.year !== refYear || cycle.month !== refMonth) continue;
 
       // Same guards as generateCardTemplateEntriesForRange / synthesizeVirtualEntry
-      if (occurrenceDate < todayStr) break;
       if (template.endDate && occurrenceDate > template.endDate.slice(0, 10)) break;
       if (template.totalOccurrences && (template.occurrenceCount ?? 0) >= template.totalOccurrences)
         break;
@@ -538,6 +560,79 @@ export function getProjectedCardTemplatesForInvoiceCycle(
         dayOfMonth: template.dayOfMonth,
       });
       break; // at most one candidate month maps to this cycle
+    }
+  }
+
+  return result;
+}
+
+// Synthetic invoice ids are prefixed so drawers can tell them apart from real
+// backend invoices (which must never be fetched/mutated for a virtual cycle).
+export const VIRTUAL_INVOICE_PREFIX = 'virtual:';
+
+export function isVirtualInvoiceId(id: string | null | undefined): boolean {
+  return !!id && id.startsWith(VIRTUAL_INVOICE_PREFIX);
+}
+
+// A future invoice cycle that has no real invoice yet but already carries a
+// projected commitment from card-linked recurring templates. Lets the UI render
+// month cards for a brand-new card whose only activity is a linked recurrence.
+export interface VirtualInvoiceCycle {
+  referenceYear: number;
+  referenceMonth: number;
+  closingDate: string;
+  dueDate: string;
+  paymentDate: string;
+  projected: ProjectedCardTemplate[];
+  projectedTotal: number;
+}
+
+// Walks the next `monthsAhead` reference cycles of `card` and, for each cycle that
+// has no real invoice but does have projected card recurrences, emits a virtual
+// cycle. Real invoices already surface their own projection via
+// getProjectedCardTemplatesForInvoiceCycle, so those cycles are skipped here.
+export function generateVirtualCardInvoiceCycles(
+  card: CreditCardLike,
+  templates: RecurringTemplateLike[],
+  existingEntries: CashFlowEntry[],
+  realInvoices: { referenceYear: number; referenceMonth: number }[],
+  monthsAhead = 12,
+  today?: string,
+): VirtualInvoiceCycle[] {
+  const todayStr = today ?? localDateStr();
+  const [startY, startM] = todayStr.split('-').map(Number);
+  const realKeys = new Set(realInvoices.map((i) => `${i.referenceYear}-${i.referenceMonth}`));
+  const result: VirtualInvoiceCycle[] = [];
+
+  let year = startY;
+  let month = startM;
+  for (let i = 0; i < monthsAhead; i++) {
+    if (!realKeys.has(`${year}-${month}`)) {
+      const projected = getProjectedCardTemplatesForInvoiceCycle(
+        templates,
+        card,
+        year,
+        month,
+        existingEntries,
+        [],
+        todayStr,
+      );
+      if (projected.length > 0) {
+        result.push({
+          referenceYear: year,
+          referenceMonth: month,
+          closingDate: getTemplateOccurrenceDate(year, month, card.closingDay),
+          dueDate: getCycleDateForDay(card, year, month, card.dueDay),
+          paymentDate: getCyclePaymentDate(card, year, month),
+          projected,
+          projectedTotal: projected.reduce((sum, r) => sum + r.estimatedAmount, 0),
+        });
+      }
+    }
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
     }
   }
 

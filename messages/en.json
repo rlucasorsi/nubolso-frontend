@@ -639,7 +639,8 @@
     "advancePaid": "Paid",
     "revertAdvance": "Revert",
     "reverting": "Reverting...",
-    "revertError": "Couldn't revert the anticipation"
+    "revertError": "Couldn't revert the anticipation",
+    "projectedNote": "This month has no invoice yet — the amount shown is the projected commitment from linked recurrences. Add a purchase to open a real invoice."
   },
   "recurringDrawer": {
     "editTitle": "Edit Recurring Account",

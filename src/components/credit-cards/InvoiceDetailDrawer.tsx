@@ -21,6 +21,8 @@ import {
   type RecurringTemplateLike,
   type FlowType,
 } from '@/lib/cashflow';
+import { isVirtualInvoiceId } from '@/lib/cashflow';
+import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { MONTH_KEYS } from '@/components/painel/config';
 import { useGetInvoice } from '@/modules/credit-cards/hooks/use-get-invoice';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
@@ -41,15 +43,25 @@ import { useTranslations } from '@/i18n/useTranslations';
 
 interface InvoiceDetailDrawerProps {
   invoiceId: string | null;
+  // Set when opening a synthesized cycle that has no real backend invoice yet;
+  // rendered directly instead of being fetched.
+  virtualInvoice?: CreditCardInvoice | null;
   open: boolean;
   onClose: () => void;
 }
 
-export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailDrawerProps) {
+export function InvoiceDetailDrawer({
+  invoiceId,
+  virtualInvoice,
+  open,
+  onClose,
+}: InvoiceDetailDrawerProps) {
   const t = useTranslations('invoiceDetail');
   const td = useTranslations('dateNames');
-  const { data: invoice, isLoading } = useGetInvoice(invoiceId ?? undefined, open);
-  const { data: cardInvoices } = useGetCardInvoices(invoice?.cardId, open);
+  const { data: fetchedInvoice, isLoading } = useGetInvoice(invoiceId ?? undefined, open);
+  const invoice = virtualInvoice ?? fetchedInvoice;
+  const isVirtual = isVirtualInvoiceId(invoice?.id);
+  const { data: cardInvoices } = useGetCardInvoices(isVirtual ? undefined : invoice?.cardId, open);
   const { data: cardsData } = useGetCreditCards();
   const { data: templatesData } = useGetRecurringTemplates();
   const { data: entriesData } = useGetEntries();
@@ -318,10 +330,10 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                   </div>
                 </div>
 
-                {invoice.isPaid ? (
+                {invoice.isPaid || isVirtual ? (
                   <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      {t('paidOn')}
+                      {invoice.isPaid ? t('paidOn') : t('paymentDate')}
                     </span>
                     <p className="text-sm font-bold">{formatDateLong(invoice.paymentDate)}</p>
                   </div>
@@ -556,7 +568,9 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
               </div>
 
               <DrawerFooter className="flex-col sm:flex-col gap-3">
-                {invoice.isPaid ? (
+                {isVirtual ? (
+                  <p className="text-xs text-muted-foreground text-center">{t('projectedNote')}</p>
+                ) : invoice.isPaid ? (
                   <>
                     <p className="text-xs text-muted-foreground text-center">{t('paidNote')}</p>
                     <Button

@@ -6,6 +6,8 @@ import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invo
 import { useDeleteCreditCard } from '@/modules/credit-cards/hooks/use-delete-credit-card';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import type { CreditCard } from '@/modules/credit-cards/model/api/credit-card';
+import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
+import { isVirtualInvoiceId } from '@/lib/cashflow';
 import { CreditCardCard } from '@/components/credit-cards/CreditCardCard';
 import { CreditCardDrawer } from '@/components/credit-cards/CreditCardDrawer';
 import { CreditCardDetailDrawer } from '@/components/credit-cards/CreditCardDetailDrawer';
@@ -41,6 +43,7 @@ export function CreditCardsView() {
   const [detailCardId, setDetailCardId] = useState<string | null>(null);
   const [addPurchaseCardId, setAddPurchaseCardId] = useState<string | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [virtualInvoice, setVirtualInvoice] = useState<CreditCardInvoice | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [deletingCard, setDeletingCard] = useState<CreditCard | null>(null);
 
@@ -193,7 +196,13 @@ export function CreditCardsView() {
         onClose={() => setDetailCardId(null)}
         onEdit={handleEditFromDetail}
         onAddPurchase={(cardId) => setAddPurchaseCardId(cardId)}
-        onSelectInvoice={(invoiceId) => setSelectedInvoiceId(invoiceId)}
+        onSelectInvoice={(invoice) => {
+          if (isVirtualInvoiceId(invoice.id)) {
+            setVirtualInvoice(invoice);
+          } else {
+            setSelectedInvoiceId(invoice.id);
+          }
+        }}
       />
 
       <AddPurchaseDrawer
@@ -204,8 +213,12 @@ export function CreditCardsView() {
 
       <InvoiceDetailDrawer
         invoiceId={selectedInvoiceId}
-        open={!!selectedInvoiceId}
-        onClose={() => setSelectedInvoiceId(null)}
+        virtualInvoice={virtualInvoice}
+        open={!!selectedInvoiceId || !!virtualInvoice}
+        onClose={() => {
+          setSelectedInvoiceId(null);
+          setVirtualInvoice(null);
+        }}
       />
 
       <UpgradeDrawer
