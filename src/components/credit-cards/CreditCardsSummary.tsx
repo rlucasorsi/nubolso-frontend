@@ -19,23 +19,25 @@ export function CreditCardsSummary({
 }: CreditCardsSummaryProps) {
   const t = useTranslations('creditCardsSummary');
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-4 sm:p-7 flex flex-col gap-1.5 sm:gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
           {t('activeCards')}
         </span>
-        <span className="text-2xl font-bold font-display text-primary">{activeCardsCount}</span>
+        <span className="text-lg sm:text-2xl font-bold font-display text-primary">
+          {activeCardsCount}
+        </span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
           <CreditCard className="h-4 w-4" />
           <span className="font-bold">{activeCardsCount === 1 ? t('card') : t('cards')}</span>
         </div>
       </div>
 
-      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
+      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-4 sm:p-7 flex flex-col gap-1.5 sm:gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
           {t('currentMonth')}
         </span>
-        <span className="text-2xl font-bold font-display">
+        <span className="text-lg sm:text-2xl font-bold font-display">
           {formatCurrency(currentInvoiceTotal)}
         </span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
@@ -44,11 +46,11 @@ export function CreditCardsSummary({
         </div>
       </div>
 
-      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
+      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-4 sm:p-7 flex flex-col gap-1.5 sm:gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
           {t('nextDue')}
         </span>
-        <span className="text-2xl font-bold font-display">
+        <span className="text-lg sm:text-2xl font-bold font-display">
           {nextDueDate ? formatDateLong(nextDueDate) : '—'}
         </span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
@@ -59,11 +61,13 @@ export function CreditCardsSummary({
         </div>
       </div>
 
-      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
+      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-4 sm:p-7 flex flex-col gap-1.5 sm:gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
           {t('openInvoices')}
         </span>
-        <span className="text-2xl font-bold font-display">{formatCurrency(totalOpenInvoices)}</span>
+        <span className="text-lg sm:text-2xl font-bold font-display">
+          {formatCurrency(totalOpenInvoices)}
+        </span>
         <div className="flex items-center gap-2 text-muted-foreground text-xs mt-2">
           <Wallet className="h-4 w-4" />
           <span className="font-bold">{t('allUnpaid')}</span>

@@ -333,6 +333,17 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                   />
                 )}
 
+                {hasProjection && (
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-bold text-primary/80 uppercase tracking-wider">
+                      {t('projectedRecurrences')}
+                    </h4>
+                    {projectedRecurrences.map((rec) => (
+                      <ProjectedRecurrenceItem key={rec.templateId} rec={rec} t={t} />
+                    ))}
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-base font-bold font-display">{t('invoiceItems')}</h3>
@@ -439,17 +450,6 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                       ))
                     )}
                   </div>
-
-                  {hasProjection && (
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-bold text-primary/80 uppercase tracking-wider">
-                        {t('projectedRecurrences')}
-                      </h4>
-                      {projectedRecurrences.map((rec) => (
-                        <ProjectedRecurrenceItem key={rec.templateId} rec={rec} t={t} />
-                      ))}
-                    </div>
-                  )}
 
                   {anticipatedGroups.length > 0 && (
                     <div className="space-y-2">

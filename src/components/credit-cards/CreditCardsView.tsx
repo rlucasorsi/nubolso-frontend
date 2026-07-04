@@ -141,11 +141,11 @@ export function CreditCardsView() {
         <ServerErrorState onRetry={refetchAll} />
       ) : isLoading ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-[124px] bg-card/50 animate-pulse rounded-base border border-white/5"
+                className="h-[96px] sm:h-[124px] bg-card/50 animate-pulse rounded-base border border-white/5"
               />
             ))}
           </div>
