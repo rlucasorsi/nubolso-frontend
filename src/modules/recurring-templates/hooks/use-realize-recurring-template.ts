@@ -15,6 +15,8 @@ export const useRealizeRecurringTemplate = () => {
         client.invalidateQueries({ queryKey: ['list_recurring_templates'] }),
         // Templates vinculados a cartão materializam como compra na fatura
         client.invalidateQueries({ queryKey: ['all_credit_card_invoices'] }),
+        client.invalidateQueries({ queryKey: ['credit_card_invoice'] }),
+        client.invalidateQueries({ queryKey: ['credit_card_invoices'] }),
       ]);
     },
   });

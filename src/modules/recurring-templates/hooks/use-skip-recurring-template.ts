@@ -14,6 +14,8 @@ export const useSkipRecurringTemplate = () => {
         client.invalidateQueries({ queryKey: ['list_entries'] }),
         client.invalidateQueries({ queryKey: ['list_recurring_templates'] }),
         client.invalidateQueries({ queryKey: ['all_credit_card_invoices'] }),
+        client.invalidateQueries({ queryKey: ['credit_card_invoice'] }),
+        client.invalidateQueries({ queryKey: ['credit_card_invoices'] }),
       ]);
     },
   });

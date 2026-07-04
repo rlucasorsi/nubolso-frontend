@@ -12,9 +12,18 @@ import {
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
 import { Plus, Pencil } from 'lucide-react';
-import { formatCurrency, formatDateLong } from '@/lib/cashflow';
+import { useMemo } from 'react';
+import {
+  formatCurrency,
+  formatDateLong,
+  getProjectedCardTemplatesForInvoiceCycle,
+  type RecurringTemplateLike,
+  type FlowType,
+} from '@/lib/cashflow';
 import { MONTH_KEYS, TYPE_CONFIG } from '@/components/painel/config';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
+import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
+import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
 import { cn, localDateStr } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -43,6 +52,39 @@ export function CreditCardDetailDrawer({
   const t = useTranslations('creditCardDetail');
   const td = useTranslations('dateNames');
   const { data: invoices, isLoading } = useGetCardInvoices(card?.id, open);
+  const { data: templatesData } = useGetRecurringTemplates();
+  const { data: entriesData } = useGetEntries();
+
+  const templates = useMemo<RecurringTemplateLike[]>(
+    () =>
+      (templatesData ?? []).map((tpl) => ({
+        id: tpl.id,
+        description: tpl.description,
+        estimatedAmount: tpl.estimatedAmount,
+        type: tpl.type.toLowerCase() as FlowType,
+        dayOfMonth: tpl.dayOfMonth,
+        isActive: tpl.isActive,
+        categoryId: tpl.categoryId,
+        category: tpl.category,
+        endDate: tpl.endDate,
+        totalOccurrences: tpl.totalOccurrences,
+        occurrenceCount: tpl.occurrenceCount,
+        creditCardId: tpl.creditCardId,
+      })),
+    [templatesData],
+  );
+
+  const existingEntries = useMemo(
+    () =>
+      (entriesData?.data ?? []).map((item) => ({
+        id: item.id,
+        date: item.date.split('T')[0],
+        type: item.type as FlowType,
+        amount: item.amount,
+        templateId: item.templateId,
+      })),
+    [entriesData],
+  );
 
   if (!card) return null;
 
@@ -81,6 +123,19 @@ export function CreditCardDetailDrawer({
 
   function renderInvoiceRow(invoice: CreditCardInvoice) {
     const isOverdue = !invoice.isPaid && invoice.paymentDate < today;
+    const projected = invoice.isPaid
+      ? []
+      : getProjectedCardTemplatesForInvoiceCycle(
+          templates,
+          card!,
+          invoice.referenceYear,
+          invoice.referenceMonth,
+          existingEntries,
+          invoice.purchaseTemplateIds ?? [],
+        );
+    const projectedTotal =
+      invoice.totalAmount + projected.reduce((sum, r) => sum + r.estimatedAmount, 0);
+    const hasProjection = projected.length > 0;
     return (
       <button
         key={invoice.id}
@@ -103,6 +158,11 @@ export function CreditCardDetailDrawer({
         </div>
         <div className="text-right shrink-0">
           <p className="text-sm font-bold">{formatCurrency(invoice.totalAmount)}</p>
+          {hasProjection && (
+            <p className="text-[11px] font-semibold text-primary">
+              {t('projected')} {formatCurrency(projectedTotal)}
+            </p>
+          )}
           {invoice.isPaid ? (
             <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
               {t('paid')}

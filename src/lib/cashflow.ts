@@ -479,6 +479,71 @@ export function generateCardTemplateEntriesForRange(
   return { pendingEntries, projectionEntries };
 }
 
+// One card-linked recurring template projected onto a specific invoice cycle.
+export interface ProjectedCardTemplate {
+  templateId: string;
+  description: string;
+  estimatedAmount: number;
+  occurrenceDate: string;
+  dayOfMonth: number;
+}
+
+// For a single invoice cycle (refYear/refMonth of `card`), returns the active
+// card-linked recurring templates whose monthly occurrence falls into that cycle
+// and hasn't yet been materialized. Used by the invoice detail drawer to show the
+// projected commitment ("valor projetado") alongside the current total.
+// Mirrors the guards in generateCardTemplateEntriesForRange so the numbers stay
+// consistent with the chart's "Projetado" mode.
+export function getProjectedCardTemplatesForInvoiceCycle(
+  templates: RecurringTemplateLike[],
+  card: CreditCardLike,
+  refYear: number,
+  refMonth: number,
+  existingEntries: CashFlowEntry[],
+  purchaseTemplateIds: string[],
+  today?: string,
+): ProjectedCardTemplate[] {
+  const todayStr = today ?? localDateStr();
+  const result: ProjectedCardTemplate[] = [];
+
+  const activeTemplates = templates.filter((t) => t.isActive && t.creditCardId === card.id);
+
+  // A monthly occurrence reaches this invoice from either the reference month
+  // (day < closingDay) or the previous month (day >= closingDay rolls forward).
+  const candidates = [
+    refMonth === 1 ? { year: refYear - 1, month: 12 } : { year: refYear, month: refMonth - 1 },
+    { year: refYear, month: refMonth },
+  ];
+
+  for (const template of activeTemplates) {
+    for (const c of candidates) {
+      const occurrenceDate = getTemplateOccurrenceDate(c.year, c.month, template.dayOfMonth);
+      const cycle = getInvoiceCycleForDate(occurrenceDate, card.closingDay);
+      if (cycle.year !== refYear || cycle.month !== refMonth) continue;
+
+      // Same guards as generateCardTemplateEntriesForRange / synthesizeVirtualEntry
+      if (occurrenceDate < todayStr) break;
+      if (template.endDate && occurrenceDate > template.endDate.slice(0, 10)) break;
+      if (template.totalOccurrences && (template.occurrenceCount ?? 0) >= template.totalOccurrences)
+        break;
+      if (existingEntries.some((e) => e.templateId === template.id && e.date === occurrenceDate))
+        break;
+      if (purchaseTemplateIds.includes(template.id)) break;
+
+      result.push({
+        templateId: template.id,
+        description: template.description,
+        estimatedAmount: template.estimatedAmount,
+        occurrenceDate,
+        dayOfMonth: template.dayOfMonth,
+      });
+      break; // at most one candidate month maps to this cycle
+    }
+  }
+
+  return result;
+}
+
 // Computes the list of period start/end ranges covering all entries (+ saldoInicial)
 // through `numFuturePeriods` ahead of the current period.
 export function getPeriodRanges(

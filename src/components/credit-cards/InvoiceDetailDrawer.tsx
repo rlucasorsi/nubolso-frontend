@@ -9,18 +9,30 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/app-drawer';
-import { Loader2, Plus, RotateCcw, Trash2, FastForward, Undo2 } from 'lucide-react';
+import { Loader2, Plus, RotateCcw, Trash2, FastForward, Undo2, Check, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { DateInputField } from '@/components/ui/form-field';
-import { formatCurrency, formatDateLong } from '@/lib/cashflow';
+import { DateInputField, AmountInputField } from '@/components/ui/form-field';
+import {
+  formatCurrency,
+  formatDateLong,
+  getProjectedCardTemplatesForInvoiceCycle,
+  type ProjectedCardTemplate,
+  type RecurringTemplateLike,
+  type FlowType,
+} from '@/lib/cashflow';
 import { MONTH_KEYS } from '@/components/painel/config';
 import { useGetInvoice } from '@/modules/credit-cards/hooks/use-get-invoice';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
+import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
+import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
+import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
 import { useUpdateInvoicePaymentDate } from '@/modules/credit-cards/hooks/use-update-invoice-payment-date';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
 import { useDeletePurchase } from '@/modules/credit-cards/hooks/use-delete-purchase';
 import { useRevertAdvance } from '@/modules/credit-cards/hooks/use-revert-advance';
+import { useRealizeRecurringTemplate } from '@/modules/recurring-templates/hooks/use-realize-recurring-template';
+import { useSkipRecurringTemplate } from '@/modules/recurring-templates/hooks/use-skip-recurring-template';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { PayInvoiceForm } from './PayInvoiceForm';
 import { AddPurchaseDrawer } from './AddPurchaseDrawer';
@@ -38,6 +50,9 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
   const td = useTranslations('dateNames');
   const { data: invoice, isLoading } = useGetInvoice(invoiceId ?? undefined, open);
   const { data: cardInvoices } = useGetCardInvoices(invoice?.cardId, open);
+  const { data: cardsData } = useGetCreditCards();
+  const { data: templatesData } = useGetRecurringTemplates();
+  const { data: entriesData } = useGetEntries();
   const updatePaymentDateMutation = useUpdateInvoicePaymentDate();
   const reopenMutation = useReopenInvoice();
   const deletePurchaseMutation = useDeletePurchase();
@@ -185,6 +200,51 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
     return closing >= now && prevClosing < now;
   })();
 
+  // Recorrentes de cartão que ainda vão cair nesta fatura (não lançados).
+  // Só faz sentido para faturas em aberto — pagas não recebem mais cobranças.
+  const projectedRecurrences = useMemo(() => {
+    if (!invoice || invoice.isPaid) return [];
+    const card = (cardsData ?? []).find((c) => c.id === invoice.cardId);
+    if (!card) return [];
+
+    const templates: RecurringTemplateLike[] = (templatesData ?? []).map((tpl) => ({
+      id: tpl.id,
+      description: tpl.description,
+      estimatedAmount: tpl.estimatedAmount,
+      type: tpl.type.toLowerCase() as FlowType,
+      dayOfMonth: tpl.dayOfMonth,
+      isActive: tpl.isActive,
+      categoryId: tpl.categoryId,
+      category: tpl.category,
+      endDate: tpl.endDate,
+      totalOccurrences: tpl.totalOccurrences,
+      occurrenceCount: tpl.occurrenceCount,
+      creditCardId: tpl.creditCardId,
+    }));
+
+    const existingEntries = (entriesData?.data ?? []).map((item) => ({
+      id: item.id,
+      date: item.date.split('T')[0],
+      type: item.type as FlowType,
+      amount: item.amount,
+      templateId: item.templateId,
+    }));
+
+    return getProjectedCardTemplatesForInvoiceCycle(
+      templates,
+      card,
+      invoice.referenceYear,
+      invoice.referenceMonth,
+      existingEntries,
+      invoice.purchaseTemplateIds ?? [],
+    );
+  }, [invoice, cardsData, templatesData, entriesData]);
+
+  const projectedTotal =
+    (invoice?.totalAmount ?? 0) +
+    projectedRecurrences.reduce((sum, r) => sum + r.estimatedAmount, 0);
+  const hasProjection = !!invoice && !invoice.isPaid && projectedRecurrences.length > 0;
+
   return (
     <>
       <Sheet open={open} onOpenChange={handleOpenChange}>
@@ -209,18 +269,39 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
           ) : (
             <>
               <div className="flex-1 px-6 pb-6 space-y-6 mt-4">
-                <div className="flex flex-col items-center text-center glass-card rounded-2xl p-6">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
-                    {invoice.isPaid ? t('paidAmount') : t('invoiceTotal')}
-                  </span>
-                  <span className="text-3xl font-bold font-display">
-                    {formatCurrency(
-                      invoice.isPaid
-                        ? (invoice.paidAmount ?? invoice.totalAmount)
-                        : invoice.totalAmount,
-                    )}
-                  </span>
-                </div>
+                {hasProjection ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                        {t('currentValue')}
+                      </span>
+                      <span className="text-2xl font-bold font-display">
+                        {formatCurrency(invoice.totalAmount)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5 border border-dashed border-primary/30">
+                      <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-1">
+                        {t('projectedValue')}
+                      </span>
+                      <span className="text-2xl font-bold font-display text-primary">
+                        {formatCurrency(projectedTotal)}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center text-center glass-card rounded-2xl p-6">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                      {invoice.isPaid ? t('paidAmount') : t('invoiceTotal')}
+                    </span>
+                    <span className="text-3xl font-bold font-display">
+                      {formatCurrency(
+                        invoice.isPaid
+                          ? (invoice.paidAmount ?? invoice.totalAmount)
+                          : invoice.totalAmount,
+                      )}
+                    </span>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
@@ -358,6 +439,17 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
                       ))
                     )}
                   </div>
+
+                  {hasProjection && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-primary/80 uppercase tracking-wider">
+                        {t('projectedRecurrences')}
+                      </h4>
+                      {projectedRecurrences.map((rec) => (
+                        <ProjectedRecurrenceItem key={rec.templateId} rec={rec} t={t} />
+                      ))}
+                    </div>
+                  )}
 
                   {anticipatedGroups.length > 0 && (
                     <div className="space-y-2">
@@ -531,5 +623,144 @@ export function InvoiceDetailDrawer({ invoiceId, open, onClose }: InvoiceDetailD
         onAction={handleReopen}
       />
     </>
+  );
+}
+
+// Recorrência de cartão ainda não lançada nesta fatura, com ações para efetivá-la
+// (vira compra na fatura) ou excluí-la do ciclo (skip da ocorrência) — mesmo fluxo
+// das recorrências em Pendências.
+function ProjectedRecurrenceItem({
+  rec,
+  t,
+}: {
+  rec: ProjectedCardTemplate;
+  t: (key: string, params?: Record<string, string | number>) => string;
+}) {
+  const [mode, setMode] = useState<'view' | 'realize' | 'exclude'>('view');
+  const [amount, setAmount] = useState(rec.estimatedAmount.toFixed(2).replace('.', ','));
+  const [error, setError] = useState<string | null>(null);
+  const realizeMutation = useRealizeRecurringTemplate();
+  const skipMutation = useSkipRecurringTemplate();
+  const busy = realizeMutation.isPending || skipMutation.isPending;
+
+  const startRealize = () => {
+    setAmount(rec.estimatedAmount.toFixed(2).replace('.', ','));
+    setError(null);
+    setMode('realize');
+  };
+
+  const confirmRealize = async () => {
+    setError(null);
+    try {
+      await realizeMutation.mutateAsync({
+        id: rec.templateId,
+        amount: parseFloat(amount.replace(',', '.')),
+        date: rec.occurrenceDate,
+      });
+      // O item some da lista quando as queries são revalidadas.
+    } catch (err) {
+      setError(extractErrorMessage(err, t('confirmRecurrenceError')));
+    }
+  };
+
+  const confirmExclude = async () => {
+    setError(null);
+    try {
+      await skipMutation.mutateAsync({ id: rec.templateId, date: rec.occurrenceDate });
+    } catch (err) {
+      setError(extractErrorMessage(err, t('excludeRecurrenceError')));
+    }
+  };
+
+  return (
+    <div className="glass-card rounded-2xl p-4 border border-dashed border-primary/25 space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-sm font-bold truncate">{rec.description}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('recurrenceOnDay', { day: rec.dayOfMonth })}
+          </p>
+        </div>
+        <span className="shrink-0 text-sm font-bold text-primary">
+          {formatCurrency(rec.estimatedAmount)}
+        </span>
+      </div>
+
+      {error && <p className="text-xs text-destructive font-medium">{error}</p>}
+
+      {mode === 'view' && (
+        <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+          <button
+            type="button"
+            onClick={() => {
+              setError(null);
+              setMode('exclude');
+            }}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 text-muted-foreground text-xs font-bold hover:bg-white/10 hover:text-white transition-colors"
+          >
+            <Ban className="h-3 w-3" />
+            {t('excludeRecurrence')}
+          </button>
+          <button
+            type="button"
+            onClick={startRealize}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/15 text-primary text-xs font-bold hover:bg-primary/25 transition-colors"
+          >
+            <Check className="h-3 w-3" />
+            {t('confirmRecurrence')}
+          </button>
+        </div>
+      )}
+
+      {mode === 'realize' && (
+        <div className="pt-1 border-t border-white/5 space-y-3">
+          <AmountInputField label={t('recurrenceAmount')} value={amount} onChange={setAmount} />
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={() => setMode('view')}
+              disabled={busy}
+              className="h-9 px-4 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-semibold disabled:opacity-50"
+            >
+              {t('cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={confirmRealize}
+              disabled={busy}
+              className="h-9 px-4 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+            >
+              {realizeMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {t('confirm')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mode === 'exclude' && (
+        <div className="pt-1 border-t border-white/5 space-y-3">
+          <p className="text-xs text-muted-foreground/70">{t('excludeRecurrenceHint')}</p>
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              onClick={() => setMode('view')}
+              disabled={busy}
+              className="h-9 px-4 rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all text-xs font-semibold disabled:opacity-50"
+            >
+              {t('cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={confirmExclude}
+              disabled={busy}
+              className="h-9 px-4 rounded-xl bg-amber-500 text-white hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20 text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+            >
+              {skipMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {t('excludeRecurrence')}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
