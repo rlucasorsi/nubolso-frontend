@@ -4,6 +4,7 @@ import { TextInputField, AmountInputField, DateInputField } from '@/components/u
 import { useTranslations } from '@/i18n/useTranslations';
 import { cn } from '@/lib/utils';
 import { ExpenseTypeHint } from './ExpenseTypeHelp';
+import { CategorySelect } from './CategorySelect';
 
 export interface EntryFormValues {
   date: string;
@@ -103,6 +104,11 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
         placeholder={t('descriptionLabel')}
         value={values.description}
         onChange={(description) => onChange({ ...values, description })}
+      />
+
+      <CategorySelect
+        value={values.categoryId}
+        onChange={(categoryId) => onChange({ ...values, categoryId })}
       />
 
       <AmountInputField

@@ -10,6 +10,7 @@ export interface TransactionFromApi {
     id: string;
     name: string;
     color?: string;
+    icon?: string;
   };
 }
 

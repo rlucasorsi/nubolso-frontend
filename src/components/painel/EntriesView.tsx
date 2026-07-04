@@ -50,6 +50,7 @@ import { cn } from '@/lib/utils';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 import { EditEntryDrawer } from './EditEntryDrawer';
 import { ExpenseTypeHelp } from './ExpenseTypeHelp';
+import { CategoryIcon } from '@/components/categories/category-icons';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
@@ -384,6 +385,25 @@ export function EntriesView() {
                             <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
                               {entry.description || typeT(entry.type)}
                             </p>
+                            {entry.category && (
+                              <span className="inline-flex items-center gap-1 mt-0.5 max-w-full">
+                                <span
+                                  className="h-4 w-4 rounded-md flex items-center justify-center shrink-0"
+                                  style={{
+                                    backgroundColor: `${entry.category.color ?? '#94a3b8'}22`,
+                                    color: entry.category.color ?? '#94a3b8',
+                                  }}
+                                >
+                                  <CategoryIcon
+                                    name={entry.category.icon}
+                                    className="h-2.5 w-2.5"
+                                  />
+                                </span>
+                                <span className="text-[10px] font-semibold text-muted-foreground/80 truncate">
+                                  {entry.category.name}
+                                </span>
+                              </span>
+                            )}
                             <p
                               className={cn(
                                 'text-sm sm:text-base font-bold whitespace-nowrap mt-0.5',

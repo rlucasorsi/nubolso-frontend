@@ -3,18 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import {
   LayoutDashboard,
   CircleDollarSign,
   CreditCard,
   RotateCw,
   Target,
+  Tag,
   Settings,
   LogOut,
   X,
@@ -45,6 +41,7 @@ export function SideMenuDrawer({ open, onClose, userName, userEmail }: SideMenuD
     { label: t('cards'), href: '/cards', icon: CreditCard },
     { label: t('recurring'), href: '/recurring', icon: RotateCw },
     { label: t('goals'), href: '/goals', icon: Target },
+    { label: t('categories'), href: '/categories', icon: Tag },
     { label: t('settings'), href: '/settings', icon: Settings },
   ];
 
@@ -70,7 +67,8 @@ export function SideMenuDrawer({ open, onClose, userName, userEmail }: SideMenuD
 
           <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-white/5">
             <span className="text-xl font-bold font-display">
-              <span className="text-white">Nu</span><span className="text-brand-gradient">Bolso</span>
+              <span className="text-white">Nu</span>
+              <span className="text-brand-gradient">Bolso</span>
             </span>
             <button
               type="button"
@@ -103,7 +101,12 @@ export function SideMenuDrawer({ open, onClose, userName, userEmail }: SideMenuD
                       : 'text-muted-foreground hover:bg-white/5 hover:text-foreground',
                   )}
                 >
-                  <Icon className={cn('h-4 w-4 shrink-0', isActive && 'drop-shadow-[0_0_6px_var(--primary)]')} />
+                  <Icon
+                    className={cn(
+                      'h-4 w-4 shrink-0',
+                      isActive && 'drop-shadow-[0_0_6px_var(--primary)]',
+                    )}
+                  />
                   {label}
                 </Link>
               );

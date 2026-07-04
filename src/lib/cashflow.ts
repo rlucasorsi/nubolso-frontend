@@ -16,6 +16,7 @@ export interface CashFlowEntry {
     id: string;
     name: string;
     color?: string;
+    icon?: string;
   };
   isPaid?: boolean;
   tipoDespesa?: ExpenseType;

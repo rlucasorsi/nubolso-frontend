@@ -10,6 +10,7 @@ import {
   MoreHorizontal,
   RotateCw,
   Target,
+  Tag,
   Settings,
   Bell,
   X,
@@ -40,6 +41,7 @@ export function MobileNav({ onOpenNotifications, unreadCount = 0 }: MobileNavPro
   const MORE_ITEMS = [
     { label: t('goals'), href: '/goals', icon: Target },
     { label: t('recurring'), href: '/recurring', icon: RotateCw },
+    { label: t('categories'), href: '/categories', icon: Tag },
     { label: t('settings'), href: '/settings', icon: Settings },
   ];
 
