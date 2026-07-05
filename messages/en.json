@@ -205,7 +205,13 @@
     "chartsInvestmentsSection": "Investments",
     "chartsDrawerCount": "{count} entries",
     "chartsReadonly": "Read-only",
-    "chartsDrawerHint": "Tap an entry to edit"
+    "chartsDrawerHint": "Tap an entry to edit",
+    "chartsBaseAuto": "Automatic",
+    "chartsBaseManual": "Manual",
+    "chartsBaseManualLabel": "Base value",
+    "chartsBaseAutoHint": "Choose which income counts toward the base.",
+    "chartsBaseNoIncome": "No income in the period",
+    "chartsBaseAdjust": "Adjust base"
   },
   "entry": {
     "addButtonLabel": "Entry",

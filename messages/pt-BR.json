@@ -205,7 +205,13 @@
     "chartsInvestmentsSection": "Investimentos",
     "chartsDrawerCount": "{count} lançamentos",
     "chartsReadonly": "Somente leitura",
-    "chartsDrawerHint": "Clique num lançamento para editar"
+    "chartsDrawerHint": "Clique num lançamento para editar",
+    "chartsBaseAuto": "Automático",
+    "chartsBaseManual": "Manual",
+    "chartsBaseManualLabel": "Valor da base",
+    "chartsBaseAutoHint": "Marque quais entradas contam na base.",
+    "chartsBaseNoIncome": "Nenhuma entrada no período",
+    "chartsBaseAdjust": "Ajustar base"
   },
   "entry": {
     "addButtonLabel": "Lançamento",

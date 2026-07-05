@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { PieChart as PieIcon, BarChart3, Percent } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import { PieChart as PieIcon, BarChart3, Percent, SlidersHorizontal } from 'lucide-react';
 import {
   ResponsiveContainer,
   PieChart,
@@ -15,10 +15,13 @@ import {
   YAxis,
 } from 'recharts';
 import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AmountInputField } from '@/components/ui/form-field';
 import { CashFlowEntry, FlowType, Period, formatCurrency } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useGetCategories } from '@/modules/categories/hooks/use-get-categories';
+import { useIncomeBaseConfig } from '@/hooks/useIncomeBaseConfig';
 import { CategoryEntriesDrawer } from './CategoryEntriesDrawer';
 
 const UNCAT_COLOR = '#94a3b8';
@@ -94,17 +97,32 @@ export function CategoryCharts({ period, entries, virtualEntries, minDate }: Cat
     [periodEntries, catMap, t],
   );
 
-  // 4.3 — base de entradas válidas: receitas cujo (categoria).includeInBalanceBase
-  // não é false. Uncategorized conta; transferências (flag false) não.
+  // 4.3 — configuração da base de entradas válidas (persistida em localStorage).
+  const { overrides, setEntryOverride, manualValue, setManualValue } = useIncomeBaseConfig(
+    period.startDate,
+  );
+
+  const incomeEntries = useMemo(
+    () => periodEntries.filter((e) => e.type === 'income'),
+    [periodEntries],
+  );
+
+  // Uma entrada conta na base se: o usuário marcou explicitamente (override),
+  // senão pelo padrão da categoria (includeInBalanceBase !== false; uncategorized conta).
+  const entryCounts = useCallback(
+    (e: CashFlowEntry) => {
+      if (e.id in overrides) return overrides[e.id];
+      return e.categoryId ? catMap.get(e.categoryId)?.includeInBalanceBase !== false : true;
+    },
+    [overrides, catMap],
+  );
+
+  const isManualBase = manualValue !== null;
+
   const baseIncome = useMemo(() => {
-    return periodEntries
-      .filter(
-        (e) =>
-          e.type === 'income' &&
-          (e.categoryId ? catMap.get(e.categoryId)?.includeInBalanceBase !== false : true),
-      )
-      .reduce((sum, e) => sum + e.amount, 0);
-  }, [periodEntries, catMap]);
+    if (isManualBase) return manualValue as number;
+    return incomeEntries.filter(entryCounts).reduce((sum, e) => sum + e.amount, 0);
+  }, [isManualBase, manualValue, incomeEntries, entryCounts]);
 
   const expenseByCategory = useMemo(
     () => groupByCategory(new Set<FlowType>(['expense'])),
@@ -167,16 +185,15 @@ export function CategoryCharts({ period, entries, virtualEntries, minDate }: Cat
           subtitle={t('chartsPercentSubtitle')}
         />
 
-        <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/[0.03] border border-white/5 px-4 py-3">
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-              {t('chartsValidIncomeBase')}
-            </p>
-            <p className="text-lg font-bold text-emerald-400 font-display truncate">
-              {formatCurrency(baseIncome)}
-            </p>
-          </div>
-        </div>
+        <IncomeBaseCard
+          baseIncome={baseIncome}
+          isManual={isManualBase}
+          manualValue={manualValue}
+          setManualValue={setManualValue}
+          incomeEntries={incomeEntries}
+          entryCounts={entryCounts}
+          setEntryOverride={setEntryOverride}
+        />
 
         {baseIncome <= 0 ? (
           <EmptyState label={t('chartsNoValidIncome')} />
@@ -400,6 +417,145 @@ function PercentSection({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function shortDate(dateStr: string): string {
+  const [, m, d] = dateStr.split('-');
+  return `${d}/${m}`;
+}
+
+function IncomeBaseCard({
+  baseIncome,
+  isManual,
+  manualValue,
+  setManualValue,
+  incomeEntries,
+  entryCounts,
+  setEntryOverride,
+}: {
+  baseIncome: number;
+  isManual: boolean;
+  manualValue: number | null;
+  setManualValue: (value: number | null) => void;
+  incomeEntries: CashFlowEntry[];
+  entryCounts: (e: CashFlowEntry) => boolean;
+  setEntryOverride: (id: string, counts: boolean) => void;
+}) {
+  const t = useTranslations('dashboard');
+  const typeT = useTranslations('entry');
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="rounded-2xl bg-white/[0.03] border border-white/5 px-4 py-3 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
+            {t('chartsValidIncomeBase')}
+          </p>
+          <p className="text-lg font-bold text-emerald-400 font-display truncate">
+            {formatCurrency(baseIncome)}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className={cn(
+            'shrink-0 h-9 px-3 rounded-xl flex items-center gap-1.5 text-xs font-bold border transition-all',
+            open
+              ? 'bg-primary/20 text-primary border-primary/40'
+              : 'bg-white/5 text-muted-foreground border-white/10 hover:bg-white/10 hover:text-white',
+          )}
+        >
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          {t('chartsBaseAdjust')}
+        </button>
+      </div>
+
+      {open && (
+        <div className="space-y-3 pt-3 border-t border-white/5">
+          <div className="flex gap-1.5">
+            <button
+              type="button"
+              onClick={() => setManualValue(null)}
+              className={cn(
+                'flex-1 h-9 rounded-xl text-xs font-bold transition-all',
+                !isManual
+                  ? 'bg-primary text-white'
+                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {t('chartsBaseAuto')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!isManual) setManualValue(Math.round(baseIncome * 100) / 100);
+              }}
+              className={cn(
+                'flex-1 h-9 rounded-xl text-xs font-bold transition-all',
+                isManual
+                  ? 'bg-primary text-white'
+                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+              )}
+            >
+              {t('chartsBaseManual')}
+            </button>
+          </div>
+
+          {isManual ? (
+            <AmountInputField
+              label={t('chartsBaseManualLabel')}
+              value={manualValue !== null ? manualValue.toFixed(2).replace('.', ',') : ''}
+              onChange={(v) => setManualValue(parseFloat(v.replace(',', '.')) || 0)}
+              inputClassName="text-sm h-10"
+            />
+          ) : (
+            <div className="space-y-1.5">
+              <p className="text-[11px] text-muted-foreground/60">{t('chartsBaseAutoHint')}</p>
+              {incomeEntries.length === 0 ? (
+                <p className="text-xs text-muted-foreground/50 py-2">{t('chartsBaseNoIncome')}</p>
+              ) : (
+                <div className="space-y-0.5">
+                  {[...incomeEntries]
+                    .sort((a, b) => b.date.localeCompare(a.date))
+                    .map((e) => {
+                      const counts = entryCounts(e);
+                      return (
+                        <label
+                          key={e.id}
+                          className="flex items-center gap-3 py-1.5 px-1.5 -mx-1.5 rounded-lg hover:bg-white/[0.03] cursor-pointer"
+                        >
+                          <Checkbox
+                            checked={counts}
+                            onCheckedChange={(c) => setEntryOverride(e.id, c === true)}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-white truncate">
+                              {e.description || typeT('income')}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground/50">
+                              {shortDate(e.date)}
+                            </p>
+                          </div>
+                          <span
+                            className={cn(
+                              'text-sm font-semibold tabular-nums shrink-0',
+                              counts ? 'text-white' : 'text-muted-foreground/40 line-through',
+                            )}
+                          >
+                            {formatCurrency(e.amount)}
+                          </span>
+                        </label>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

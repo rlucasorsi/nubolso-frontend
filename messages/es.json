@@ -205,7 +205,13 @@
     "chartsInvestmentsSection": "Inversiones",
     "chartsDrawerCount": "{count} movimientos",
     "chartsReadonly": "Solo lectura",
-    "chartsDrawerHint": "Toca un movimiento para editar"
+    "chartsDrawerHint": "Toca un movimiento para editar",
+    "chartsBaseAuto": "Automático",
+    "chartsBaseManual": "Manual",
+    "chartsBaseManualLabel": "Valor de base",
+    "chartsBaseAutoHint": "Elige qué ingresos cuentan en la base.",
+    "chartsBaseNoIncome": "Sin ingresos en el período",
+    "chartsBaseAdjust": "Ajustar base"
   },
   "entry": {
     "addButtonLabel": "Movimiento",
