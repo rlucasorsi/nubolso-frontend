@@ -222,7 +222,8 @@
     "loading": "Carregando...",
     "placeholder": "Selecione uma categoria",
     "notFound": "Nenhuma categoria encontrada",
-    "none": "Sem categoria"
+    "none": "Sem categoria",
+    "createNew": "Nova categoria"
   },
   "categories": {
     "title": "Categorias",

@@ -30,9 +30,22 @@ interface CategoryDrawerProps {
   open: boolean;
   onClose: () => void;
   category?: Category | null;
+  // Tipo inicial ao criar (usado quando aberto a partir de um select escopado por tipo).
+  defaultType?: FlowType;
+  // Quando true, trava o tipo em defaultType (não editável) — mantém a categoria no escopo do contexto.
+  lockType?: boolean;
+  // Callback com a categoria recém-criada (permite auto-selecioná-la no contexto de origem).
+  onCreated?: (category: Category) => void;
 }
 
-export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps) {
+export function CategoryDrawer({
+  open,
+  onClose,
+  category,
+  defaultType,
+  lockType,
+  onCreated,
+}: CategoryDrawerProps) {
   const t = useTranslations('categories');
   const isEdit = !!category;
 
@@ -50,12 +63,12 @@ export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps)
   useEffect(() => {
     if (!open) return;
     setName(category?.name ?? '');
-    setType(category?.type ?? 'expense');
+    setType(category?.type ?? defaultType ?? 'expense');
     setIcon(category?.icon ?? 'Tag');
     setColor(category?.color ?? DEFAULT_CATEGORY_COLOR);
     setIncludeInBalanceBase(category?.includeInBalanceBase ?? true);
     setNameError(undefined);
-  }, [open, category]);
+  }, [open, category, defaultType]);
 
   const swatches = useMemo(
     () =>
@@ -78,7 +91,13 @@ export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps)
     if (isEdit && category) {
       updateMutation.mutate({ id: category.id, ...payload }, { onSuccess, onError });
     } else {
-      createMutation.mutate(payload, { onSuccess, onError });
+      createMutation.mutate(payload, {
+        onSuccess: (created) => {
+          onCreated?.(created);
+          onClose();
+        },
+        onError,
+      });
     }
   }
 
@@ -109,7 +128,7 @@ export function CategoryDrawer({ open, onClose, category }: CategoryDrawerProps)
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               {t('typeLabel')} <span className="text-balance-danger">*</span>
             </label>
-            <TypeToggle value={type} onChange={setType} />
+            <TypeToggle value={type} onChange={setType} disabled={lockType && !isEdit} />
           </div>
 
           <TextInputField

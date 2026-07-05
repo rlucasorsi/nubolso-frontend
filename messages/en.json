@@ -222,7 +222,8 @@
     "loading": "Loading...",
     "placeholder": "Select a category",
     "notFound": "No categories found",
-    "none": "No category"
+    "none": "No category",
+    "createNew": "New category"
   },
   "categories": {
     "title": "Categories",

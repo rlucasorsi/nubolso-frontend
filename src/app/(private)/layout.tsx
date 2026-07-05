@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   RotateCw,
   CreditCard,
+  Tag,
   Menu,
   Bell,
 } from 'lucide-react';
@@ -80,6 +81,7 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
               { href: '/cards', icon: CreditCard, label: t('cards') },
               { href: '/recurring', icon: RotateCw, label: t('recurring') },
               { href: '/goals', icon: Target, label: t('goals') },
+              { href: '/categories', icon: Tag, label: t('categories') },
             ] as const
           ).map(({ href, icon: Icon, label }) => {
             const isActive = pathname === href;

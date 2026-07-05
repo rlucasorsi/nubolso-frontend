@@ -58,7 +58,7 @@ export function CategoriesView() {
   };
 
   return (
-    <div className="container max-w-3xl mx-auto py-8 px-4 space-y-6 animate-fade-in">
+    <div className="container max-w-6xl mx-auto py-8 px-4 space-y-8 animate-fade-in">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>

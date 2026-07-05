@@ -11,9 +11,10 @@ const ACTIVE_STYLES: Record<FlowType, string> = {
 interface TypeToggleProps {
   value: FlowType;
   onChange: (v: FlowType) => void;
+  disabled?: boolean;
 }
 
-export function TypeToggle({ value, onChange }: TypeToggleProps) {
+export function TypeToggle({ value, onChange, disabled }: TypeToggleProps) {
   const t = useTranslations('entry');
 
   const TYPE_LABELS: Record<FlowType, string> = {
@@ -28,8 +29,9 @@ export function TypeToggle({ value, onChange }: TypeToggleProps) {
         <button
           key={type}
           type="button"
+          disabled={disabled}
           onClick={() => onChange(type)}
-          className={`flex-1 flex items-center justify-center py-2 h-12 text-[12px] font-bold rounded-xl transition-all duration-300 border ${
+          className={`flex-1 flex items-center justify-center py-2 h-12 text-[12px] font-bold rounded-xl transition-all duration-300 border disabled:cursor-not-allowed disabled:opacity-60 ${
             value === type
               ? ACTIVE_STYLES[type]
               : 'border-white/5 bg-surface-container text-muted-foreground hover:bg-white/5 hover:text-foreground'
