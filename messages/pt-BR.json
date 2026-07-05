@@ -211,7 +211,11 @@
     "chartsBaseManualLabel": "Valor da base",
     "chartsBaseAutoHint": "Marque quais entradas contam na base.",
     "chartsBaseNoIncome": "Nenhuma entrada no período",
-    "chartsBaseAdjust": "Ajustar base"
+    "chartsBaseAdjust": "Ajustar base",
+    "investedByPeriodTitle": "Investido por período",
+    "investedByPeriodSubtitle": "Total investido em cada ciclo",
+    "investedByPeriodEmpty": "Nenhum investimento nos períodos",
+    "investedTotal": "Total investido"
   },
   "entry": {
     "addButtonLabel": "Lançamento",

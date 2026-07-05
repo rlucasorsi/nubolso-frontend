@@ -211,7 +211,11 @@
     "chartsBaseManualLabel": "Base value",
     "chartsBaseAutoHint": "Choose which income counts toward the base.",
     "chartsBaseNoIncome": "No income in the period",
-    "chartsBaseAdjust": "Adjust base"
+    "chartsBaseAdjust": "Adjust base",
+    "investedByPeriodTitle": "Invested by period",
+    "investedByPeriodSubtitle": "Total invested in each cycle",
+    "investedByPeriodEmpty": "No investments in these periods",
+    "investedTotal": "Total invested"
   },
   "entry": {
     "addButtonLabel": "Entry",

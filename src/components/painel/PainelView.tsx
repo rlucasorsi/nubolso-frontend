@@ -6,6 +6,7 @@ import { DayList } from './DayList';
 import { DailyEntriesDrawer, DailyEntriesState } from './DailyEntriesDrawer';
 import { DashboardSummary } from './DashboardSummary';
 import { CategoryCharts } from './CategoryCharts';
+import { InvestmentByPeriodChart } from './InvestmentByPeriodChart';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { useCashFlow } from '@/hooks/useCashFlow';
 import { EntryFormValues, resolveTipoDespesa } from './EntryForm';
@@ -152,6 +153,11 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
     setShowPastDays(false);
     setPeriodIdx(findTodayPeriodIdx());
   };
+  const handleSelectPeriodIdx = (idx: number) => {
+    userNavigatedRef.current = true;
+    setShowPastDays(false);
+    setPeriodIdx(idx);
+  };
 
   return (
     <div ref={rootRef} className="flex flex-col w-full max-w-6xl mx-auto pb-24 overflow-x-hidden">
@@ -229,6 +235,13 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
             virtualEntries={virtualEntries}
             minDate={saldoInicial.date}
           />
+          <div className="px-5 pb-4">
+            <InvestmentByPeriodChart
+              periods={periods}
+              selectedIndex={periodIdx}
+              onSelectPeriod={handleSelectPeriodIdx}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="days" className="mt-2">

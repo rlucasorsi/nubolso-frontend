@@ -211,7 +211,11 @@
     "chartsBaseManualLabel": "Valor de base",
     "chartsBaseAutoHint": "Elige qué ingresos cuentan en la base.",
     "chartsBaseNoIncome": "Sin ingresos en el período",
-    "chartsBaseAdjust": "Ajustar base"
+    "chartsBaseAdjust": "Ajustar base",
+    "investedByPeriodTitle": "Invertido por período",
+    "investedByPeriodSubtitle": "Total invertido en cada ciclo",
+    "investedByPeriodEmpty": "Sin inversiones en los períodos",
+    "investedTotal": "Total invertido"
   },
   "entry": {
     "addButtonLabel": "Movimiento",
