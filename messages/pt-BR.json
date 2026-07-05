@@ -202,7 +202,10 @@
     "chartsTotal": "Total",
     "chartsCreditCard": "Cartão de crédito",
     "chartsExpensesSection": "Despesas",
-    "chartsInvestmentsSection": "Investimentos"
+    "chartsInvestmentsSection": "Investimentos",
+    "chartsDrawerCount": "{count} lançamentos",
+    "chartsReadonly": "Somente leitura",
+    "chartsDrawerHint": "Clique num lançamento para editar"
   },
   "entry": {
     "addButtonLabel": "Lançamento",

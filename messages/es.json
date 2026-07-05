@@ -202,7 +202,10 @@
     "chartsTotal": "Total",
     "chartsCreditCard": "Tarjeta de crédito",
     "chartsExpensesSection": "Gastos",
-    "chartsInvestmentsSection": "Inversiones"
+    "chartsInvestmentsSection": "Inversiones",
+    "chartsDrawerCount": "{count} movimientos",
+    "chartsReadonly": "Solo lectura",
+    "chartsDrawerHint": "Toca un movimiento para editar"
   },
   "entry": {
     "addButtonLabel": "Movimiento",

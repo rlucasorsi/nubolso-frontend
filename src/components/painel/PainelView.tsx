@@ -223,7 +223,12 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
             balanceSettings={balanceSettings}
             onSelectInvoice={setSelectedInvoiceId}
           />
-          <CategoryCharts period={period} entries={entries} virtualEntries={virtualEntries} />
+          <CategoryCharts
+            period={period}
+            entries={entries}
+            virtualEntries={virtualEntries}
+            minDate={saldoInicial.date}
+          />
         </TabsContent>
 
         <TabsContent value="days" className="mt-2">

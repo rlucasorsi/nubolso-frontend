@@ -202,7 +202,10 @@
     "chartsTotal": "Total",
     "chartsCreditCard": "Credit card",
     "chartsExpensesSection": "Expenses",
-    "chartsInvestmentsSection": "Investments"
+    "chartsInvestmentsSection": "Investments",
+    "chartsDrawerCount": "{count} entries",
+    "chartsReadonly": "Read-only",
+    "chartsDrawerHint": "Tap an entry to edit"
   },
   "entry": {
     "addButtonLabel": "Entry",

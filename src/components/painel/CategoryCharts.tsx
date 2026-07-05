@@ -19,6 +19,7 @@ import { CashFlowEntry, FlowType, Period, formatCurrency } from '@/lib/cashflow'
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useGetCategories } from '@/modules/categories/hooks/use-get-categories';
+import { CategoryEntriesDrawer } from './CategoryEntriesDrawer';
 
 const UNCAT_COLOR = '#94a3b8';
 const UNCAT_KEY = '__uncategorized__';
@@ -32,6 +33,7 @@ interface CategoryChartsProps {
   period: Period;
   entries: CashFlowEntry[];
   virtualEntries: CashFlowEntry[];
+  minDate?: string;
 }
 
 interface CategorySlice {
@@ -41,9 +43,17 @@ interface CategorySlice {
   total: number;
 }
 
-export function CategoryCharts({ period, entries, virtualEntries }: CategoryChartsProps) {
+interface SelectedCategory {
+  key: string;
+  name: string;
+  color: string;
+  types: Set<FlowType>;
+}
+
+export function CategoryCharts({ period, entries, virtualEntries, minDate }: CategoryChartsProps) {
   const t = useTranslations('dashboard');
   const { data: categories } = useGetCategories();
+  const [selected, setSelected] = useState<SelectedCategory | null>(null);
 
   const catMap = useMemo(() => new Map((categories ?? []).map((c) => [c.id, c])), [categories]);
 
@@ -106,13 +116,32 @@ export function CategoryCharts({ period, entries, virtualEntries }: CategoryChar
     [groupByCategory],
   );
 
+  const openCategory = (slice: CategorySlice, types: Set<FlowType>) =>
+    setSelected({ key: slice.key, name: slice.name, color: slice.color, types });
+
+  // Derivado ao vivo de periodEntries: após editar um lançamento (React Query
+  // invalida e o useCashFlow recalcula), a lista do drawer se atualiza sozinha.
+  const selectedEntries = useMemo(() => {
+    if (!selected) return [];
+    return periodEntries.filter((e) => {
+      if (!selected.types.has(e.type)) return false;
+      const key = e.creditCardInvoiceId ? CREDIT_CARD_KEY : (e.categoryId ?? UNCAT_KEY);
+      return key === selected.key;
+    });
+  }, [selected, periodEntries]);
+
   return (
     <div className="px-5 space-y-6 pb-4">
       <DistributionChart title={t('chartsCategoryTitle')} subtitle={t('chartsCategorySubtitle')}>
         {(types) => {
           const data = groupByCategory(types);
           return (
-            <DonutChart data={data} emptyLabel={t('chartsEmpty')} totalLabel={t('chartsTotal')} />
+            <DonutChart
+              data={data}
+              emptyLabel={t('chartsEmpty')}
+              totalLabel={t('chartsTotal')}
+              onSelect={(slice) => openCategory(slice, types)}
+            />
           );
         }}
       </DistributionChart>
@@ -120,7 +149,13 @@ export function CategoryCharts({ period, entries, virtualEntries }: CategoryChar
       <DistributionChart title={t('chartsRankingTitle')} subtitle={t('chartsRankingSubtitle')}>
         {(types) => {
           const data = groupByCategory(types);
-          return <RankingChart data={data} emptyLabel={t('chartsEmpty')} />;
+          return (
+            <RankingChart
+              data={data}
+              emptyLabel={t('chartsEmpty')}
+              onSelect={(slice) => openCategory(slice, types)}
+            />
+          );
         }}
       </DistributionChart>
 
@@ -153,11 +188,13 @@ export function CategoryCharts({ period, entries, virtualEntries }: CategoryChar
               label={t('chartsExpensesSection')}
               items={expenseByCategory}
               base={baseIncome}
+              onSelect={(slice) => openCategory(slice, new Set(['expense']))}
             />
             <PercentSection
               label={t('chartsInvestmentsSection')}
               items={investmentByCategory}
               base={baseIncome}
+              onSelect={(slice) => openCategory(slice, new Set(['investment']))}
             />
           </div>
         )}
@@ -166,6 +203,16 @@ export function CategoryCharts({ period, entries, virtualEntries }: CategoryChar
           {t('chartsValidIncomeNote')}
         </p>
       </Card>
+
+      <CategoryEntriesDrawer
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+        categoryName={selected?.name ?? ''}
+        categoryColor={selected?.color ?? UNCAT_COLOR}
+        periodLabel={period.label}
+        entries={selectedEntries}
+        minDate={minDate}
+      />
     </div>
   );
 }
@@ -292,10 +339,12 @@ function PercentSection({
   label,
   items,
   base,
+  onSelect,
 }: {
   label: string;
   items: CategorySlice[];
   base: number;
+  onSelect?: (slice: CategorySlice) => void;
 }) {
   if (items.length === 0) return null;
 
@@ -318,7 +367,12 @@ function PercentSection({
         {items.map((c) => {
           const percent = base > 0 ? (c.total / base) * 100 : 0;
           return (
-            <div key={c.key} className="space-y-1.5">
+            <button
+              key={c.key}
+              type="button"
+              onClick={() => onSelect?.(c)}
+              className="w-full text-left space-y-1.5 rounded-lg px-1.5 -mx-1.5 py-1 cursor-pointer transition-colors hover:bg-white/[0.03]"
+            >
               <div className="flex items-center justify-between gap-3 text-sm">
                 <div className="flex items-center gap-2 min-w-0">
                   <span
@@ -342,7 +396,7 @@ function PercentSection({
                   style={{ width: `${Math.min(percent, 100)}%`, backgroundColor: c.color }}
                 />
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -382,10 +436,12 @@ function DonutChart({
   data,
   emptyLabel,
   totalLabel,
+  onSelect,
 }: {
   data: CategorySlice[];
   emptyLabel: string;
   totalLabel: string;
+  onSelect?: (slice: CategorySlice) => void;
 }) {
   const total = data.reduce((sum, d) => sum + d.total, 0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -407,10 +463,12 @@ function DonutChart({
               outerRadius={90}
               paddingAngle={data.length > 1 ? 2 : 0}
               stroke="none"
+              className="cursor-pointer focus:outline-none"
               activeIndex={activeIndex ?? undefined}
               activeShape={renderActiveShape}
               onMouseEnter={(_, index) => setActiveIndex(index)}
               onMouseLeave={() => setActiveIndex(null)}
+              onClick={(_, index) => onSelect?.(data[index])}
             >
               {data.map((d, i) => (
                 <Cell
@@ -457,12 +515,14 @@ function DonutChart({
 
       <div className="flex-1 w-full space-y-1 min-w-0">
         {data.map((d, i) => (
-          <div
+          <button
             key={d.key}
+            type="button"
             onMouseEnter={() => setActiveIndex(i)}
             onMouseLeave={() => setActiveIndex(null)}
+            onClick={() => onSelect?.(d)}
             className={cn(
-              'flex items-center justify-between gap-3 text-sm rounded-lg px-1.5 -mx-1.5 py-1 cursor-default transition-colors',
+              'w-full flex items-center justify-between gap-3 text-sm rounded-lg px-1.5 -mx-1.5 py-1 cursor-pointer transition-colors',
               activeIndex === i && 'bg-white/5',
             )}
             style={{ opacity: activeIndex === null || activeIndex === i ? 1 : 0.45 }}
@@ -482,7 +542,7 @@ function DonutChart({
                 {formatCurrency(d.total)}
               </span>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>
@@ -493,13 +553,21 @@ function DonutChart({
 /* 4.2 — Ranking (barras horizontais)                                 */
 /* ------------------------------------------------------------------ */
 
-function RankingChart({ data, emptyLabel }: { data: CategorySlice[]; emptyLabel: string }) {
+function RankingChart({
+  data,
+  emptyLabel,
+  onSelect,
+}: {
+  data: CategorySlice[];
+  emptyLabel: string;
+  onSelect?: (slice: CategorySlice) => void;
+}) {
   if (data.length === 0) return <EmptyState label={emptyLabel} />;
 
   const height = Math.max(data.length * 42 + 8, 90);
 
   return (
-    <div style={{ height }} className="w-full">
+    <div style={{ height }} className="w-full [&_.recharts-surface]:cursor-pointer">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 0, right: 12, left: 0, bottom: 0 }}>
           <XAxis type="number" hide domain={[0, 'dataMax']} />
@@ -513,7 +581,12 @@ function RankingChart({ data, emptyLabel }: { data: CategorySlice[]; emptyLabel:
             tickFormatter={(v: string) => (v.length > 14 ? `${v.slice(0, 13)}…` : v)}
           />
           <Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} content={<SliceTooltip />} />
-          <Bar dataKey="total" radius={[0, 6, 6, 0]} barSize={18}>
+          <Bar
+            dataKey="total"
+            radius={[0, 6, 6, 0]}
+            barSize={18}
+            onClick={(_, index) => onSelect?.(data[index])}
+          >
             {data.map((d) => (
               <Cell key={d.key} fill={d.color} />
             ))}
