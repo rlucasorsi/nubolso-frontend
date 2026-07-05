@@ -238,6 +238,8 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
           <div className="px-5 pb-4">
             <InvestmentByPeriodChart
               periods={periods}
+              entries={entries}
+              virtualEntries={virtualEntries}
               selectedIndex={periodIdx}
               onSelectPeriod={handleSelectPeriodIdx}
             />

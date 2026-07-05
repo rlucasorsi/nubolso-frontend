@@ -215,7 +215,8 @@
     "investedByPeriodTitle": "Invested by period",
     "investedByPeriodSubtitle": "Total invested in each cycle",
     "investedByPeriodEmpty": "No investments in these periods",
-    "investedTotal": "Total invested"
+    "investedTotal": "Total invested",
+    "investedRecurrences": "Count recurring"
   },
   "entry": {
     "addButtonLabel": "Entry",

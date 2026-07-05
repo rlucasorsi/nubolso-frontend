@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { PiggyBank } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -14,25 +14,44 @@ import {
   LabelList,
 } from 'recharts';
 import { Card } from '@/components/ui/card';
-import { Period, formatCurrency, formatCurrencyCompact } from '@/lib/cashflow';
+import { CashFlowEntry, Period, formatCurrency, formatCurrencyCompact } from '@/lib/cashflow';
+import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 
 const INVEST_COLOR = '#3b82f6';
 // Janela de períodos exibidos, centrada no período selecionado, para manter legível.
 const WINDOW = 12;
 
+// Soma dos investimentos (por data) de uma lista de lançamentos dentro do período.
+function sumInvestment(list: CashFlowEntry[], start: string, end: string): number {
+  let sum = 0;
+  for (const e of list) {
+    if (e.type === 'investment' && !e.isCardBilled && e.date >= start && e.date <= end) {
+      sum += e.amount;
+    }
+  }
+  return sum;
+}
+
 interface InvestmentByPeriodChartProps {
   periods: Period[];
+  entries: CashFlowEntry[];
+  virtualEntries: CashFlowEntry[];
   selectedIndex: number;
   onSelectPeriod?: (index: number) => void;
 }
 
 export function InvestmentByPeriodChart({
   periods,
+  entries,
+  virtualEntries,
   selectedIndex,
   onSelectPeriod,
 }: InvestmentByPeriodChartProps) {
   const t = useTranslations('dashboard');
+  // Recorrências = estimativas virtuais de recorrentes. Reais (inclui recorrentes
+  // já efetivados) sempre aparecem; o flag liga/desliga só as projeções.
+  const [showRecurrences, setShowRecurrences] = useState(true);
 
   const data = useMemo(() => {
     if (periods.length === 0) return [];
@@ -56,14 +75,16 @@ export function InvestmentByPeriodChart({
             .toLocaleDateString(undefined, { month: 'short' })
             .replace('.', '')
         : `${sDay}/${sMonth}`;
+      const realInv = sumInvestment(entries, p.startDate, p.endDate);
+      const virtInv = showRecurrences ? sumInvestment(virtualEntries, p.startDate, p.endDate) : 0;
       return {
         idx: start + i,
         label: axisLabel,
         range: `${sDay}/${sMonth} – ${eDay}/${eMonth}`,
-        value: p.totalInvestment,
+        value: realInv + virtInv,
       };
     });
-  }, [periods, selectedIndex]);
+  }, [periods, selectedIndex, entries, virtualEntries, showRecurrences]);
 
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const hasData = data.some((d) => d.value > 0);
@@ -92,6 +113,22 @@ export function InvestmentByPeriodChart({
         </div>
       </div>
 
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setShowRecurrences((v) => !v)}
+          aria-pressed={showRecurrences}
+          className={cn(
+            'h-7 px-3 rounded-lg text-[11px] font-bold border transition-all',
+            showRecurrences
+              ? 'bg-primary/20 text-primary border-primary/40'
+              : 'bg-white/5 text-muted-foreground border-white/10 hover:bg-white/10 hover:text-white',
+          )}
+        >
+          {t('investedRecurrences')}
+        </button>
+      </div>
+
       {!hasData ? (
         <div className="flex items-center justify-center py-10">
           <p className="text-sm text-muted-foreground/50 font-medium">
@@ -101,7 +138,7 @@ export function InvestmentByPeriodChart({
       ) : (
         <div className="h-[220px] w-full [&_.recharts-surface]:cursor-pointer">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 20, right: 4, left: 4, bottom: 0 }}>
+            <BarChart data={data} margin={{ top: 24, right: 24, left: 12, bottom: 0 }}>
               <CartesianGrid
                 vertical={false}
                 strokeDasharray="3 3"
@@ -120,7 +157,7 @@ export function InvestmentByPeriodChart({
                 tick={{ fontSize: 9, fill: '#94a3b8' }}
                 tickFormatter={formatY}
               />
-              <Tooltip cursor={{ fill: 'rgba(255,255,255,0.04)' }} content={<InvestTooltip />} />
+              <Tooltip cursor={false} content={<InvestTooltip />} />
               <Bar
                 dataKey="value"
                 radius={[6, 6, 0, 0]}

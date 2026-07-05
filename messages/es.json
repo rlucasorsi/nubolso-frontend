@@ -215,7 +215,8 @@
     "investedByPeriodTitle": "Invertido por período",
     "investedByPeriodSubtitle": "Total invertido en cada ciclo",
     "investedByPeriodEmpty": "Sin inversiones en los períodos",
-    "investedTotal": "Total invertido"
+    "investedTotal": "Total invertido",
+    "investedRecurrences": "Contabilizar recurrentes"
   },
   "entry": {
     "addButtonLabel": "Movimiento",

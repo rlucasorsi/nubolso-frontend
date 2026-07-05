@@ -215,7 +215,8 @@
     "investedByPeriodTitle": "Investido por período",
     "investedByPeriodSubtitle": "Total investido em cada ciclo",
     "investedByPeriodEmpty": "Nenhum investimento nos períodos",
-    "investedTotal": "Total investido"
+    "investedTotal": "Total investido",
+    "investedRecurrences": "Contabilizar recorrências"
   },
   "entry": {
     "addButtonLabel": "Lançamento",
