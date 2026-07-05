@@ -2,7 +2,7 @@
 import { Period, formatCurrency, formatDateAxis, formatDateLong } from '@/lib/cashflow';
 import { BalanceSettings } from '@/hooks/useCashFlow';
 import { Card } from '@/components/ui/card';
-import { TrendingUp, Info, HelpCircle, Wallet } from 'lucide-react';
+import { TrendingUp, HelpCircle, Wallet } from 'lucide-react';
 import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ReferenceLine } from 'recharts';
 import { cn } from '@/lib/utils';
@@ -60,59 +60,37 @@ export function DashboardSummary({
     return sourceDays.filter((d) => d.date >= start && d.date <= endStr);
   }, [chartView, period, sourceDays]);
 
-  const { maxExpenseDay, maxExpenseAmount, bestDay, bestDayAmount, chartData, yDomain, yTicks } =
-    useMemo(() => {
-      let maxExpenseDay = period.days[0];
-      let maxExpenseAmount = 0;
-      let bestDay = period.days[0];
-      let bestDayAmount = -Infinity;
+  const { chartData, yDomain, yTicks } = useMemo(() => {
+    const chartData = activeChartDays.map((d) => ({
+      date: d.date,
+      saldoPast: d.date <= today ? d.saldoAcumulado : null,
+      saldoFuture: d.date >= today ? d.saldoAcumulado : null,
+      income: d.income,
+      totalExpense: d.expense + d.investment,
+    }));
 
-      period.days.forEach((day) => {
-        const totalExp = day.expense + day.investment;
-        if (totalExp > maxExpenseAmount) {
-          maxExpenseAmount = totalExp;
-          maxExpenseDay = day;
-        }
-        if (day.saldoDiario > bestDayAmount) {
-          bestDayAmount = day.saldoDiario;
-          bestDay = day;
-        }
-      });
+    const saldoValues = activeChartDays.map((d) => d.saldoAcumulado);
+    const rawMin = Math.min(...saldoValues, balanceSettings.yellowThreshold, 0);
+    const rawMax = Math.max(...saldoValues, balanceSettings.greenThreshold, 0);
+    const range = Math.max(rawMax - rawMin, 1);
+    const rough = range / 4;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
+    const normalized = rough / magnitude;
+    const multiplier = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+    const niceStep = multiplier * magnitude;
+    const yMin = Math.floor(rawMin / niceStep) * niceStep;
+    const yMax = Math.ceil(rawMax / niceStep) * niceStep;
+    const yDomain: [number, number] =
+      yMin === yMax ? [yMin - niceStep, yMax + niceStep] : [yMin, yMax];
+    const yTicks: number[] = [];
+    for (let v = yDomain[0]; v <= yDomain[1] + 1e-6; v += niceStep) yTicks.push(v);
 
-      const chartData = activeChartDays.map((d) => ({
-        date: d.date,
-        saldoPast: d.date <= today ? d.saldoAcumulado : null,
-        saldoFuture: d.date >= today ? d.saldoAcumulado : null,
-        income: d.income,
-        totalExpense: d.expense + d.investment,
-      }));
-
-      const saldoValues = activeChartDays.map((d) => d.saldoAcumulado);
-      const rawMin = Math.min(...saldoValues, balanceSettings.yellowThreshold, 0);
-      const rawMax = Math.max(...saldoValues, balanceSettings.greenThreshold, 0);
-      const range = Math.max(rawMax - rawMin, 1);
-      const rough = range / 4;
-      const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
-      const normalized = rough / magnitude;
-      const multiplier = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
-      const niceStep = multiplier * magnitude;
-      const yMin = Math.floor(rawMin / niceStep) * niceStep;
-      const yMax = Math.ceil(rawMax / niceStep) * niceStep;
-      const yDomain: [number, number] =
-        yMin === yMax ? [yMin - niceStep, yMax + niceStep] : [yMin, yMax];
-      const yTicks: number[] = [];
-      for (let v = yDomain[0]; v <= yDomain[1] + 1e-6; v += niceStep) yTicks.push(v);
-
-      return {
-        maxExpenseDay,
-        maxExpenseAmount,
-        bestDay,
-        bestDayAmount,
-        chartData,
-        yDomain,
-        yTicks,
-      };
-    }, [period, activeChartDays, today, balanceSettings]);
+    return {
+      chartData,
+      yDomain,
+      yTicks,
+    };
+  }, [activeChartDays, today, balanceSettings]);
 
   const getZoneColor = (value: number) => {
     if (value >= balanceSettings.greenThreshold) return ZONE_COLORS.positive;
@@ -420,35 +398,6 @@ export function DashboardSummary({
       </Card>
 
       <InvoiceMonthlyChart onSelectInvoice={onSelectInvoice} />
-
-      {/* Alerts & Insights List */}
-      <div className="space-y-3">
-        <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
-          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0">
-            <Info className="w-6 h-6 text-muted-foreground" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-sm font-bold text-white">{t('largestExpense')}</p>
-            <p className="text-xs text-muted-foreground/60 font-medium">
-              {t('onDay', { date: formatDateLong(maxExpenseDay.date) })} | -{' '}
-              {formatCurrency(maxExpenseAmount)}
-            </p>
-          </div>
-        </Card>
-
-        <Card className="bg-[#1c1a24] border-none rounded-2xl p-5 flex items-center gap-5">
-          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0">
-            <TrendingUp className="w-6 h-6 text-muted-foreground" />
-          </div>
-          <div className="space-y-0.5">
-            <p className="text-sm font-bold text-white">{t('bestDay')}</p>
-            <p className="text-xs text-muted-foreground/60 font-medium">
-              {t('onDay', { date: formatDateLong(bestDay.date) })} | +{' '}
-              {formatCurrency(bestDayAmount)}
-            </p>
-          </div>
-        </Card>
-      </div>
     </div>
   );
 }

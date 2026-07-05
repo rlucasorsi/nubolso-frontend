@@ -5,6 +5,7 @@ import { PeriodNav } from './PeriodNav';
 import { DayList } from './DayList';
 import { DailyEntriesDrawer, DailyEntriesState } from './DailyEntriesDrawer';
 import { DashboardSummary } from './DashboardSummary';
+import { CategoryCharts } from './CategoryCharts';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { useCashFlow } from '@/hooks/useCashFlow';
 import { EntryFormValues, resolveTipoDespesa } from './EntryForm';
@@ -34,6 +35,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
     currentBalance,
     balanceSettings,
     saldoInicial,
+    entries,
     allEntries,
     virtualEntries,
     cardPendingEntries,
@@ -221,6 +223,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
             balanceSettings={balanceSettings}
             onSelectInvoice={setSelectedInvoiceId}
           />
+          <CategoryCharts period={period} entries={entries} virtualEntries={virtualEntries} />
         </TabsContent>
 
         <TabsContent value="days" className="mt-2">
