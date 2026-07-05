@@ -257,6 +257,8 @@ export function AddEntryDrawer({
                 <CreditPurchaseFields
                   description={purchaseForm.description}
                   onDescriptionChange={purchaseForm.setDescription}
+                  categoryId={purchaseForm.categoryId}
+                  onCategoryChange={purchaseForm.setCategoryId}
                   inputMode={purchaseForm.inputMode}
                   onInputModeChange={purchaseForm.setInputMode}
                   amount={purchaseForm.amount}

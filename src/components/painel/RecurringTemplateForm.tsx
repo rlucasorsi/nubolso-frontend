@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { FlowType } from '@/lib/cashflow';
 import { EndType, PaymentMode } from '@/lib/schemas/recurring-templates';
 import { TypeToggle } from './TypeToggle';
+import { CategorySelect } from './CategorySelect';
 import {
   TextInputField,
   AmountInputField,
@@ -83,6 +84,8 @@ export function RecurringTemplateForm({ values, onChange, errors }: RecurringTem
               type,
               paymentMode: type === 'income' ? 'debit' : values.paymentMode,
               creditCardId: type === 'income' ? undefined : values.creditCardId,
+              // Categorias são por tipo: ao trocar o tipo, limpa a categoria selecionada.
+              categoryId: type === values.type ? values.categoryId : undefined,
             })
           }
         />
@@ -146,6 +149,12 @@ export function RecurringTemplateForm({ values, onChange, errors }: RecurringTem
         value={values.estimatedAmount}
         onChange={(estimatedAmount) => onChange({ ...values, estimatedAmount })}
         error={errors?.estimatedAmount}
+      />
+
+      <CategorySelect
+        type={values.type}
+        value={values.categoryId}
+        onChange={(categoryId) => onChange({ ...values, categoryId })}
       />
 
       <NumberInputField

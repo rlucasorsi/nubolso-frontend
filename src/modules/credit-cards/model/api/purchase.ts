@@ -32,6 +32,7 @@ export interface CreatePurchaseRequest {
   installmentsCount: number;
   purchaseDate: string;
   strategy?: 'FIRST' | 'LAST';
+  categoryId?: string;
 }
 
 export type CreatePurchaseResponse = CreditCardPurchase;

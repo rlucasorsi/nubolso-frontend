@@ -10,6 +10,7 @@ import {
   NumberInputField,
 } from '@/components/ui/form-field';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { CategorySelect } from '@/components/painel/CategorySelect';
 import { PurchaseSimulationPreview } from './PurchaseSimulationPreview';
 import type { SimulatePurchaseResponse } from '@/modules/credit-cards/model/api/purchase';
 import type {
@@ -21,6 +22,8 @@ import { useTranslations } from '@/i18n/useTranslations';
 interface CreditPurchaseFieldsProps {
   description: string;
   onDescriptionChange: (v: string) => void;
+  categoryId?: string;
+  onCategoryChange: (v?: string) => void;
   inputMode: PurchaseInputMode;
   onInputModeChange: (v: PurchaseInputMode) => void;
   amount: string;
@@ -43,6 +46,8 @@ interface CreditPurchaseFieldsProps {
 export function CreditPurchaseFields({
   description,
   onDescriptionChange,
+  categoryId,
+  onCategoryChange,
   inputMode,
   onInputModeChange,
   amount,
@@ -72,6 +77,9 @@ export function CreditPurchaseFields({
         value={description}
         onChange={onDescriptionChange}
       />
+
+      {/* Compras e créditos de cartão são sempre despesa — categorias escopadas nesse tipo. */}
+      <CategorySelect type="expense" value={categoryId} onChange={onCategoryChange} />
 
       <div className="space-y-2">
         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">

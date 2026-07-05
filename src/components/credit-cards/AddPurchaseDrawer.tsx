@@ -35,7 +35,12 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
   };
 
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) handleClose(); }}>
+    <Sheet
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) handleClose();
+      }}
+    >
       <DrawerContent>
         <DrawerHeader onClose={handleClose}>
           <SheetTitle className="text-2xl font-bold font-display text-primary">
@@ -77,6 +82,8 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
           <CreditPurchaseFields
             description={form.description}
             onDescriptionChange={form.setDescription}
+            categoryId={form.categoryId}
+            onCategoryChange={form.setCategoryId}
             inputMode={form.inputMode}
             onInputModeChange={form.setInputMode}
             amount={form.amount}
@@ -110,7 +117,11 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             onClick={() => form.handleConfirm(handleClose)}
             disabled={!form.isValid || form.isConfirming}
           >
-            {form.isConfirming ? t('confirming') : isCredit ? t('confirmCredit') : t('confirmPurchase')}
+            {form.isConfirming
+              ? t('confirming')
+              : isCredit
+                ? t('confirmCredit')
+                : t('confirmPurchase')}
           </Button>
         </DrawerFooter>
       </DrawerContent>

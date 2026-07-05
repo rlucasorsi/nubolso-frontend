@@ -29,7 +29,13 @@ interface UsePurchaseFormParams {
   isCredit?: boolean;
 }
 
-export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true, isCredit = false }: UsePurchaseFormParams) {
+export function usePurchaseForm({
+  isOpen,
+  cardId,
+  defaultDate,
+  enabled = true,
+  isCredit = false,
+}: UsePurchaseFormParams) {
   const getInitialDate = () => defaultDate ?? getTodayDateString();
 
   const [description, setDescription] = useState('');
@@ -38,6 +44,7 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true, i
   const [purchaseDate, setPurchaseDate] = useState(getInitialDate);
   const [inputMode, setInputMode] = useState<PurchaseInputMode>('total');
   const [strategy, setStrategy] = useState<PurchaseStrategy>('FIRST');
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
   const [errors, setErrors] = useState<{ amount?: string; purchaseDate?: string }>({});
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -66,6 +73,7 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true, i
     setPurchaseDate(getInitialDate());
     setInputMode('total');
     setStrategy('FIRST');
+    setCategoryId(undefined);
     setErrors({});
     setApiError(null);
     simulateMutation.reset();
@@ -76,19 +84,40 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true, i
     if (!isOpen || !enabled || !isValid || !cardId || isCredit) return;
 
     const timeout = setTimeout(() => {
-      simulateMutation.mutate({ cardId, description, totalAmount, installmentsCount, purchaseDate });
+      simulateMutation.mutate({
+        cardId,
+        description,
+        totalAmount,
+        installmentsCount,
+        purchaseDate,
+      });
     }, 400);
 
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, enabled, cardId, description, totalAmount, installmentsCount, purchaseDate, isValid, isCredit]);
+  }, [
+    isOpen,
+    enabled,
+    cardId,
+    description,
+    totalAmount,
+    installmentsCount,
+    purchaseDate,
+    isValid,
+    isCredit,
+  ]);
 
   const adjustedSimulation = useMemo(() => {
     const data = simulateMutation.data;
-    if (!data || installmentsCount <= 1 || Number.isNaN(totalAmount) || totalAmount <= 0) return data;
+    if (!data || installmentsCount <= 1 || Number.isNaN(totalAmount) || totalAmount <= 0)
+      return data;
 
     const totalInCents = Math.round(totalAmount * 100);
-    const generated = generateInstallments({ totalAmount: totalInCents, installments: installmentsCount, strategy });
+    const generated = generateInstallments({
+      totalAmount: totalInCents,
+      installments: installmentsCount,
+      strategy,
+    });
 
     return {
       ...data,
@@ -124,23 +153,52 @@ export function usePurchaseForm({ isOpen, cardId, defaultDate, enabled = true, i
 
     try {
       if (isCredit) {
-        await createCreditMutation.mutateAsync({ cardId, description, totalAmount, installmentsCount, purchaseDate, strategy });
+        await createCreditMutation.mutateAsync({
+          cardId,
+          description,
+          totalAmount,
+          installmentsCount,
+          purchaseDate,
+          strategy,
+          categoryId,
+        });
       } else {
-        await createMutation.mutateAsync({ cardId, description, totalAmount, installmentsCount, purchaseDate, strategy });
+        await createMutation.mutateAsync({
+          cardId,
+          description,
+          totalAmount,
+          installmentsCount,
+          purchaseDate,
+          strategy,
+          categoryId,
+        });
       }
       onSuccess();
     } catch (err) {
-      setApiError(extractErrorMessage(err, isCredit ? 'Não foi possível registrar o crédito' : 'Não foi possível registrar a compra'));
+      setApiError(
+        extractErrorMessage(
+          err,
+          isCredit ? 'Não foi possível registrar o crédito' : 'Não foi possível registrar a compra',
+        ),
+      );
     }
   }
 
   return {
-    description, setDescription,
-    amount, setAmount,
-    installmentsCount, setInstallmentsCount,
-    purchaseDate, setPurchaseDate,
-    inputMode, setInputMode,
-    strategy, setStrategy,
+    description,
+    setDescription,
+    amount,
+    setAmount,
+    installmentsCount,
+    setInstallmentsCount,
+    purchaseDate,
+    setPurchaseDate,
+    inputMode,
+    setInputMode,
+    strategy,
+    setStrategy,
+    categoryId,
+    setCategoryId,
     isValid,
     computedTotal,
     adjustedSimulation,
