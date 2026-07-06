@@ -253,11 +253,17 @@ export function synthesizeVirtualEntry(
   month: number,
   existingEntries: CashFlowEntry[],
   today?: string,
+  overdueFrom?: string,
 ): CashFlowEntry | null {
   const occurrenceDate = getTemplateOccurrenceDate(year, month, template.dayOfMonth);
 
   const todayStr = today ?? localDateStr();
-  if (occurrenceDate < todayStr) return null;
+  // Ocorrências passadas normalmente são descartadas. Mas quando `overdueFrom`
+  // (início do período atual) é informado, uma ocorrência ainda não realizada
+  // a partir dessa data é mantida para aparecer como "vencida" na lista de
+  // pendências, em vez de simplesmente sumir quando a data de vencimento passa.
+  const lowerBound = overdueFrom && overdueFrom < todayStr ? overdueFrom : todayStr;
+  if (occurrenceDate < lowerBound) return null;
 
   if (template.endDate && occurrenceDate > template.endDate.slice(0, 10)) return null;
 
@@ -290,6 +296,7 @@ export function generateVirtualEntriesForRange(
   existingEntries: CashFlowEntry[],
   startDate: string,
   endDate: string,
+  overdueFrom?: string,
 ): CashFlowEntry[] {
   const result: CashFlowEntry[] = [];
   const activeTemplates = templates.filter((t) => t.isActive);
@@ -303,7 +310,14 @@ export function generateVirtualEntriesForRange(
 
   while (year < endY || (year === endY && month <= endM)) {
     for (const template of activeTemplates) {
-      const entry = synthesizeVirtualEntry(template, year, month, existingEntries);
+      const entry = synthesizeVirtualEntry(
+        template,
+        year,
+        month,
+        existingEntries,
+        undefined,
+        overdueFrom,
+      );
       if (entry && entry.date >= startDate && entry.date <= endDate) {
         result.push(entry);
       }
@@ -408,6 +422,7 @@ export function generateCardTemplateEntriesForRange(
   startDate: string,
   endDate: string,
   today?: string,
+  overdueFrom?: string,
 ): { pendingEntries: CashFlowEntry[]; projectionEntries: CashFlowEntry[] } {
   const pendingEntries: CashFlowEntry[] = [];
   const projectionEntries: CashFlowEntry[] = [];
@@ -452,8 +467,15 @@ export function generateCardTemplateEntriesForRange(
       const cycleClosingDate = getTemplateOccurrenceDate(cycle.year, cycle.month, card.closingDay);
       if (cycleClosingDate < todayStr) continue;
 
-      // Pending-confirmation list only shows genuinely upcoming occurrences.
-      if (occurrenceDate >= todayStr && occurrenceDate >= startDate && occurrenceDate <= endDate) {
+      // Pending-confirmation list shows upcoming occurrences and, quando
+      // `overdueFrom` é informado, também as vencidas do período atual (cujo
+      // ciclo de fatura ainda não fechou, garantido pelo guard acima).
+      const pendingLowerBound = overdueFrom && overdueFrom < todayStr ? overdueFrom : todayStr;
+      if (
+        occurrenceDate >= pendingLowerBound &&
+        occurrenceDate >= startDate &&
+        occurrenceDate <= endDate
+      ) {
         pendingEntries.push({
           id: `cardpending_${template.id}_${occurrenceDate}`,
           date: occurrenceDate,

@@ -10,6 +10,7 @@ import {
   generateInvoiceEntriesForRange,
   generatePeriods,
   generateVirtualEntriesForRange,
+  getPeriodForDate,
   getPeriodRanges,
 } from '@/lib/cashflow';
 import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
@@ -180,6 +181,15 @@ export function useCashFlow() {
     [entries, saldoInicial, startDay],
   );
 
+  // Início do período atual: ocorrências não realizadas a partir daqui continuam
+  // sendo geradas mesmo já vencidas (aparecem como "vencida" nas pendências, em
+  // vez de sumir). Limitado a partir da data do saldo inicial para não ressuscitar
+  // recorrências anteriores ao saldo conhecido.
+  const overdueFrom = useMemo(() => {
+    const periodStart = getPeriodForDate(localDateStr(), startDay).startDate;
+    return periodStart > saldoInicial.date ? periodStart : saldoInicial.date;
+  }, [startDay, saldoInicial.date]);
+
   // Map credit card invoices from API to CreditCardInvoiceLike
   const creditCardInvoices = useMemo<CreditCardInvoiceLike[]>(() => {
     if (!creditCardInvoicesQuery.data) return [];
@@ -212,10 +222,11 @@ export function useCashFlow() {
       rawEntries,
       firstStart,
       lastEnd,
+      overdueFrom,
     );
     const invoiceEntries = generateInvoiceEntriesForRange(creditCardInvoices, firstStart, lastEnd);
     return [...recurringEntries, ...invoiceEntries];
-  }, [recurringTemplates, rawEntries, creditCardInvoices, periodRanges]);
+  }, [recurringTemplates, rawEntries, creditCardInvoices, periodRanges, overdueFrom]);
 
   // Future occurrences of card-linked recurring templates: pending confirmations
   // (occurrence date) and projected invoice charges (invoice payment date).
@@ -229,8 +240,17 @@ export function useCashFlow() {
         rawEntries,
         periodRanges[0].start,
         periodRanges[periodRanges.length - 1].end,
+        undefined,
+        overdueFrom,
       );
-    }, [recurringTemplates, creditCards, creditCardInvoices, rawEntries, periodRanges]);
+    }, [
+      recurringTemplates,
+      creditCards,
+      creditCardInvoices,
+      rawEntries,
+      periodRanges,
+      overdueFrom,
+    ]);
 
   const periods = useMemo(
     () => generatePeriods(entries, virtualEntries, saldoInicial, 60, startDay),
