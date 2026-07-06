@@ -73,7 +73,19 @@ export function DatePicker({ date, onChange, placeholder, className, minDate }: 
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
         <DrawerContent className="p-0 border-none bg-card">
           <DrawerTitle className="sr-only">{resolvedPlaceholder}</DrawerTitle>
-          <div className="flex justify-center p-4 pb-10" data-vaul-no-drag>
+          {/*
+            data-vaul-no-drag já impede o arrasto, mas o vaul ainda chama
+            setPointerCapture no onPointerDown do Content, o que engole o toque
+            nos botões de dia no mobile. Barramos a propagação do pointerdown
+            aqui para que o capture nunca rode sobre o calendário — o clique do
+            react-day-picker continua funcionando e a alça do drawer (fora deste
+            wrapper) segue arrastável.
+          */}
+          <div
+            className="flex justify-center p-4 pb-10"
+            data-vaul-no-drag
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             {calendar}
           </div>
         </DrawerContent>
