@@ -51,6 +51,7 @@ import {
 import { EntryFormValues, resolveTipoDespesa } from './EntryForm';
 import { ExpenseTypeHint } from './ExpenseTypeHelp';
 import { TypeToggle } from './TypeToggle';
+import { CategorySelect } from './CategorySelect';
 import { AddEntryDrawer } from './AddEntryDrawer';
 import { TYPE_CONFIG, MONTH_KEYS, WEEKDAY_KEYS } from './config';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -146,6 +147,7 @@ export function DailyEntriesDrawer({
       type: entry.type,
       description: entry.description || '',
       tipoDespesa: entry.tipoDespesa ?? null,
+      categoryId: entry.categoryId ?? undefined,
     });
   }
 
@@ -160,6 +162,7 @@ export function DailyEntriesDrawer({
       type: editValues.type,
       description: editValues.description || undefined,
       tipoDespesa: resolveTipoDespesa(editValues),
+      categoryId: editValues.categoryId,
     });
 
     setEditingId(null);
@@ -173,6 +176,7 @@ export function DailyEntriesDrawer({
       amount: entry.amount.toFixed(2).replace('.', ','),
       type: entry.type,
       description: entry.description || '',
+      categoryId: entry.categoryId ?? undefined,
     });
   }
 
@@ -183,6 +187,7 @@ export function DailyEntriesDrawer({
       id: entry.templateId,
       amount: parseFloat(editValues.amount.replace(',', '.')) || 0,
       date: editValues.date,
+      categoryId: editValues.categoryId,
     });
 
     setRealizingId(null);
@@ -491,6 +496,13 @@ export function DailyEntriesDrawer({
                                         value={editValues.amount}
                                         onChange={(amount) =>
                                           setEditValues((prev) => ({ ...prev, amount }))
+                                        }
+                                      />
+                                      <CategorySelect
+                                        type={editValues.type}
+                                        value={editValues.categoryId}
+                                        onChange={(categoryId) =>
+                                          setEditValues((prev) => ({ ...prev, categoryId }))
                                         }
                                       />
                                       <div className="flex gap-2 justify-end">

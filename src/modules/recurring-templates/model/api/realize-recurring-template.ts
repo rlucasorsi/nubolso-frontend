@@ -3,6 +3,7 @@ export interface RealizeRecurringTemplateRequest {
   amount: number;
   date: string;
   isPaid?: boolean;
+  categoryId?: string;
 }
 
 export interface RealizeRecurringTemplateResponse {

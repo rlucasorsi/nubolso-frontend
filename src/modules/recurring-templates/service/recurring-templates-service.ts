@@ -51,7 +51,13 @@ export const recurringTemplatesService = {
     return HttpClient.delete<RecurringTemplate>(`/recurring-templates/${params.id}`);
   },
 
-  realize: async (params: { id: string; amount: number; date: string; isPaid?: boolean }) => {
+  realize: async (params: {
+    id: string;
+    amount: number;
+    date: string;
+    isPaid?: boolean;
+    categoryId?: string;
+  }) => {
     const { id, ...rest } = params;
     return HttpClient.post<any, any>(`/recurring-templates/${id}/realize`, rest);
   },
