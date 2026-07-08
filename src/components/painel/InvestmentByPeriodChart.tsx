@@ -1,18 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { PiggyBank } from 'lucide-react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  LabelList,
-} from 'recharts';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, PiggyBank } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { CashFlowEntry, Period, formatCurrency, formatCurrencyCompact } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
@@ -21,6 +10,14 @@ import { useTranslations } from '@/i18n/useTranslations';
 const INVEST_COLOR = '#3b82f6';
 // Janela de períodos exibidos, centrada no período selecionado, para manter legível.
 const WINDOW = 12;
+const ARROW_PADDING = 56; // px-7 on each side (28px × 2)
+const MAX_BAR_HEIGHT = 140;
+const MIN_BAR_HEIGHT = 4;
+const TOP_LABEL_HEIGHT = 16;
+const LABEL_GAP = 4;
+const Y_AXIS_WIDTH = 44;
+// Frações do valor máximo em que as linhas de grade horizontais são desenhadas.
+const GRID_TICKS = [1, 0.75, 0.5, 0.25, 0];
 
 // Soma dos investimentos (por data) de uma lista de lançamentos dentro do período.
 function sumInvestment(list: CashFlowEntry[], start: string, end: string): number {
@@ -53,6 +50,64 @@ export function InvestmentByPeriodChart({
   // já efetivados) sempre aparecem; o flag liga/desliga só as projeções.
   const [showRecurrences, setShowRecurrences] = useState(true);
 
+  const [itemWidth, setItemWidth] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const lastCenteredIndexRef = useRef<number | null>(null);
+  const dragRef = useRef({ active: false, startX: 0, scrollLeft: 0, hasDragged: false });
+
+  const onDragStart = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    dragRef.current = {
+      active: true,
+      startX: e.pageX,
+      scrollLeft: scrollRef.current.scrollLeft,
+      hasDragged: false,
+    };
+    scrollRef.current.style.cursor = 'grabbing';
+    scrollRef.current.style.scrollBehavior = 'auto';
+  };
+
+  const onDragMove = (e: React.MouseEvent) => {
+    if (!dragRef.current.active || !scrollRef.current) return;
+    const delta = e.pageX - dragRef.current.startX;
+    if (Math.abs(delta) > 4) dragRef.current.hasDragged = true;
+    scrollRef.current.scrollLeft = dragRef.current.scrollLeft - delta;
+  };
+
+  const onDragEnd = () => {
+    dragRef.current.active = false;
+    if (!scrollRef.current) return;
+    scrollRef.current.style.cursor = '';
+    scrollRef.current.style.scrollBehavior = '';
+  };
+
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (dragRef.current.hasDragged) {
+      e.stopPropagation();
+      dragRef.current.hasDragged = false;
+    }
+  };
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el || el.clientWidth <= 0) return;
+    const visibleItems = el.clientWidth < 480 ? 5 : 10;
+    setItemWidth((el.clientWidth - ARROW_PADDING) / visibleItems);
+  }, [periods.length]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const measure = () => {
+      if (el.clientWidth <= 0) return;
+      const visibleItems = el.clientWidth < 480 ? 5 : 10;
+      setItemWidth((el.clientWidth - ARROW_PADDING) / visibleItems);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const data = useMemo(() => {
     if (periods.length === 0) return [];
     let start = 0;
@@ -66,7 +121,6 @@ export function InvestmentByPeriodChart({
     }
     return periods.slice(start, end).map((p, i) => {
       const [, sMonth, sDay] = p.startDate.split('-');
-      const [, eMonth, eDay] = p.endDate.split('-');
       // Período alinhado ao mês (começa no dia 1): rótulo é o mês.
       // Período que começa no meio do mês: rótulo é a data inicial (ex.: 20/07).
       const startsOnFirst = sDay === '01';
@@ -80,7 +134,6 @@ export function InvestmentByPeriodChart({
       return {
         idx: start + i,
         label: axisLabel,
-        range: `${sDay}/${sMonth} – ${eDay}/${eMonth}`,
         value: realInv + virtInv,
       };
     });
@@ -88,8 +141,25 @@ export function InvestmentByPeriodChart({
 
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const hasData = data.some((d) => d.value > 0);
+  const maxValue = Math.max(1, ...data.map((d) => d.value));
+  const formatAxisValue = (v: number) => formatCurrencyCompact(v).replace('R$', '').trim();
 
-  const formatY = (v: number) => formatCurrencyCompact(v).replace('R$', '').trim();
+  // Mantém o período selecionado visível (centralizado) ao navegar pelo topo do painel.
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el || itemWidth <= 0 || data.length === 0) return;
+    if (lastCenteredIndexRef.current === selectedIndex) return;
+    const dataIdx = data.findIndex((d) => d.idx === selectedIndex);
+    if (dataIdx < 0) return;
+    const isFirstCenter = lastCenteredIndexRef.current === null;
+    lastCenteredIndexRef.current = selectedIndex;
+    const target = Math.max(dataIdx * itemWidth - el.clientWidth / 2 + itemWidth / 2, 0);
+    el.scrollTo({ left: target, behavior: isFirstCenter ? 'auto' : 'smooth' });
+  }, [selectedIndex, itemWidth, data]);
+
+  const scrollByItems = (direction: 1 | -1) => {
+    scrollRef.current?.scrollBy({ left: direction * itemWidth * 3, behavior: 'smooth' });
+  };
 
   return (
     <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-7 space-y-5">
@@ -136,67 +206,116 @@ export function InvestmentByPeriodChart({
           </p>
         </div>
       ) : (
-        <div className="h-[220px] w-full [&_.recharts-surface]:cursor-pointer">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 24, right: 24, left: 12, bottom: 0 }}>
-              <CartesianGrid
-                vertical={false}
-                strokeDasharray="3 3"
-                className="stroke-white/[0.06]"
-              />
-              <XAxis
-                dataKey="label"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 10, fill: '#94a3b8' }}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                width={40}
-                tick={{ fontSize: 9, fill: '#94a3b8' }}
-                tickFormatter={formatY}
-              />
-              <Tooltip cursor={false} content={<InvestTooltip />} />
-              <Bar
-                dataKey="value"
-                radius={[6, 6, 0, 0]}
-                maxBarSize={44}
-                onClick={(_, index) => onSelectPeriod?.(data[index].idx)}
+        <div className="flex gap-1">
+          <div
+            className="relative shrink-0 text-right"
+            style={{ width: Y_AXIS_WIDTH, height: MAX_BAR_HEIGHT, marginTop: TOP_LABEL_HEIGHT }}
+          >
+            {GRID_TICKS.map((frac) => (
+              <span
+                key={frac}
+                className="absolute right-0 pr-2 -translate-y-1/2 text-[9px] font-semibold text-muted-foreground/40 leading-none"
+                style={{ bottom: frac * MAX_BAR_HEIGHT }}
               >
-                <LabelList
-                  dataKey="value"
-                  position="top"
-                  fill="#ffffff"
-                  fontSize={9}
-                  fontWeight={700}
-                  formatter={(v: number) => (v > 0 ? formatCurrencyCompact(v) : '')}
+                {formatAxisValue(maxValue * frac)}
+              </span>
+            ))}
+          </div>
+
+          <div className="relative flex-1 min-w-0 -mx-1">
+            <div
+              className="absolute left-0 right-0 pointer-events-none"
+              style={{ top: TOP_LABEL_HEIGHT, height: MAX_BAR_HEIGHT }}
+            >
+              {GRID_TICKS.map((frac) => (
+                <div
+                  key={frac}
+                  className="absolute left-0 right-0 border-t border-white/[0.06]"
+                  style={{ bottom: frac * MAX_BAR_HEIGHT }}
                 />
-                {data.map((d) => (
-                  <Cell
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => scrollByItems(-1)}
+              aria-label={t('investedPreviousPeriods')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-lg bg-[#1c1a24]/90 text-muted-foreground/60 hover:text-white transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+
+            <div
+              ref={scrollRef}
+              className="relative flex overflow-x-auto px-7 scroll-smooth cursor-grab"
+              style={{ scrollbarWidth: 'none' }}
+              onMouseDown={onDragStart}
+              onMouseMove={onDragMove}
+              onMouseUp={onDragEnd}
+              onMouseLeave={onDragEnd}
+              onClickCapture={onClickCapture}
+            >
+              {data.map((d) => {
+                const isSelected = d.idx === selectedIndex;
+                const barHeight =
+                  d.value > 0
+                    ? Math.max(MIN_BAR_HEIGHT, (d.value / maxValue) * MAX_BAR_HEIGHT)
+                    : MIN_BAR_HEIGHT;
+
+                return (
+                  <button
                     key={d.idx}
-                    fill={INVEST_COLOR}
-                    fillOpacity={d.idx === selectedIndex ? 1 : 0.5}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                    type="button"
+                    onClick={() => onSelectPeriod?.(d.idx)}
+                    className="shrink-0 flex flex-col items-center cursor-pointer"
+                    style={{ minWidth: itemWidth || 44 }}
+                  >
+                    <div
+                      className="relative flex items-end justify-center"
+                      style={{ height: MAX_BAR_HEIGHT + TOP_LABEL_HEIGHT }}
+                    >
+                      {d.value > 0 && (
+                        <span
+                          className="absolute text-[8px] font-bold text-muted-foreground/60 leading-none whitespace-nowrap"
+                          style={{ bottom: barHeight + LABEL_GAP }}
+                        >
+                          {formatCurrencyCompact(d.value)}
+                        </span>
+                      )}
+                      <div
+                        className="rounded-[4px] transition-all"
+                        style={{
+                          height: barHeight,
+                          width: Math.max(8, (itemWidth || 44) * 0.55),
+                          backgroundColor: INVEST_COLOR,
+                          opacity: d.value === 0 ? 0.15 : isSelected ? 1 : 0.5,
+                        }}
+                      />
+                    </div>
+                    <span
+                      className={cn(
+                        'pt-2 text-[9px] font-bold leading-none',
+                        isSelected ? 'text-blue-500' : 'text-muted-foreground/60',
+                      )}
+                    >
+                      {d.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => scrollByItems(1)}
+              aria-label={t('investedNextPeriods')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-lg bg-[#1c1a24]/90 text-muted-foreground/60 hover:text-white transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
     </Card>
-  );
-}
-
-function InvestTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0].payload as { range: string; value: number };
-  return (
-    <div className="rounded-xl border border-white/10 bg-[#13121a] px-3 py-2 shadow-xl">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-        {d.range}
-      </p>
-      <p className="text-sm font-bold text-white font-display mt-0.5">{formatCurrency(d.value)}</p>
-    </div>
   );
 }

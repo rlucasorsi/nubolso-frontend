@@ -29,6 +29,11 @@ const FUTURE_MONTHS = 12;
 const ARROW_PADDING = 56; // px-7 on each side (28px × 2)
 const MAX_BAR_HEIGHT = 160;
 const MIN_BAR_HEIGHT = 6;
+const TOP_LABEL_HEIGHT = 16;
+const LABEL_GAP = 4;
+const Y_AXIS_WIDTH = 44;
+// Frações do valor máximo em que as linhas de grade horizontais são desenhadas.
+const GRID_TICKS = [1, 0.75, 0.5, 0.25, 0];
 
 function monthKey(year: number, month: number) {
   return year * 12 + (month - 1);
@@ -159,6 +164,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   }, [invoicesData, cardFilter]);
 
   const maxTotal = Math.max(1, ...buckets.map((b) => b.total));
+  const formatAxisValue = (v: number) => formatCurrencyCompact(v).replace('R$', '').trim();
 
   // useLayoutEffect fires synchronously after DOM commit, before the browser
   // paints. This guarantees the scroll is applied before the first visible
@@ -238,118 +244,161 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
           </DropdownMenu>
         </div>
 
-        <div className="relative -mx-1">
-          <button
-            type="button"
-            onClick={() => scrollByMonths(-1)}
-            aria-label={t('previousMonths')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-lg bg-[#1c1a24]/90 text-muted-foreground/60 hover:text-white transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-
+        <div className="flex gap-1">
           <div
-            ref={scrollRef}
-            data-testid="invoice-chart-scroll"
-            className="flex overflow-x-auto px-7 scroll-smooth cursor-grab"
-            style={{ scrollbarWidth: 'none' }}
-            onMouseDown={onDragStart}
-            onMouseMove={onDragMove}
-            onMouseUp={onDragEnd}
-            onMouseLeave={onDragEnd}
-            onClickCapture={onClickCapture}
+            className="relative shrink-0 text-right"
+            style={{ width: Y_AXIS_WIDTH, height: MAX_BAR_HEIGHT, marginTop: TOP_LABEL_HEIGHT }}
           >
-            {buckets.map((bucket) => {
-              const hasInvoice = bucket.invoices.length > 0;
-              const barHeight = hasInvoice
-                ? Math.max(MIN_BAR_HEIGHT, (bucket.total / maxTotal) * MAX_BAR_HEIGHT)
-                : MIN_BAR_HEIGHT;
-
-              return (
-                <Popover
-                  key={bucket.key}
-                  open={openMonthKey === bucket.key}
-                  onOpenChange={(o) => !o && setOpenMonthKey(null)}
-                >
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={() => handleBarClick(bucket)}
-                      disabled={!hasInvoice}
-                      className={cn(
-                        'shrink-0 flex flex-col items-center justify-end gap-2 pt-2 pb-1',
-                        hasInvoice ? 'cursor-pointer' : 'cursor-default opacity-50',
-                      )}
-                      style={{ height: MAX_BAR_HEIGHT + 36, minWidth: itemWidth || 56 }}
-                    >
-                      {hasInvoice && (
-                        <span className="text-[8px] font-bold text-muted-foreground/60 leading-none">
-                          {formatCurrencyCompact(bucket.total)}
-                        </span>
-                      )}
-                      <div
-                        className={cn(
-                          'rounded-[4px] transition-all',
-                          bucket.hasOpenInvoice
-                            ? 'bg-[#7b5cff]'
-                            : hasInvoice
-                              ? 'bg-[#7b5cff]/40'
-                              : 'bg-white/10',
-                        )}
-                        style={{ height: barHeight, width: Math.max(8, (itemWidth || 56) * 0.55) }}
-                      />
-                      <span
-                        className={cn(
-                          'text-[9px] font-bold leading-none',
-                          bucket.hasOpenInvoice ? 'text-[#7b5cff]' : 'text-muted-foreground/60',
-                        )}
-                      >
-                        {td(MONTH_KEYS[bucket.month - 1])}
-                      </span>
-                      <span className="text-[8px] font-medium text-muted-foreground/40 leading-none">
-                        {String(bucket.year).slice(-2)}
-                      </span>
-                    </button>
-                  </PopoverTrigger>
-
-                  {bucket.invoices.length > 1 && (
-                    <PopoverContent className="bg-[#1c1a24] border-white/10 text-white w-56 p-2">
-                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider px-2 pb-1">
-                        {t('chooseInvoice')}
-                      </p>
-                      <div className="space-y-1">
-                        {bucket.invoices.map((inv) => (
-                          <button
-                            key={inv.id}
-                            type="button"
-                            onClick={() => {
-                              onSelectInvoice(inv.id);
-                              setOpenMonthKey(null);
-                            }}
-                            className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-left"
-                          >
-                            <span className="text-xs font-semibold truncate">{inv.cardName}</span>
-                            <span className="text-xs font-bold text-muted-foreground shrink-0">
-                              {formatCurrencyCompact(inv.totalAmount)}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  )}
-                </Popover>
-              );
-            })}
+            {GRID_TICKS.map((frac) => (
+              <span
+                key={frac}
+                className="absolute right-0 pr-2 -translate-y-1/2 text-[9px] font-semibold text-muted-foreground/40 leading-none"
+                style={{ bottom: frac * MAX_BAR_HEIGHT }}
+              >
+                {formatAxisValue(maxTotal * frac)}
+              </span>
+            ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => scrollByMonths(1)}
-            aria-label={t('nextMonths')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-lg bg-[#1c1a24]/90 text-muted-foreground/60 hover:text-white transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          <div className="relative flex-1 min-w-0 -mx-1">
+            <div
+              className="absolute left-0 right-0 pointer-events-none"
+              style={{ top: TOP_LABEL_HEIGHT, height: MAX_BAR_HEIGHT }}
+            >
+              {GRID_TICKS.map((frac) => (
+                <div
+                  key={frac}
+                  className="absolute left-0 right-0 border-t border-white/[0.06]"
+                  style={{ bottom: frac * MAX_BAR_HEIGHT }}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => scrollByMonths(-1)}
+              aria-label={t('previousMonths')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-lg bg-[#1c1a24]/90 text-muted-foreground/60 hover:text-white transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+
+            <div
+              ref={scrollRef}
+              data-testid="invoice-chart-scroll"
+              className="relative flex overflow-x-auto px-7 scroll-smooth cursor-grab"
+              style={{ scrollbarWidth: 'none' }}
+              onMouseDown={onDragStart}
+              onMouseMove={onDragMove}
+              onMouseUp={onDragEnd}
+              onMouseLeave={onDragEnd}
+              onClickCapture={onClickCapture}
+            >
+              {buckets.map((bucket) => {
+                const hasInvoice = bucket.invoices.length > 0;
+                const barHeight = hasInvoice
+                  ? Math.max(MIN_BAR_HEIGHT, (bucket.total / maxTotal) * MAX_BAR_HEIGHT)
+                  : MIN_BAR_HEIGHT;
+
+                return (
+                  <Popover
+                    key={bucket.key}
+                    open={openMonthKey === bucket.key}
+                    onOpenChange={(o) => !o && setOpenMonthKey(null)}
+                  >
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => handleBarClick(bucket)}
+                        disabled={!hasInvoice}
+                        className={cn(
+                          'shrink-0 flex flex-col items-center',
+                          hasInvoice ? 'cursor-pointer' : 'cursor-default opacity-50',
+                        )}
+                        style={{ minWidth: itemWidth || 56 }}
+                      >
+                        <div
+                          className="relative flex items-end justify-center"
+                          style={{ height: MAX_BAR_HEIGHT + TOP_LABEL_HEIGHT }}
+                        >
+                          {hasInvoice && (
+                            <span
+                              className="absolute text-[8px] font-bold text-muted-foreground/60 leading-none whitespace-nowrap"
+                              style={{ bottom: barHeight + LABEL_GAP }}
+                            >
+                              {formatCurrencyCompact(bucket.total)}
+                            </span>
+                          )}
+                          <div
+                            className={cn(
+                              'rounded-[4px] transition-all',
+                              bucket.hasOpenInvoice
+                                ? 'bg-[#7b5cff]'
+                                : hasInvoice
+                                  ? 'bg-[#7b5cff]/40'
+                                  : 'bg-white/10',
+                            )}
+                            style={{
+                              height: barHeight,
+                              width: Math.max(8, (itemWidth || 56) * 0.55),
+                            }}
+                          />
+                        </div>
+                        <div className="pt-2 flex flex-col items-center gap-0.5">
+                          <span
+                            className={cn(
+                              'text-[9px] font-bold leading-none',
+                              bucket.hasOpenInvoice ? 'text-[#7b5cff]' : 'text-muted-foreground/60',
+                            )}
+                          >
+                            {td(MONTH_KEYS[bucket.month - 1])}
+                          </span>
+                          <span className="text-[8px] font-medium text-muted-foreground/40 leading-none">
+                            {String(bucket.year).slice(-2)}
+                          </span>
+                        </div>
+                      </button>
+                    </PopoverTrigger>
+
+                    {bucket.invoices.length > 1 && (
+                      <PopoverContent className="bg-[#1c1a24] border-white/10 text-white w-56 p-2">
+                        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider px-2 pb-1">
+                          {t('chooseInvoice')}
+                        </p>
+                        <div className="space-y-1">
+                          {bucket.invoices.map((inv) => (
+                            <button
+                              key={inv.id}
+                              type="button"
+                              onClick={() => {
+                                onSelectInvoice(inv.id);
+                                setOpenMonthKey(null);
+                              }}
+                              className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-left"
+                            >
+                              <span className="text-xs font-semibold truncate">{inv.cardName}</span>
+                              <span className="text-xs font-bold text-muted-foreground shrink-0">
+                                {formatCurrencyCompact(inv.totalAmount)}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    )}
+                  </Popover>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => scrollByMonths(1)}
+              aria-label={t('nextMonths')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 rounded-lg bg-[#1c1a24]/90 text-muted-foreground/60 hover:text-white transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </Card>
