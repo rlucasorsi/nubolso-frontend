@@ -98,7 +98,8 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   }, [mounted]);
 
   // Aviso instantâneo (enquanto o app está aberto) quando um lançamento faz o
-  // gasto de uma categoria orçada (no período atual) cruzar o limite.
+  // gasto de uma categoria orçada (no período atual) cruzar o limite — ou
+  // atingir a meta, no caso de categorias tipo "goal" (ex.: Investimento).
   // Complementa (não substitui) o job diário do backend, que cobre o caso do
   // app fechado.
   useEffect(() => {
@@ -108,9 +109,14 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
       const category = catMap.get(budget.categoryId);
       if (!category || budget.amount <= 0) continue;
       const spent = getCategorySpent(entries, virtualEntries, budget.categoryId, period);
-      const status = getBudgetStatus(spent, budget.amount);
+      const status = getBudgetStatus(spent, budget.amount, category.budgetDirection);
       const key = `${period.startDate}:${budget.categoryId}`;
-      if (status === 'danger' && !warnedBudgetsRef.current.has(key)) {
+      if (warnedBudgetsRef.current.has(key)) continue;
+
+      if (category.budgetDirection === 'goal' && status === 'ok') {
+        warnedBudgetsRef.current.add(key);
+        toast.success(tb('goalReachedToast', { category: category.name }));
+      } else if (category.budgetDirection === 'limit' && status === 'danger') {
         warnedBudgetsRef.current.add(key);
         toast.warning(tb('overspendToast', { category: category.name }));
       }

@@ -1,6 +1,8 @@
 import { CashFlowEntry, Period } from './cashflow';
+import { BudgetDirection } from '@/modules/categories/service/categories-service';
 
-export type BudgetStatus = 'ok' | 'warning' | 'danger';
+// 'progress' = meta (goal) ainda não atingida — neutro, não é um alerta.
+export type BudgetStatus = 'ok' | 'warning' | 'danger' | 'progress';
 
 const WARNING_THRESHOLD = 0.8;
 
@@ -31,9 +33,46 @@ export function getCategorySpent(
     .reduce((sum, e) => sum + e.amount, 0);
 }
 
-// "Comprometido" automático no período: recorrentes (excluindo categorias já
-// orçadas manualmente, pra não somar duas vezes na conta de sobra) e fatura de
-// cartão (sempre à parte, é um meio de pagamento, não uma categoria).
+// Lançamentos de recorrência (real já efetivado ou estimativa virtual) no
+// período — identificados por templateId, não por "tudo que sobra". Exclui
+// categorias já orçadas manualmente, pra não contar duas vezes na conta de
+// sobra, e ocorrências de cartão (entram pela fatura, não aqui).
+//
+// Uma recorrência confirmada vira um lançamento real, mas continua sendo a
+// MESMA ocorrência — nunca soma o real e o virtual da mesma recorrência no
+// mesmo período. Normalmente synthesizeVirtualEntry (cashflow.ts) já evita
+// gerar a estimativa quando existe um real com a mesma data, mas isso falha
+// se a data foi alterada ao confirmar (o usuário pode editar a data na hora
+// de efetivar) — então deduplicamos aqui por templateId, priorizando sempre
+// o lançamento real sobre a estimativa.
+export function getRecurringEntriesInPeriod(
+  entries: CashFlowEntry[],
+  virtualEntries: CashFlowEntry[],
+  period: Pick<Period, 'startDate' | 'endDate'>,
+  budgetedCategoryIds: Set<string>,
+): CashFlowEntry[] {
+  const candidates = entriesInPeriod(entries, virtualEntries, period).filter(
+    (e) =>
+      (e.type === 'expense' || e.type === 'investment') &&
+      !!e.templateId &&
+      !e.creditCardInvoiceId &&
+      (!e.categoryId || !budgetedCategoryIds.has(e.categoryId)),
+  );
+
+  const byTemplate = new Map<string, CashFlowEntry>();
+  for (const e of candidates) {
+    const key = e.templateId as string;
+    const existing = byTemplate.get(key);
+    if (!existing || (existing.isVirtual && !e.isVirtual)) {
+      byTemplate.set(key, e);
+    }
+  }
+  return [...byTemplate.values()];
+}
+
+// "Comprometido" automático no período: recorrentes (só o que realmente vem de
+// um template — lançamentos avulsos não entram aqui) e fatura de cartão
+// (sempre à parte, é um meio de pagamento, não uma categoria).
 export function getCommittedTotals(
   entries: CashFlowEntry[],
   virtualEntries: CashFlowEntry[],
@@ -44,21 +83,35 @@ export function getCommittedTotals(
     (e) => e.type === 'expense' || e.type === 'investment',
   );
 
-  let recurring = 0;
-  let invoice = 0;
-  for (const e of periodEntries) {
-    if (e.creditCardInvoiceId) {
-      invoice += e.amount;
-    } else if (!e.categoryId || !budgetedCategoryIds.has(e.categoryId)) {
-      recurring += e.amount;
-    }
-  }
+  const recurring = getRecurringEntriesInPeriod(
+    entries,
+    virtualEntries,
+    period,
+    budgetedCategoryIds,
+  ).reduce((sum, e) => sum + e.amount, 0);
+
+  const invoice = periodEntries
+    .filter((e) => !!e.creditCardInvoiceId)
+    .reduce((sum, e) => sum + e.amount, 0);
+
   return { recurring, invoice };
 }
 
-export function getBudgetStatus(spent: number, budget: number): BudgetStatus {
+// Categoria tipo 'goal' (ex.: Investimento) inverte a leitura: atingir/ultrapassar
+// o valor é bom (verde), não bater ainda é só "em andamento" (neutro) — nunca
+// vermelho/âmbar, já que não há motivo de alerta em não ter investido o suficiente.
+export function getBudgetStatus(
+  spent: number,
+  budget: number,
+  direction: BudgetDirection = 'limit',
+): BudgetStatus {
   if (budget <= 0) return 'ok';
   const ratio = spent / budget;
+
+  if (direction === 'goal') {
+    return ratio >= 1 ? 'ok' : 'progress';
+  }
+
   if (ratio >= 1) return 'danger';
   if (ratio >= WARNING_THRESHOLD) return 'warning';
   return 'ok';

@@ -10,12 +10,14 @@ import {
   DrawerFooter,
   SheetTitle,
 } from '@/components/ui/app-drawer';
+import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { toast } from 'sonner';
 import { useUpsertCategoryBudget } from '@/modules/category-budgets/hooks/use-upsert-category-budget';
 import { useDeleteCategoryBudget } from '@/modules/category-budgets/hooks/use-delete-category-budget';
+import { useUpdateCategory } from '@/modules/categories/hooks/use-update-category';
 import { CategoryIcon } from '@/components/categories/category-icons';
-import { Category } from '@/modules/categories/service/categories-service';
+import { BudgetDirection, Category } from '@/modules/categories/service/categories-service';
 import { CategoryBudget } from '@/modules/category-budgets/service/category-budgets-service';
 
 interface BudgetAmountDrawerProps {
@@ -30,7 +32,8 @@ interface BudgetAmountDrawerProps {
 
 // Editor leve para o valor do orçamento de uma categoria já existente, escopado
 // ao período selecionado — nome, cor e ícone continuam só editáveis na tela de
-// Categorias (CategoryDrawer).
+// Categorias (CategoryDrawer). A direção (limite x meta) é da categoria, não
+// do período, mas o usuário ajusta ela aqui mesmo, junto do valor.
 export function BudgetAmountDrawer({
   open,
   onClose,
@@ -41,14 +44,18 @@ export function BudgetAmountDrawer({
   const t = useTranslations('budget');
   const tc = useTranslations('categories');
   const [amount, setAmount] = useState('');
+  const [direction, setDirection] = useState<BudgetDirection>('limit');
   const upsertMutation = useUpsertCategoryBudget();
   const deleteMutation = useDeleteCategoryBudget();
-  const isPending = upsertMutation.isPending || deleteMutation.isPending;
+  const updateCategoryMutation = useUpdateCategory();
+  const isPending =
+    upsertMutation.isPending || deleteMutation.isPending || updateCategoryMutation.isPending;
 
   useEffect(() => {
     if (!open) return;
     setAmount(existingBudget ? existingBudget.amount.toFixed(2).replace('.', ',') : '');
-  }, [open, existingBudget]);
+    setDirection(category?.budgetDirection ?? 'limit');
+  }, [open, existingBudget, category]);
 
   function handleRemove() {
     if (!existingBudget) return;
@@ -58,20 +65,33 @@ export function BudgetAmountDrawer({
     });
   }
 
+  function saveDirectionIfChanged(onDone: () => void) {
+    if (!category || direction === category.budgetDirection) {
+      onDone();
+      return;
+    }
+    updateCategoryMutation.mutate(
+      { id: category.id, budgetDirection: direction },
+      { onSuccess: onDone, onError: () => toast.error(tc('saveError')) },
+    );
+  }
+
   function handleSave() {
     if (!category) return;
     const parsed = amount.trim() ? parseFloat(amount.replace(',', '.')) : null;
 
-    if (!parsed || parsed <= 0) {
-      if (existingBudget) handleRemove();
-      else onClose();
-      return;
-    }
+    saveDirectionIfChanged(() => {
+      if (!parsed || parsed <= 0) {
+        if (existingBudget) handleRemove();
+        else onClose();
+        return;
+      }
 
-    upsertMutation.mutate(
-      { categoryId: category.id, periodStart, amount: parsed },
-      { onSuccess: onClose, onError: () => toast.error(tc('saveError')) },
-    );
+      upsertMutation.mutate(
+        { categoryId: category.id, periodStart, amount: parsed },
+        { onSuccess: onClose, onError: () => toast.error(tc('saveError')) },
+      );
+    });
   }
 
   return (
@@ -98,6 +118,41 @@ export function BudgetAmountDrawer({
               <p className="text-sm font-semibold text-foreground truncate">{category.name}</p>
             </div>
           )}
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {t('directionLabel')}
+            </label>
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => setDirection('limit')}
+                className={cn(
+                  'flex-1 h-11 rounded-xl text-xs font-bold transition-all px-2',
+                  direction === 'limit'
+                    ? 'bg-primary text-white'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                {t('directionLimit')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDirection('goal')}
+                className={cn(
+                  'flex-1 h-11 rounded-xl text-xs font-bold transition-all px-2',
+                  direction === 'goal'
+                    ? 'bg-primary text-white'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                {t('directionGoal')}
+              </button>
+            </div>
+            <p className="text-[11px] text-muted-foreground/60">
+              {direction === 'limit' ? t('directionLimitHint') : t('directionGoalHint')}
+            </p>
+          </div>
 
           <AmountInputField
             label={t('budgetAmountLabel')}

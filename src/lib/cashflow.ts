@@ -270,9 +270,15 @@ export function synthesizeVirtualEntry(
   if (template.totalOccurrences && (template.occurrenceCount ?? 0) >= template.totalOccurrences)
     return null;
 
-  const realized = existingEntries.find(
-    (e) => e.templateId === template.id && e.date === occurrenceDate,
-  );
+  // Casa por ano/mês, não pela data exata: ao efetivar (realize), o usuário pode
+  // editar a data do lançamento pra um dia diferente do vencimento do template
+  // dentro do mesmo mês — se comparássemos a data exata, a ocorrência já
+  // confirmada continuaria gerando uma estimativa virtual duplicada.
+  const realized = existingEntries.find((e) => {
+    if (e.templateId !== template.id) return false;
+    const [eYear, eMonth] = e.date.split('-').map(Number);
+    return eYear === year && eMonth === month;
+  });
   if (realized) return null;
 
   return {

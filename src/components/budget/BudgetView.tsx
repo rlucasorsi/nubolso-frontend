@@ -13,12 +13,14 @@ import {
   entriesInPeriod,
   getCategorySpent,
   getCommittedTotals,
+  getRecurringEntriesInPeriod,
   getBudgetStatus,
   BudgetStatus,
 } from '@/lib/budget';
 import { cn, localDateStr } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { IncomeBaseCard } from '@/components/painel/CategoryCharts';
+import { CategoryEntriesDrawer } from '@/components/painel/CategoryEntriesDrawer';
 import { PeriodNav } from '@/components/painel/PeriodNav';
 import { CategoryDrawer } from '@/components/categories/CategoryDrawer';
 import { BudgetAmountDrawer } from './BudgetAmountDrawer';
@@ -32,6 +34,7 @@ const STATUS_COLORS: Record<BudgetStatus, { text: string; bar: string }> = {
   ok: { text: 'text-emerald-500', bar: '#10b981' },
   warning: { text: 'text-amber-400', bar: '#f59e0b' },
   danger: { text: 'text-red-500', bar: '#ef4444' },
+  progress: { text: 'text-blue-400', bar: '#3b82f6' },
 };
 
 // Categorias de receita nunca têm orçamento (é a base de entrada, não um limite
@@ -52,6 +55,7 @@ export function BudgetView() {
   const [budgetDrawerCategory, setBudgetDrawerCategory] = useState<Category | null>(null);
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [addDrawerOpen, setAddDrawerOpen] = useState(false);
+  const [showRecurringDetail, setShowRecurringDetail] = useState(false);
 
   const today = localDateStr();
   const [periodIdx, setPeriodIdx] = useState(0);
@@ -144,6 +148,13 @@ export function BudgetView() {
         : { recurring: 0, invoice: 0 },
     [entries, virtualEntries, period, budgetedCategoryIds],
   );
+  const recurringEntries = useMemo(
+    () =>
+      period
+        ? getRecurringEntriesInPeriod(entries, virtualEntries, period, budgetedCategoryIds)
+        : [],
+    [entries, virtualEntries, period, budgetedCategoryIds],
+  );
   const totalBudgeted = (categoryBudgets ?? []).reduce((sum, b) => sum + b.amount, 0);
   const committedTotal = committed.recurring + committed.invoice;
   const sobra = baseIncome - committedTotal - totalBudgeted;
@@ -228,7 +239,11 @@ export function BudgetView() {
           {t('committedSection')}
         </h3>
         <div className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => setShowRecurringDetail(true)}
+            className="w-full flex items-center justify-between gap-3 rounded-lg -mx-1.5 px-1.5 py-1 hover:bg-white/[0.03] transition-colors"
+          >
             <span className="flex items-center gap-2 text-sm text-white/80">
               <RotateCw className="h-3.5 w-3.5 text-muted-foreground/50" />
               {t('committedRecurring')}
@@ -236,7 +251,7 @@ export function BudgetView() {
             <span className="text-sm font-bold text-white font-display">
               {formatCurrency(committed.recurring)}
             </span>
-          </div>
+          </button>
           <div className="flex items-center justify-between gap-3">
             <span className="flex items-center gap-2 text-sm text-white/80">
               <CreditCard className="h-3.5 w-3.5 text-muted-foreground/50" />
@@ -281,6 +296,15 @@ export function BudgetView() {
           </div>
         )}
       </Card>
+
+      <CategoryEntriesDrawer
+        open={showRecurringDetail}
+        onClose={() => setShowRecurringDetail(false)}
+        categoryName={t('committedRecurring')}
+        categoryColor="#7b5cff"
+        periodLabel={period.label}
+        entries={recurringEntries}
+      />
 
       <AddCategoryBudgetDrawer
         open={addDrawerOpen}
@@ -329,7 +353,8 @@ function BudgetCategoryRow({
   spent: number;
   onEdit: () => void;
 }) {
-  const status = getBudgetStatus(spent, budget);
+  const t = useTranslations('budget');
+  const status = getBudgetStatus(spent, budget, category.budgetDirection);
   const percent = budget > 0 ? (spent / budget) * 100 : 0;
   const colors = STATUS_COLORS[status];
 
@@ -351,6 +376,11 @@ function BudgetCategoryRow({
             <CategoryIcon name={category.icon} className="h-3 w-3" />
           </span>
           <span className="font-medium text-white truncate">{category.name}</span>
+          {category.budgetDirection === 'goal' && (
+            <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-blue-400 bg-blue-400/10 rounded px-1.5 py-0.5">
+              {t('directionGoal')}
+            </span>
+          )}
           <Pencil className="h-3 w-3 text-muted-foreground/0 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
         </div>
         <div className="flex items-baseline gap-1 shrink-0">
