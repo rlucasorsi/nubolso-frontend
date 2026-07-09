@@ -9,6 +9,7 @@ export interface UpdateEntryRequest {
   categoryId?: string;
   isPaid?: boolean;
   tipoDespesa?: ExpenseType;
+  templateId?: string | null;
 }
 
 export interface UpdateEntryResponse {

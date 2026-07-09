@@ -29,6 +29,7 @@ import {
   RotateCw,
   Pencil,
   Trash2,
+  Ban,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -139,6 +140,7 @@ export function EntriesView() {
       categoryId: item.categoryId,
       category: item.category,
       isPaid: item.isPaid,
+      isSkipped: item.isSkipped,
       tipoDespesa: item.tipoDespesa,
       templateId: item.templateId,
     }));
@@ -364,7 +366,10 @@ export function EntriesView() {
                       return (
                         <div
                           key={entry.id}
-                          className="group bg-[#1c1a24] border-none rounded-2xl p-3 sm:p-4 transition-all duration-300 flex items-center gap-2.5 sm:gap-4"
+                          className={cn(
+                            'group bg-[#1c1a24] border-none rounded-2xl p-3 sm:p-4 transition-all duration-300 flex items-center gap-2.5 sm:gap-4',
+                            entry.isSkipped && 'opacity-60',
+                          )}
                         >
                           <div
                             className={cn(
@@ -443,7 +448,15 @@ export function EntriesView() {
                                   {dailyT('recurring')}
                                 </Badge>
                               )}
-                              {entry.isVirtual ? (
+                              {entry.isSkipped ? (
+                                <Badge
+                                  variant="outline"
+                                  className="h-4 px-1.5 gap-1 text-[8px] font-bold border-white/10 text-muted-foreground/50 bg-white/[0.02] whitespace-nowrap"
+                                >
+                                  <Ban className="h-2 w-2" />
+                                  {dailyT('skipped')}
+                                </Badge>
+                              ) : entry.isVirtual ? (
                                 <Badge
                                   variant="outline"
                                   className="h-4 px-1.5 text-[8px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10 whitespace-nowrap"
@@ -493,7 +506,15 @@ export function EntriesView() {
                                   {dailyT('recurring')}
                                 </Badge>
                               )}
-                              {entry.isVirtual ? (
+                              {entry.isSkipped ? (
+                                <Badge
+                                  variant="outline"
+                                  className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/50 bg-white/[0.02] whitespace-nowrap"
+                                >
+                                  <Ban className="h-2.5 w-2.5" />
+                                  {dailyT('skipped')}
+                                </Badge>
+                              ) : entry.isVirtual ? (
                                 <Badge
                                   variant="outline"
                                   className="h-5 px-1.5 text-[9px] font-bold border-amber-400/30 text-amber-400 bg-amber-400/10 whitespace-nowrap"

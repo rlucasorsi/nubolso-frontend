@@ -5,6 +5,7 @@ import { useTranslations } from '@/i18n/useTranslations';
 import { cn } from '@/lib/utils';
 import { ExpenseTypeHint } from './ExpenseTypeHelp';
 import { CategorySelect } from './CategorySelect';
+import { RecurringTemplateSelect } from './RecurringTemplateSelect';
 
 export interface EntryFormValues {
   date: string;
@@ -13,6 +14,7 @@ export interface EntryFormValues {
   description: string;
   categoryId?: string;
   tipoDespesa?: ExpenseType;
+  templateId?: string;
 }
 
 // tipoDespesa só existe para despesas — para receita/investimento é sempre null.
@@ -27,9 +29,11 @@ interface EntryFormProps {
   onChange: (values: EntryFormValues) => void;
   errors?: { date?: string; amount?: string; tipoDespesa?: string };
   minDate?: string;
+  // Vínculo com recorrência existente só faz sentido ao editar um lançamento já criado.
+  showTemplateLink?: boolean;
 }
 
-export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps) {
+export function EntryForm({ values, onChange, errors, minDate, showTemplateLink }: EntryFormProps) {
   const t = useTranslations('entry');
 
   const expenseTypeOptions: { value: 'fixa' | 'variavel'; label: string }[] = [
@@ -60,8 +64,9 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
               type,
               // Ao sair de "despesa", zera a classificação (regra: null para outros tipos).
               tipoDespesa: type === 'expense' ? values.tipoDespesa : null,
-              // Categorias são por tipo: ao trocar o tipo, limpa a categoria selecionada.
+              // Categorias e recorrências são por tipo: ao trocar o tipo, limpa a seleção.
               categoryId: type === values.type ? values.categoryId : undefined,
+              templateId: type === values.type ? values.templateId : undefined,
             })
           }
         />
@@ -121,6 +126,14 @@ export function EntryForm({ values, onChange, errors, minDate }: EntryFormProps)
         onChange={(amount) => onChange({ ...values, amount })}
         error={errors?.amount}
       />
+
+      {showTemplateLink && (
+        <RecurringTemplateSelect
+          type={values.type}
+          value={values.templateId}
+          onChange={(templateId) => onChange({ ...values, templateId })}
+        />
+      )}
     </div>
   );
 }

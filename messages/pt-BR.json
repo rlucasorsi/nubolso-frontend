@@ -248,7 +248,11 @@
     "expenseTypeNone": "Sem tipo",
     "expenseTypeFixedHint": "Recorrente e previsível — aluguel, contas e assinaturas.",
     "expenseTypeVariableHint": "Varia ou pode ser evitada — lazer, mercado e restaurantes.",
-    "expenseTypeHelpTitle": "O que é despesa fixa e variável?"
+    "expenseTypeHelpTitle": "O que é despesa fixa e variável?",
+    "loading": "Carregando...",
+    "linkTemplateLabel": "Vincular à recorrência",
+    "linkTemplateNone": "Nenhuma",
+    "linkTemplateHint": "Marca este lançamento como a efetivação de uma recorrência já cadastrada."
   },
   "category": {
     "label": "Categoria",

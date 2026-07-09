@@ -48,6 +48,7 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
         description: entry.description ?? '',
         categoryId: entry.categoryId ?? undefined,
         tipoDespesa: entry.tipoDespesa ?? null,
+        templateId: entry.templateId ?? undefined,
       });
       setErrors({});
     }
@@ -81,6 +82,7 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
         date: values.date,
         categoryId: values.categoryId,
         tipoDespesa: resolveTipoDespesa(values),
+        templateId: values.templateId ?? null,
       },
       {
         onSuccess: onClose,
@@ -99,7 +101,13 @@ export function EditEntryDrawer({ entry, open, onClose, minDate }: EditEntryDraw
         </DrawerHeader>
 
         <div className="flex-1 px-6 py-4">
-          <EntryForm values={values} onChange={setValues} errors={errors} minDate={minDate} />
+          <EntryForm
+            values={values}
+            onChange={setValues}
+            errors={errors}
+            minDate={minDate}
+            showTemplateLink
+          />
         </div>
 
         <DrawerFooter>

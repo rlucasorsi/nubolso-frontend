@@ -248,7 +248,11 @@
     "expenseTypeNone": "Sin tipo",
     "expenseTypeFixedHint": "Recurrente y previsible — alquiler, servicios y suscripciones.",
     "expenseTypeVariableHint": "Varía o puede evitarse — ocio, mercado y restaurantes.",
-    "expenseTypeHelpTitle": "¿Qué son gastos fijos y variables?"
+    "expenseTypeHelpTitle": "¿Qué son gastos fijos y variables?",
+    "loading": "Cargando...",
+    "linkTemplateLabel": "Vincular a recurrencia",
+    "linkTemplateNone": "Ninguna",
+    "linkTemplateHint": "Marca este movimiento como la confirmación de una recurrencia ya registrada."
   },
   "category": {
     "label": "Categoría",
