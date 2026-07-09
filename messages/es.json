@@ -294,6 +294,8 @@
     "committedSection": "Comprometido",
     "committedRecurring": "Recurrentes",
     "committedInvoice": "Factura de tarjeta",
+    "committedRecurringRealized": "Ya efectuado",
+    "committedRecurringPending": "Todavía pendiente",
     "leftoverLabel": "Disponible",
     "categoriesSection": "Categorías con presupuesto",
     "add": "Agregar",

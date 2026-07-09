@@ -72,29 +72,42 @@ export function getRecurringEntriesInPeriod(
 
 // "Comprometido" automático no período: recorrentes (só o que realmente vem de
 // um template — lançamentos avulsos não entram aqui) e fatura de cartão
-// (sempre à parte, é um meio de pagamento, não uma categoria).
+// (sempre à parte, é um meio de pagamento, não uma categoria). Recorrentes
+// vem quebrado em já efetivado (lançamento real, isVirtual false) x pendente
+// (estimativa virtual, ainda não confirmado) — soma dos dois = recurring.
 export function getCommittedTotals(
   entries: CashFlowEntry[],
   virtualEntries: CashFlowEntry[],
   period: Pick<Period, 'startDate' | 'endDate'>,
   budgetedCategoryIds: Set<string>,
-): { recurring: number; invoice: number } {
+): { recurring: number; recurringRealized: number; recurringPending: number; invoice: number } {
   const periodEntries = entriesInPeriod(entries, virtualEntries, period).filter(
     (e) => e.type === 'expense' || e.type === 'investment',
   );
 
-  const recurring = getRecurringEntriesInPeriod(
+  const recurringEntries = getRecurringEntriesInPeriod(
     entries,
     virtualEntries,
     period,
     budgetedCategoryIds,
-  ).reduce((sum, e) => sum + e.amount, 0);
+  );
+  const recurringRealized = recurringEntries
+    .filter((e) => !e.isVirtual)
+    .reduce((sum, e) => sum + e.amount, 0);
+  const recurringPending = recurringEntries
+    .filter((e) => e.isVirtual)
+    .reduce((sum, e) => sum + e.amount, 0);
 
   const invoice = periodEntries
     .filter((e) => !!e.creditCardInvoiceId)
     .reduce((sum, e) => sum + e.amount, 0);
 
-  return { recurring, invoice };
+  return {
+    recurring: recurringRealized + recurringPending,
+    recurringRealized,
+    recurringPending,
+    invoice,
+  };
 }
 
 // Categoria tipo 'goal' (ex.: Investimento) inverte a leitura: atingir/ultrapassar

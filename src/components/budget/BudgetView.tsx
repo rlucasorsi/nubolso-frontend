@@ -145,7 +145,7 @@ export function BudgetView() {
     () =>
       period
         ? getCommittedTotals(entries, virtualEntries, period, budgetedCategoryIds)
-        : { recurring: 0, invoice: 0 },
+        : { recurring: 0, recurringRealized: 0, recurringPending: 0, invoice: 0 },
     [entries, virtualEntries, period, budgetedCategoryIds],
   );
   const recurringEntries = useMemo(
@@ -252,6 +252,26 @@ export function BudgetView() {
               {formatCurrency(committed.recurring)}
             </span>
           </button>
+          {committed.recurring > 0 && (
+            <div className="pl-[22px] space-y-1.5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[11px] text-muted-foreground/50">
+                  {t('committedRecurringRealized')}
+                </span>
+                <span className="text-xs font-semibold text-emerald-400 font-display">
+                  {formatCurrency(committed.recurringRealized)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[11px] text-muted-foreground/50">
+                  {t('committedRecurringPending')}
+                </span>
+                <span className="text-xs font-semibold text-amber-400 font-display">
+                  {formatCurrency(committed.recurringPending)}
+                </span>
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between gap-3">
             <span className="flex items-center gap-2 text-sm text-white/80">
               <CreditCard className="h-3.5 w-3.5 text-muted-foreground/50" />

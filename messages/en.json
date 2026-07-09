@@ -294,6 +294,8 @@
     "committedSection": "Committed",
     "committedRecurring": "Recurring",
     "committedInvoice": "Card invoice",
+    "committedRecurringRealized": "Already posted",
+    "committedRecurringPending": "Still upcoming",
     "leftoverLabel": "Leftover",
     "categoriesSection": "Budgeted categories",
     "add": "Add",
