@@ -4,7 +4,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
 import { useDeleteEntry } from '@/modules/entries/hooks/use-delete-entry';
+import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
+import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
 import { ServerErrorState } from '@/components/ui/server-error-state';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { toast } from 'sonner';
 import {
   CashFlowEntry,
   FlowType,
@@ -27,9 +31,11 @@ import {
   ArrowDownLeft,
   CircleDollarSign,
   RotateCw,
+  RotateCcw,
   Pencil,
   Trash2,
   Ban,
+  CreditCard,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -81,7 +87,21 @@ export function EntriesView() {
   const [expenseTypeFilter, setExpenseTypeFilter] = useState<'all' | 'fixa' | 'variavel'>('all');
   const [editingEntry, setEditingEntry] = useState<CashFlowEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<CashFlowEntry | null>(null);
+  const [reopenInvoiceId, setReopenInvoiceId] = useState<string | null>(null);
   const { mutate: deleteEntry, isPending: isDeleting } = useDeleteEntry();
+  const { data: invoicesData } = useGetAllInvoices();
+  const reopenInvoiceMutation = useReopenInvoice();
+
+  // Mapeia a Transaction de uma fatura paga de volta pro id da fatura, pra
+  // identificar essas entradas na lista e não deixar editar valor/vincular
+  // recorrência nelas — a fatura já é uma despesa de cartão de crédito.
+  const transactionToInvoiceId = useMemo(() => {
+    const map = new Map<string, string>();
+    (invoicesData ?? []).forEach((invoice) => {
+      if (invoice.transactionId) map.set(invoice.transactionId, invoice.id);
+    });
+    return map;
+  }, [invoicesData]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
@@ -143,6 +163,7 @@ export function EntriesView() {
       isSkipped: item.isSkipped,
       tipoDespesa: item.tipoDespesa,
       templateId: item.templateId,
+      creditCardInvoiceId: transactionToInvoiceId.get(item.id),
     }));
 
     if (showRecurring) {
@@ -189,6 +210,7 @@ export function EntriesView() {
     filters,
     expenseTypeFilter,
     minDate,
+    transactionToInvoiceId,
   ]);
 
   const groupedByDay = useMemo(() => {
@@ -448,6 +470,15 @@ export function EntriesView() {
                                   {dailyT('recurring')}
                                 </Badge>
                               )}
+                              {entry.creditCardInvoiceId && (
+                                <Badge
+                                  variant="outline"
+                                  className="h-4 px-1.5 gap-1 text-[8px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02] whitespace-nowrap"
+                                >
+                                  <CreditCard className="h-2 w-2" />
+                                  {dailyT('invoice')}
+                                </Badge>
+                              )}
                               {entry.isSkipped ? (
                                 <Badge
                                   variant="outline"
@@ -506,6 +537,15 @@ export function EntriesView() {
                                   {dailyT('recurring')}
                                 </Badge>
                               )}
+                              {entry.creditCardInvoiceId && (
+                                <Badge
+                                  variant="outline"
+                                  className="h-5 px-1.5 gap-1 text-[9px] font-bold border-white/10 text-muted-foreground/70 bg-white/[0.02] whitespace-nowrap"
+                                >
+                                  <CreditCard className="h-2.5 w-2.5" />
+                                  {dailyT('invoice')}
+                                </Badge>
+                              )}
                               {entry.isSkipped ? (
                                 <Badge
                                   variant="outline"
@@ -532,21 +572,33 @@ export function EntriesView() {
                             </div>
                           </div>
 
-                          {!entry.isVirtual && (
+                          {!entry.isVirtual && entry.creditCardInvoiceId ? (
                             <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                               <button
-                                onClick={() => setEditingEntry(entry)}
+                                onClick={() => setReopenInvoiceId(entry.creditCardInvoiceId as string)}
+                                title={dailyT('reopenInvoice')}
                                 className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl text-muted-foreground/50 hover:text-primary hover:bg-primary/10 transition-all"
                               >
-                                <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                              </button>
-                              <button
-                                onClick={() => setDeletingEntry(entry)}
-                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all"
-                              >
-                                <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               </button>
                             </div>
+                          ) : (
+                            !entry.isVirtual && (
+                              <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                                <button
+                                  onClick={() => setEditingEntry(entry)}
+                                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl text-muted-foreground/50 hover:text-primary hover:bg-primary/10 transition-all"
+                                >
+                                  <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => setDeletingEntry(entry)}
+                                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all"
+                                >
+                                  <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                </button>
+                              </div>
+                            )
                           )}
                         </div>
                       );
@@ -641,6 +693,27 @@ export function EntriesView() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ConfirmDialog
+        open={reopenInvoiceId !== null}
+        onOpenChange={(open) => !open && setReopenInvoiceId(null)}
+        variant="warning"
+        icon={<RotateCcw className="w-8 h-8" />}
+        title={dailyT('reopenTitle')}
+        description={dailyT('reopenDescription')}
+        cancelLabel={dailyT('cancel')}
+        actionLabel={reopenInvoiceMutation.isPending ? dailyT('reopening') : dailyT('reopen')}
+        actionDisabled={reopenInvoiceMutation.isPending}
+        onAction={async () => {
+          if (!reopenInvoiceId) return;
+          try {
+            await reopenInvoiceMutation.mutateAsync(reopenInvoiceId);
+            setReopenInvoiceId(null);
+          } catch {
+            toast.error(dailyT('reopenError'));
+          }
+        }}
+      />
     </div>
   );
 }
