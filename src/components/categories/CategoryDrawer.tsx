@@ -84,7 +84,13 @@ export function CategoryDrawer({
     }
     setNameError(undefined);
 
-    const payload = { name: trimmed, type, icon, color, includeInBalanceBase };
+    const payload = {
+      name: trimmed,
+      type,
+      icon,
+      color,
+      includeInBalanceBase,
+    };
     const onSuccess = () => onClose();
     const onError = (e: Error) => toast.error(e.message || t('saveError'));
 

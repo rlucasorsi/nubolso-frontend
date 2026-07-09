@@ -10,6 +10,7 @@ import {
   CreditCard,
   RotateCw,
   Target,
+  Wallet,
   Tag,
   Settings,
   LogOut,
@@ -41,6 +42,7 @@ export function SideMenuDrawer({ open, onClose, userName, userEmail }: SideMenuD
     { label: t('cards'), href: '/cards', icon: CreditCard },
     { label: t('recurring'), href: '/recurring', icon: RotateCw },
     { label: t('goals'), href: '/goals', icon: Target },
+    { label: t('budget'), href: '/orcamento', icon: Wallet },
     { label: t('categories'), href: '/categories', icon: Tag },
     { label: t('settings'), href: '/settings', icon: Settings },
   ];

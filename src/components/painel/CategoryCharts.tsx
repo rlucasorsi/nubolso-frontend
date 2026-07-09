@@ -17,6 +17,12 @@ import {
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AmountInputField } from '@/components/ui/form-field';
+import {
+  Sheet,
+  DrawerContent,
+  DrawerHeader,
+  SheetTitle,
+} from '@/components/ui/app-drawer';
 import { CashFlowEntry, FlowType, Period, formatCurrency } from '@/lib/cashflow';
 import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -150,7 +156,11 @@ export function CategoryCharts({ period, entries, virtualEntries, minDate }: Cat
 
   return (
     <div className="px-5 space-y-6 pb-4">
-      <DistributionChart title={t('chartsCategoryTitle')} subtitle={t('chartsCategorySubtitle')}>
+      <DistributionChart
+        title={t('chartsCategoryTitle')}
+        subtitle={t('chartsCategorySubtitle')}
+        allowAll={false}
+      >
         {(types) => {
           const data = groupByCategory(types);
           return (
@@ -164,7 +174,11 @@ export function CategoryCharts({ period, entries, virtualEntries, minDate }: Cat
         }}
       </DistributionChart>
 
-      <DistributionChart title={t('chartsRankingTitle')} subtitle={t('chartsRankingSubtitle')}>
+      <DistributionChart
+        title={t('chartsRankingTitle')}
+        subtitle={t('chartsRankingSubtitle')}
+        allowAll={false}
+      >
         {(types) => {
           const data = groupByCategory(types);
           return (
@@ -243,19 +257,28 @@ const ALL_TYPES: FlowType[] = ['income', 'expense', 'investment'];
 function DistributionChart({
   title,
   subtitle,
+  allowAll = true,
   children,
 }: {
   title: string;
   subtitle: string;
+  // Quando false, remove o chip "Todas" e força seleção única entre os tipos.
+  allowAll?: boolean;
   children: (types: Set<FlowType>) => React.ReactNode;
 }) {
   const t = useTranslations('dashboard');
   const typeT = useTranslations('entry');
-  const [selected, setSelected] = useState<Set<FlowType>>(new Set(ALL_TYPES));
+  const [selected, setSelected] = useState<Set<FlowType>>(
+    allowAll ? new Set(ALL_TYPES) : new Set(['expense']),
+  );
 
-  const isAll = selected.size === ALL_TYPES.length;
+  const isAll = allowAll && selected.size === ALL_TYPES.length;
 
   const toggle = (type: FlowType) => {
+    if (!allowAll) {
+      setSelected(new Set([type]));
+      return;
+    }
     setSelected((prev) => {
       // Vindo de "Todas", clicar num tipo seleciona apenas ele (intuitivo),
       // em vez de removê-lo do conjunto completo.
@@ -285,13 +308,15 @@ function DistributionChart({
         <ChartHeader icon={icon} title={title} subtitle={subtitle} />
 
         <div className="flex items-center gap-1.5 flex-wrap">
-          <FilterChip active={isAll} onClick={() => setSelected(new Set(ALL_TYPES))}>
-            {t('chartsAll')}
-          </FilterChip>
+          {allowAll && (
+            <FilterChip active={isAll} onClick={() => setSelected(new Set(ALL_TYPES))}>
+              {t('chartsAll')}
+            </FilterChip>
+          )}
           {ALL_TYPES.map((type) => (
             <FilterChip
               key={type}
-              active={!isAll && selected.has(type)}
+              active={allowAll ? !isAll && selected.has(type) : selected.has(type)}
               onClick={() => toggle(type)}
             >
               {typeT(type)}
@@ -426,7 +451,7 @@ function shortDate(dateStr: string): string {
   return `${d}/${m}`;
 }
 
-function IncomeBaseCard({
+export function IncomeBaseCard({
   baseIncome,
   isManual,
   manualValue,
@@ -449,113 +474,121 @@ function IncomeBaseCard({
 
   return (
     <div className="rounded-2xl bg-white/[0.03] border border-white/5 px-4 py-3 space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-            {t('chartsValidIncomeBase')}
-          </p>
-          <p className="text-lg font-bold text-emerald-400 font-display truncate">
-            {formatCurrency(baseIncome)}
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
+          {t('chartsValidIncomeBase')}
+        </p>
         <button
           type="button"
-          onClick={() => setOpen((o) => !o)}
-          className={cn(
-            'shrink-0 h-9 px-3 rounded-xl flex items-center gap-1.5 text-xs font-bold border transition-all',
-            open
-              ? 'bg-primary/20 text-primary border-primary/40'
-              : 'bg-white/5 text-muted-foreground border-white/10 hover:bg-white/10 hover:text-white',
-          )}
+          onClick={() => setOpen(true)}
+          className="shrink-0 h-9 w-9 rounded-xl flex items-center justify-center border bg-white/5 text-muted-foreground border-white/10 hover:bg-white/10 hover:text-white transition-all"
+          title={t('chartsBaseAdjust')}
+          aria-label={t('chartsBaseAdjust')}
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
-          {t('chartsBaseAdjust')}
         </button>
       </div>
 
-      {open && (
-        <div className="space-y-3 pt-3 border-t border-white/5">
-          <div className="flex gap-1.5">
-            <button
-              type="button"
-              onClick={() => setManualValue(null)}
-              className={cn(
-                'flex-1 h-9 rounded-xl text-xs font-bold transition-all',
-                !isManual
-                  ? 'bg-primary text-white'
-                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
-              )}
-            >
-              {t('chartsBaseAuto')}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (!isManual) setManualValue(Math.round(baseIncome * 100) / 100);
-              }}
-              className={cn(
-                'flex-1 h-9 rounded-xl text-xs font-bold transition-all',
-                isManual
-                  ? 'bg-primary text-white'
-                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
-              )}
-            >
-              {t('chartsBaseManual')}
-            </button>
-          </div>
+      <p className="text-3xl font-bold text-emerald-400 font-display truncate">
+        {formatCurrency(baseIncome)}
+      </p>
 
-          {isManual ? (
-            <AmountInputField
-              label={t('chartsBaseManualLabel')}
-              value={manualValue !== null ? manualValue.toFixed(2).replace('.', ',') : ''}
-              onChange={(v) => setManualValue(parseFloat(v.replace(',', '.')) || 0)}
-              inputClassName="text-sm h-10"
-            />
-          ) : (
-            <div className="space-y-1.5">
-              <p className="text-[11px] text-muted-foreground/60">{t('chartsBaseAutoHint')}</p>
-              {incomeEntries.length === 0 ? (
-                <p className="text-xs text-muted-foreground/50 py-2">{t('chartsBaseNoIncome')}</p>
-              ) : (
-                <div className="space-y-0.5">
-                  {[...incomeEntries]
-                    .sort((a, b) => b.date.localeCompare(a.date))
-                    .map((e) => {
-                      const counts = entryCounts(e);
-                      return (
-                        <label
-                          key={e.id}
-                          className="flex items-center gap-3 py-1.5 px-1.5 -mx-1.5 rounded-lg hover:bg-white/[0.03] cursor-pointer"
-                        >
-                          <Checkbox
-                            checked={counts}
-                            onCheckedChange={(c) => setEntryOverride(e.id, c === true)}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm text-white truncate">
-                              {e.description || typeT('income')}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground/50">
-                              {shortDate(e.date)}
-                            </p>
-                          </div>
-                          <span
-                            className={cn(
-                              'text-sm font-semibold tabular-nums shrink-0',
-                              counts ? 'text-white' : 'text-muted-foreground/40 line-through',
-                            )}
-                          >
-                            {formatCurrency(e.amount)}
-                          </span>
-                        </label>
-                      );
-                    })}
-                </div>
-              )}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <DrawerContent>
+          <DrawerHeader onClose={() => setOpen(false)}>
+            <SheetTitle className="text-2xl font-bold font-display text-primary">
+              {t('chartsBaseAdjust')}
+            </SheetTitle>
+          </DrawerHeader>
+
+          <div className="flex-1 px-6 py-4 space-y-4">
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => setManualValue(null)}
+                className={cn(
+                  'flex-1 h-9 rounded-xl text-xs font-bold transition-all',
+                  !isManual
+                    ? 'bg-primary text-white'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                {t('chartsBaseAuto')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isManual) setManualValue(Math.round(baseIncome * 100) / 100);
+                }}
+                className={cn(
+                  'flex-1 h-9 rounded-xl text-xs font-bold transition-all',
+                  isManual
+                    ? 'bg-primary text-white'
+                    : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+                )}
+              >
+                {t('chartsBaseManual')}
+              </button>
             </div>
-          )}
-        </div>
-      )}
+
+            {isManual ? (
+              <AmountInputField
+                label={t('chartsBaseManualLabel')}
+                value={manualValue !== null ? manualValue.toFixed(2).replace('.', ',') : ''}
+                onChange={(v) => setManualValue(parseFloat(v.replace(',', '.')) || 0)}
+                inputClassName="text-sm h-10"
+              />
+            ) : (
+              <div className="space-y-1.5">
+                <p className="text-2xl font-bold text-emerald-400 font-display">
+                  {formatCurrency(baseIncome)}
+                </p>
+                <p className="text-[11px] text-muted-foreground/60">{t('chartsBaseAutoHint')}</p>
+                {incomeEntries.length === 0 ? (
+                  <p className="text-xs text-muted-foreground/50 py-2">
+                    {t('chartsBaseNoIncome')}
+                  </p>
+                ) : (
+                  <div className="space-y-0.5">
+                    {[...incomeEntries]
+                      .sort((a, b) => b.date.localeCompare(a.date))
+                      .map((e) => {
+                        const counts = entryCounts(e);
+                        return (
+                          <label
+                            key={e.id}
+                            className="flex items-center gap-3 py-1.5 px-1.5 -mx-1.5 rounded-lg hover:bg-white/[0.03] cursor-pointer"
+                          >
+                            <Checkbox
+                              checked={counts}
+                              onCheckedChange={(c) => setEntryOverride(e.id, c === true)}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm text-white truncate">
+                                {e.description || typeT('income')}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground/50">
+                                {shortDate(e.date)}
+                              </p>
+                            </div>
+                            <span
+                              className={cn(
+                                'text-sm font-semibold tabular-nums shrink-0',
+                                counts ? 'text-white' : 'text-muted-foreground/40 line-through',
+                              )}
+                            >
+                              {formatCurrency(e.amount)}
+                            </span>
+                          </label>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </DrawerContent>
+      </Sheet>
     </div>
   );
 }

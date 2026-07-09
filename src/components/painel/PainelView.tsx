@@ -20,6 +20,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslations } from '@/i18n/useTranslations';
 import { PendingEntriesView } from './PendingEntriesView';
 import { usePendingAlertDays, getPendingAlertStatus } from '@/hooks/usePendingAlertDays';
+import { useGetCategories } from '@/modules/categories/hooks/use-get-categories';
+import { useGetCategoryBudgets } from '@/modules/category-budgets/hooks/use-get-category-budgets';
+import { getCategorySpent, getBudgetStatus } from '@/lib/budget';
+import { toast } from 'sonner';
 
 interface PainelViewProps {
   onAddEntry: (entry: Omit<CashFlowEntry, 'id'>) => void;
@@ -45,8 +49,12 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
     refetchAll,
   } = useCashFlow();
   const { alertDays } = usePendingAlertDays();
+  const { data: categories } = useGetCategories();
+  const tb = useTranslations('budget');
 
   const [periodIdx, setPeriodIdx] = useState(0);
+  const period = periods[periodIdx];
+  const { data: categoryBudgets } = useGetCategoryBudgets(period?.startDate ?? '');
   const [mounted, setMounted] = useState(false);
   const [sheet, setSheet] = useState<DailyEntriesState | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
@@ -56,6 +64,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   const [showPastDays, setShowPastDays] = useState(false);
   const userNavigatedRef = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const warnedBudgetsRef = useRef<Set<string>>(new Set());
 
   const findTodayPeriodIdx = () => {
     const today = localDateStr();
@@ -88,7 +97,25 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
     return () => scrollEl.removeEventListener('scroll', onScroll);
   }, [mounted]);
 
-  const period = periods[periodIdx];
+  // Aviso instantâneo (enquanto o app está aberto) quando um lançamento faz o
+  // gasto de uma categoria orçada (no período atual) cruzar o limite.
+  // Complementa (não substitui) o job diário do backend, que cobre o caso do
+  // app fechado.
+  useEffect(() => {
+    if (!period || !categories || !categoryBudgets) return;
+    const catMap = new Map(categories.map((c) => [c.id, c]));
+    for (const budget of categoryBudgets) {
+      const category = catMap.get(budget.categoryId);
+      if (!category || budget.amount <= 0) continue;
+      const spent = getCategorySpent(entries, virtualEntries, budget.categoryId, period);
+      const status = getBudgetStatus(spent, budget.amount);
+      const key = `${period.startDate}:${budget.categoryId}`;
+      if (status === 'danger' && !warnedBudgetsRef.current.has(key)) {
+        warnedBudgetsRef.current.add(key);
+        toast.warning(tb('overspendToast', { category: category.name }));
+      }
+    }
+  }, [entries, virtualEntries, categories, categoryBudgets, period, tb]);
 
   if (!mounted) return null;
 
