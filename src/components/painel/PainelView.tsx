@@ -5,6 +5,7 @@ import { PeriodNav } from './PeriodNav';
 import { DayList } from './DayList';
 import { DailyEntriesDrawer, DailyEntriesState } from './DailyEntriesDrawer';
 import { DashboardSummary } from './DashboardSummary';
+import { BudgetSummaryCard } from './BudgetSummaryCard';
 import { CategoryCharts } from './CategoryCharts';
 import { InvestmentByPeriodChart } from './InvestmentByPeriodChart';
 import { AddEntryDrawer } from './AddEntryDrawer';
@@ -262,6 +263,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
             balanceSettings={balanceSettings}
             onSelectInvoice={setSelectedInvoiceId}
           />
+          <BudgetSummaryCard period={period} entries={entries} virtualEntries={virtualEntries} />
           <CategoryCharts
             period={period}
             entries={entries}

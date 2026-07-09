@@ -317,7 +317,11 @@
     "budgetAmountLabel": "Monthly budget",
     "saveBudget": "Save",
     "removeBudget": "Remove budget",
-    "createNewCategory": "Create new category"
+    "createNewCategory": "Create new category",
+    "summaryViewAll": "View all",
+    "summaryIncome": "Income",
+    "summaryBudgeted": "Budgeted",
+    "summaryNoBudgets": "No budgets set up yet"
   },
   "periodNav": {
     "today": "Today",

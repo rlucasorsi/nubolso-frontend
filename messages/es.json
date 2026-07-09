@@ -317,7 +317,11 @@
     "budgetAmountLabel": "Presupuesto mensual",
     "saveBudget": "Guardar",
     "removeBudget": "Quitar presupuesto",
-    "createNewCategory": "Crear nueva categoría"
+    "createNewCategory": "Crear nueva categoría",
+    "summaryViewAll": "Ver todo",
+    "summaryIncome": "Ingreso",
+    "summaryBudgeted": "Presupuestado",
+    "summaryNoBudgets": "Todavía no hay presupuestos definidos"
   },
   "periodNav": {
     "today": "Hoy",

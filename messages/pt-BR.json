@@ -317,7 +317,11 @@
     "budgetAmountLabel": "Orçamento mensal",
     "saveBudget": "Salvar",
     "removeBudget": "Remover orçamento",
-    "createNewCategory": "Criar nova categoria"
+    "createNewCategory": "Criar nova categoria",
+    "summaryViewAll": "Ver tudo",
+    "summaryIncome": "Renda",
+    "summaryBudgeted": "Orçado",
+    "summaryNoBudgets": "Nenhum orçamento definido ainda"
   },
   "periodNav": {
     "today": "Hoje",
