@@ -18,7 +18,10 @@
     "menuDescription": "Main navigation menu",
     "language": "Language",
     "more": "More",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "tagline": "Financial Management",
+    "expandSidebar": "Keep menu open",
+    "collapseSidebar": "Collapse menu"
   },
   "notifications": {
     "title": "Notifications",
@@ -296,10 +299,10 @@
     "subtitle": "Where each part of your income goes this cycle",
     "loading": "Loading budget...",
     "committedSection": "Committed",
-    "committedRecurring": "Recurring",
     "committedInvoice": "Card invoice",
     "committedRecurringRealized": "Already posted",
-    "committedRecurringPending": "Still upcoming",
+    "committedPending": "Pending",
+    "noCommitments": "No commitments this cycle.",
     "leftoverLabel": "Leftover",
     "categoriesSection": "Budgeted categories",
     "add": "Add",

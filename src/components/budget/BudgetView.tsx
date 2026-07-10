@@ -1,26 +1,39 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Wallet, RotateCw, CreditCard, Loader2, Pencil, Plus } from 'lucide-react';
+import {
+  Wallet,
+  CreditCard,
+  Loader2,
+  Pencil,
+  Plus,
+  CheckCircle2,
+  Clock,
+  Ban,
+  Info,
+} from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useCashFlow } from '@/hooks/useCashFlow';
 import { useGetCategories } from '@/modules/categories/hooks/use-get-categories';
 import { useGetCategoryBudgets } from '@/modules/category-budgets/hooks/use-get-category-budgets';
 import { useIncomeBaseConfig } from '@/hooks/useIncomeBaseConfig';
-import { FlowType, formatCurrency } from '@/lib/cashflow';
+import { CashFlowEntry, FlowType, formatCurrency } from '@/lib/cashflow';
 import {
   entriesInPeriod,
   getCategorySpent,
   getCommittedTotals,
   getRecurringEntriesInPeriod,
+  getInvoiceGroups,
   getBudgetStatus,
   BudgetStatus,
+  InvoiceGroup,
 } from '@/lib/budget';
 import { cn, localDateStr } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { IncomeBaseCard } from '@/components/painel/CategoryCharts';
 import { CategoryEntriesDrawer } from '@/components/painel/CategoryEntriesDrawer';
+import { EditEntryDrawer } from '@/components/painel/EditEntryDrawer';
 import { PeriodNav } from '@/components/painel/PeriodNav';
 import { CategoryDrawer } from '@/components/categories/CategoryDrawer';
 import { BudgetAmountDrawer } from './BudgetAmountDrawer';
@@ -29,6 +42,12 @@ import { CategoryIcon } from '@/components/categories/category-icons';
 import { Category } from '@/modules/categories/service/categories-service';
 import { CategoryBudget } from '@/modules/category-budgets/service/category-budgets-service';
 import { ServerErrorState } from '@/components/ui/server-error-state';
+
+// Mesmo critério de edição usado em CategoryEntriesDrawer.tsx — só lançamento
+// real (não estimativa, não fatura, não ignorado) pode ser editado direto.
+function isEditableEntry(e: CashFlowEntry): boolean {
+  return !e.isVirtual && !e.creditCardInvoiceId && !e.isSkipped;
+}
 
 const STATUS_COLORS: Record<BudgetStatus, { text: string; bar: string }> = {
   ok: { text: 'text-emerald-500', bar: '#10b981' },
@@ -55,7 +74,8 @@ export function BudgetView() {
   const [budgetDrawerCategory, setBudgetDrawerCategory] = useState<Category | null>(null);
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [addDrawerOpen, setAddDrawerOpen] = useState(false);
-  const [showRecurringDetail, setShowRecurringDetail] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<CashFlowEntry | null>(null);
+  const [invoiceDrawerGroup, setInvoiceDrawerGroup] = useState<InvoiceGroup | null>(null);
 
   const today = localDateStr();
   const [periodIdx, setPeriodIdx] = useState(0);
@@ -145,18 +165,33 @@ export function BudgetView() {
     () =>
       period
         ? getCommittedTotals(entries, virtualEntries, period, budgetedCategoryIds)
-        : { recurring: 0, recurringRealized: 0, recurringPending: 0, invoice: 0 },
+        : {
+            recurring: 0,
+            recurringRealized: 0,
+            recurringPending: 0,
+            invoice: 0,
+            invoiceRealized: 0,
+            invoicePending: 0,
+          },
     [entries, virtualEntries, period, budgetedCategoryIds],
   );
   const recurringEntries = useMemo(
     () =>
       period
-        ? getRecurringEntriesInPeriod(entries, virtualEntries, period, budgetedCategoryIds)
+        ? [...getRecurringEntriesInPeriod(entries, virtualEntries, period, budgetedCategoryIds)].sort(
+            (a, b) => a.date.localeCompare(b.date),
+          )
         : [],
     [entries, virtualEntries, period, budgetedCategoryIds],
   );
+  const invoiceGroups = useMemo(
+    () => (period ? getInvoiceGroups(entries, virtualEntries, period) : []),
+    [entries, virtualEntries, period],
+  );
   const totalBudgeted = (categoryBudgets ?? []).reduce((sum, b) => sum + b.amount, 0);
   const committedTotal = committed.recurring + committed.invoice;
+  const committedRealizedTotal = committed.recurringRealized + committed.invoiceRealized;
+  const committedPendingTotal = committed.recurringPending + committed.invoicePending;
   const sobra = baseIncome - committedTotal - totalBudgeted;
   const sobraStatus: BudgetStatus =
     sobra < 0 ? 'danger' : baseIncome > 0 && sobra < baseIncome * 0.1 ? 'warning' : 'ok';
@@ -235,53 +270,52 @@ export function BudgetView() {
       </div>
 
       <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-7 space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50">
-          {t('committedSection')}
-        </h3>
-        <div className="space-y-3">
-          <button
-            type="button"
-            onClick={() => setShowRecurringDetail(true)}
-            className="w-full flex items-center justify-between gap-3 rounded-lg -mx-1.5 px-1.5 py-1 hover:bg-white/[0.03] transition-colors"
-          >
-            <span className="flex items-center gap-2 text-sm text-white/80">
-              <RotateCw className="h-3.5 w-3.5 text-muted-foreground/50" />
-              {t('committedRecurring')}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50">
+            {t('committedSection')}
+          </h3>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold">
+              <span className="uppercase tracking-wider text-muted-foreground/50">
+                {t('committedRecurringRealized')}
+              </span>
+              <span className="text-emerald-400 font-display">
+                {formatCurrency(committedRealizedTotal)}
+              </span>
             </span>
-            <span className="text-sm font-bold text-white font-display">
-              {formatCurrency(committed.recurring)}
-            </span>
-          </button>
-          {committed.recurring > 0 && (
-            <div className="pl-[22px] space-y-1.5">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[11px] text-muted-foreground/50">
-                  {t('committedRecurringRealized')}
-                </span>
-                <span className="text-xs font-semibold text-emerald-400 font-display">
-                  {formatCurrency(committed.recurringRealized)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[11px] text-muted-foreground/50">
-                  {t('committedRecurringPending')}
-                </span>
-                <span className="text-xs font-semibold text-amber-400 font-display">
-                  {formatCurrency(committed.recurringPending)}
-                </span>
-              </div>
-            </div>
-          )}
-          <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-sm text-white/80">
-              <CreditCard className="h-3.5 w-3.5 text-muted-foreground/50" />
-              {t('committedInvoice')}
-            </span>
-            <span className="text-sm font-bold text-white font-display">
-              {formatCurrency(committed.invoice)}
+            <span className="flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold">
+              <span className="uppercase tracking-wider text-muted-foreground/50">
+                {t('committedPending')}
+              </span>
+              <span className="text-amber-400 font-display">
+                {formatCurrency(committedPendingTotal)}
+              </span>
             </span>
           </div>
         </div>
+
+        {recurringEntries.length === 0 && invoiceGroups.length === 0 ? (
+          <p className="text-sm text-muted-foreground/50 py-4 text-center">
+            {t('noCommitments')}
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {recurringEntries.map((entry) => (
+              <CommittedEntryRow
+                key={entry.id}
+                entry={entry}
+                onClick={() => isEditableEntry(entry) && setEditingEntry(entry)}
+              />
+            ))}
+            {invoiceGroups.map((group) => (
+              <CommittedInvoiceRow
+                key={group.id}
+                group={group}
+                onClick={() => setInvoiceDrawerGroup(group)}
+              />
+            ))}
+          </div>
+        )}
       </Card>
 
       <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-7 space-y-5">
@@ -317,13 +351,19 @@ export function BudgetView() {
         )}
       </Card>
 
+      <EditEntryDrawer
+        entry={editingEntry}
+        open={editingEntry !== null}
+        onClose={() => setEditingEntry(null)}
+      />
+
       <CategoryEntriesDrawer
-        open={showRecurringDetail}
-        onClose={() => setShowRecurringDetail(false)}
-        categoryName={t('committedRecurring')}
+        open={invoiceDrawerGroup !== null}
+        onClose={() => setInvoiceDrawerGroup(null)}
+        categoryName={invoiceDrawerGroup?.cardName ?? t('committedInvoice')}
         categoryColor="#7b5cff"
         periodLabel={period.label}
-        entries={recurringEntries}
+        entries={invoiceDrawerGroup?.entries ?? []}
       />
 
       <AddCategoryBudgetDrawer
@@ -417,5 +457,105 @@ function BudgetCategoryRow({
         />
       </div>
     </button>
+  );
+}
+
+function CommittedRowShell({
+  icon,
+  iconColor,
+  title,
+  categoryLabel,
+  amount,
+  statusIcon,
+  statusTitle,
+  editable,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  iconColor?: string;
+  title: string;
+  categoryLabel?: string;
+  amount: number;
+  statusIcon: React.ReactNode;
+  statusTitle: string;
+  editable: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={!editable}
+      onClick={onClick}
+      className={cn(
+        'w-full flex items-center gap-3 rounded-lg -mx-1.5 px-1.5 py-2 transition-colors text-left',
+        editable ? 'hover:bg-white/[0.03] cursor-pointer' : 'cursor-default',
+      )}
+    >
+      <span
+        className="h-7 w-7 rounded-md flex items-center justify-center shrink-0"
+        style={{ backgroundColor: `${iconColor ?? '#94a3b8'}22`, color: iconColor ?? '#94a3b8' }}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-white truncate">{title}</p>
+        {categoryLabel && (
+          <span className="inline-block mt-0.5 text-[10px] font-semibold text-muted-foreground/60 bg-white/5 rounded px-1.5 py-0.5">
+            {categoryLabel}
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-sm font-bold text-white font-display tabular-nums">
+          {formatCurrency(amount)}
+        </span>
+        <span title={statusTitle}>{statusIcon}</span>
+      </div>
+    </button>
+  );
+}
+
+function CommittedEntryRow({ entry, onClick }: { entry: CashFlowEntry; onClick: () => void }) {
+  const typeT = useTranslations('entry');
+  const badgeT = useTranslations('dailyEntries');
+  const editable = isEditableEntry(entry);
+
+  const status = entry.isSkipped
+    ? { icon: <Ban className="h-4 w-4 text-muted-foreground/40" />, title: badgeT('skipped') }
+    : entry.isVirtual
+      ? { icon: <Clock className="h-4 w-4 text-amber-400" />, title: badgeT('estimated') }
+      : { icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />, title: badgeT('confirmed') };
+
+  return (
+    <CommittedRowShell
+      icon={<CategoryIcon name={entry.category?.icon} className="h-3.5 w-3.5" />}
+      iconColor={entry.category?.color}
+      title={entry.description || typeT(entry.type)}
+      categoryLabel={entry.category?.name}
+      amount={entry.amount}
+      statusIcon={status.icon}
+      statusTitle={status.title}
+      editable={editable}
+      onClick={onClick}
+    />
+  );
+}
+
+function CommittedInvoiceRow({ group, onClick }: { group: InvoiceGroup; onClick: () => void }) {
+  const t = useTranslations('budget');
+  const badgeT = useTranslations('dailyEntries');
+
+  return (
+    <CommittedRowShell
+      icon={<CreditCard className="h-3.5 w-3.5" />}
+      iconColor="#7b5cff"
+      title={t('committedInvoice')}
+      categoryLabel={group.cardName}
+      amount={group.amount}
+      statusIcon={<Info className="h-4 w-4 text-muted-foreground/50" />}
+      statusTitle={badgeT('invoice')}
+      editable
+      onClick={onClick}
+    />
   );
 }

@@ -18,7 +18,10 @@
     "menuDescription": "Menú de navegación principal",
     "language": "Idioma",
     "more": "Más",
-    "notifications": "Notificaciones"
+    "notifications": "Notificaciones",
+    "tagline": "Gestión Financiera",
+    "expandSidebar": "Mantener menú abierto",
+    "collapseSidebar": "Contraer menú"
   },
   "notifications": {
     "title": "Notificaciones",
@@ -296,10 +299,10 @@
     "subtitle": "A dónde va cada parte de tu ingreso este ciclo",
     "loading": "Cargando presupuesto...",
     "committedSection": "Comprometido",
-    "committedRecurring": "Recurrentes",
     "committedInvoice": "Factura de tarjeta",
     "committedRecurringRealized": "Ya efectuado",
-    "committedRecurringPending": "Todavía pendiente",
+    "committedPending": "Pendiente",
+    "noCommitments": "Sin compromisos en este ciclo.",
     "leftoverLabel": "Disponible",
     "categoriesSection": "Categorías con presupuesto",
     "add": "Agregar",

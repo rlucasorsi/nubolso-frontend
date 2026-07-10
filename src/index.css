@@ -39,6 +39,15 @@ input[type='number'] {
     --gradient-bg: radial-gradient(circle at 50% 0%, #1A0B2E 0%, #09090B 100%);
     --gradient-primary: linear-gradient(135deg, #9D7CFF 0%, #7C3AED 100%);
     --shadow-glow: 0 0 25px rgba(157, 124, 255, 0.3);
+
+    --sidebar-background: #1c1a24;
+    --sidebar-foreground: #F8FAFC;
+    --sidebar-primary: #7b5cff;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: rgba(123, 92, 255, 0.15);
+    --sidebar-accent-foreground: #b298ff;
+    --sidebar-border: rgba(255, 255, 255, 0.08);
+    --sidebar-ring: #7b5cff;
   }
 
   .dark {

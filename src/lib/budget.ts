@@ -80,7 +80,14 @@ export function getCommittedTotals(
   virtualEntries: CashFlowEntry[],
   period: Pick<Period, 'startDate' | 'endDate'>,
   budgetedCategoryIds: Set<string>,
-): { recurring: number; recurringRealized: number; recurringPending: number; invoice: number } {
+): {
+  recurring: number;
+  recurringRealized: number;
+  recurringPending: number;
+  invoice: number;
+  invoiceRealized: number;
+  invoicePending: number;
+} {
   const periodEntries = entriesInPeriod(entries, virtualEntries, period).filter(
     (e) => e.type === 'expense' || e.type === 'investment',
   );
@@ -98,16 +105,57 @@ export function getCommittedTotals(
     .filter((e) => e.isVirtual)
     .reduce((sum, e) => sum + e.amount, 0);
 
-  const invoice = periodEntries
-    .filter((e) => !!e.creditCardInvoiceId)
+  const invoiceEntries = periodEntries.filter((e) => !!e.creditCardInvoiceId);
+  const invoiceRealized = invoiceEntries
+    .filter((e) => !e.isVirtual)
+    .reduce((sum, e) => sum + e.amount, 0);
+  const invoicePending = invoiceEntries
+    .filter((e) => e.isVirtual)
     .reduce((sum, e) => sum + e.amount, 0);
 
   return {
     recurring: recurringRealized + recurringPending,
     recurringRealized,
     recurringPending,
-    invoice,
+    invoice: invoiceRealized + invoicePending,
+    invoiceRealized,
+    invoicePending,
   };
+}
+
+// Uma linha por fatura de cartão com atividade no período — várias compras da
+// mesma fatura (parcelas, projeções de recorrente já faturadas) somadas numa
+// única linha "Comprometido", igual ao card já agrega hoje.
+export interface InvoiceGroup {
+  id: string;
+  cardName?: string;
+  amount: number;
+  entries: CashFlowEntry[];
+}
+
+export function getInvoiceGroups(
+  entries: CashFlowEntry[],
+  virtualEntries: CashFlowEntry[],
+  period: Pick<Period, 'startDate' | 'endDate'>,
+): InvoiceGroup[] {
+  const invoiceEntries = entriesInPeriod(entries, virtualEntries, period).filter(
+    (e) => (e.type === 'expense' || e.type === 'investment') && !!e.creditCardInvoiceId,
+  );
+
+  const byInvoice = new Map<string, CashFlowEntry[]>();
+  for (const e of invoiceEntries) {
+    const key = e.creditCardInvoiceId as string;
+    const list = byInvoice.get(key);
+    if (list) list.push(e);
+    else byInvoice.set(key, [e]);
+  }
+
+  return [...byInvoice.entries()].map(([id, groupEntries]) => ({
+    id,
+    cardName: groupEntries[0]?.creditCardName,
+    amount: groupEntries.reduce((sum, e) => sum + e.amount, 0),
+    entries: groupEntries,
+  }));
 }
 
 // Categoria tipo 'goal' (ex.: Investimento) inverte a leitura: atingir/ultrapassar
