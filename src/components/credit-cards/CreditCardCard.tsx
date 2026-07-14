@@ -1,8 +1,18 @@
 ﻿'use client';
 
+import { useMemo } from 'react';
 import type { CreditCard as CreditCardType } from '@/modules/credit-cards/model/api/credit-card';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
-import { formatCurrency, formatDateLong } from '@/lib/cashflow';
+import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
+import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
+import {
+  formatCurrency,
+  formatDateLong,
+  getProjectedCardTemplatesForInvoiceCycle,
+  generateVirtualCardInvoiceCycles,
+  type RecurringTemplateLike,
+  type FlowType,
+} from '@/lib/cashflow';
 import { CreditCard as CreditCardIcon, MoreHorizontal, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,17 +30,108 @@ interface CreditCardCardProps {
   onDelete: () => void;
 }
 
+// Unifica fatura real e ciclo virtual (ainda sem fatura no backend, só recorrência
+// prevista) num único formato pra achar a fatura "atual" de verdade — mesma lógica
+// do CreditCardDetailDrawer, senão uma fatura vencida antiga ou um ciclo sem fatura
+// ainda (só recorrência pendente) bagunça qual é a fatura atual/próxima.
+interface Cycle {
+  referenceYear: number;
+  referenceMonth: number;
+  paymentDate: string;
+  totalAmount: number;
+  purchaseTemplateIds: string[];
+  isVirtual: boolean;
+}
+
 export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps) {
   const t = useTranslations('creditCard');
   const td = useTranslations('creditCardDetail');
   const { data: invoices, isLoading } = useGetCardInvoices(card.id);
+  const { data: templatesData } = useGetRecurringTemplates();
+  const { data: entriesData } = useGetEntries();
 
-  const unpaidInvoices = (invoices ?? [])
-    .filter((invoice) => !invoice.isPaid)
-    .sort((a, b) => a.referenceYear - b.referenceYear || a.referenceMonth - b.referenceMonth);
+  const templates: RecurringTemplateLike[] = useMemo(
+    () =>
+      (templatesData ?? []).map((tpl) => ({
+        id: tpl.id,
+        description: tpl.description,
+        estimatedAmount: tpl.estimatedAmount,
+        type: tpl.type.toLowerCase() as FlowType,
+        dayOfMonth: tpl.dayOfMonth,
+        isActive: tpl.isActive,
+        categoryId: tpl.categoryId,
+        category: tpl.category,
+        endDate: tpl.endDate,
+        totalOccurrences: tpl.totalOccurrences,
+        occurrenceCount: tpl.occurrenceCount,
+        creditCardId: tpl.creditCardId,
+      })),
+    [templatesData],
+  );
 
-  const currentInvoice = unpaidInvoices[0];
-  const nextInvoice = unpaidInvoices[1];
+  const existingEntries = useMemo(
+    () =>
+      (entriesData?.data ?? []).map((item) => ({
+        id: item.id,
+        date: item.date.split('T')[0],
+        type: item.type as FlowType,
+        amount: item.amount,
+        templateId: item.templateId,
+      })),
+    [entriesData],
+  );
+
+  const { currentCycle, nextCycle } = useMemo(() => {
+    const realUnpaid: Cycle[] = (invoices ?? [])
+      .filter((invoice) => !invoice.isPaid)
+      .map((invoice) => ({
+        referenceYear: invoice.referenceYear,
+        referenceMonth: invoice.referenceMonth,
+        paymentDate: invoice.paymentDate,
+        totalAmount: invoice.totalAmount,
+        purchaseTemplateIds: invoice.purchaseTemplateIds ?? [],
+        isVirtual: false,
+      }));
+
+    const virtualCycles: Cycle[] = generateVirtualCardInvoiceCycles(
+      card,
+      templates,
+      existingEntries,
+      invoices ?? [],
+    ).map((cycle) => ({
+      referenceYear: cycle.referenceYear,
+      referenceMonth: cycle.referenceMonth,
+      paymentDate: cycle.paymentDate,
+      totalAmount: 0,
+      purchaseTemplateIds: [],
+      isVirtual: true,
+    }));
+
+    const unpaid = [...realUnpaid, ...virtualCycles].sort(
+      (a, b) => a.referenceYear - b.referenceYear || a.referenceMonth - b.referenceMonth,
+    );
+
+    return { currentCycle: unpaid[0], nextCycle: unpaid[1] };
+  }, [invoices, card, templates, existingEntries]);
+
+  // Recorrentes de cartão que ainda vão cair na fatura atual (não lançados),
+  // mesmo cálculo usado no InvoiceDetailDrawer/CreditCardDetailDrawer.
+  const projectedRecurrences = useMemo(() => {
+    if (!currentCycle) return [];
+
+    return getProjectedCardTemplatesForInvoiceCycle(
+      templates,
+      card,
+      currentCycle.referenceYear,
+      currentCycle.referenceMonth,
+      existingEntries,
+      currentCycle.purchaseTemplateIds,
+    );
+  }, [currentCycle, card, templates, existingEntries]);
+
+  const currentAmount = currentCycle?.totalAmount ?? 0;
+  const projectedTotal =
+    currentAmount + projectedRecurrences.reduce((sum, r) => sum + r.estimatedAmount, 0);
 
   return (
     <div
@@ -97,9 +198,9 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
             </span>
             {isLoading ? (
               <Skeleton className="h-3 w-28 mt-1" />
-            ) : currentInvoice ? (
+            ) : currentCycle ? (
               <span className="text-xs text-muted-foreground">
-                {t('payOn', { date: formatDateLong(currentInvoice.paymentDate) })}
+                {t('payOn', { date: formatDateLong(currentCycle.paymentDate) })}
               </span>
             ) : (
               <span className="text-xs text-muted-foreground">{t('noOpenInvoices')}</span>
@@ -108,9 +209,14 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
           {isLoading ? (
             <Skeleton className="h-6 w-20 shrink-0" />
           ) : (
-            <span className="text-lg font-bold text-foreground shrink-0">
-              {formatCurrency(currentInvoice?.totalAmount ?? 0)}
-            </span>
+            <div className="flex flex-col items-end shrink-0">
+              <span className="text-lg font-bold text-foreground">
+                {formatCurrency(currentAmount)}
+              </span>
+              <span className="text-[11px] font-semibold text-primary">
+                {td('projected')} {formatCurrency(projectedTotal)}
+              </span>
+            </div>
           )}
         </div>
 
@@ -122,7 +228,7 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
             <Skeleton className="h-4 w-16" />
           ) : (
             <span className="text-sm font-bold text-primary/80">
-              {formatCurrency(nextInvoice?.totalAmount ?? 0)}
+              {formatCurrency(nextCycle?.totalAmount ?? 0)}
             </span>
           )}
         </div>
