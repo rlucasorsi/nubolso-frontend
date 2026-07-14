@@ -71,6 +71,15 @@ export function CreditPurchaseFields({
 
   return (
     <>
+      <DateInputField
+        label={t('purchaseDate')}
+        required
+        value={purchaseDate}
+        onChange={onPurchaseDateChange}
+        minDate={minDate}
+        error={purchaseDateError}
+      />
+
       <TextInputField
         label={t('descriptionLabel')}
         placeholder={t('descriptionPlaceholder')}
@@ -192,15 +201,6 @@ export function CreditPurchaseFields({
           </span>
         </div>
       )}
-
-      <DateInputField
-        label={t('purchaseDate')}
-        required
-        value={purchaseDate}
-        onChange={onPurchaseDateChange}
-        minDate={minDate}
-        error={purchaseDateError}
-      />
 
       {apiError && <p className="text-xs text-destructive text-center">{apiError}</p>}
 
