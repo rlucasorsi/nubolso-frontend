@@ -3,12 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  TextInputField,
-  AmountInputField,
-  DateInputField,
-  NumberInputField,
-} from '@/components/ui/form-field';
+import { TextInputField, AmountInputField, NumberInputField } from '@/components/ui/form-field';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { CategorySelect } from '@/components/painel/CategorySelect';
 import { PurchaseSimulationPreview } from './PurchaseSimulationPreview';
@@ -34,10 +29,6 @@ interface CreditPurchaseFieldsProps {
   strategy: PurchaseStrategy;
   onStrategyChange: (v: PurchaseStrategy) => void;
   computedTotal: number | null;
-  purchaseDate: string;
-  onPurchaseDateChange: (v: string) => void;
-  purchaseDateError?: string;
-  minDate?: string;
   apiError?: string | null;
   simulation?: SimulatePurchaseResponse;
   isSimulating: boolean;
@@ -58,10 +49,6 @@ export function CreditPurchaseFields({
   strategy,
   onStrategyChange,
   computedTotal,
-  purchaseDate,
-  onPurchaseDateChange,
-  purchaseDateError,
-  minDate,
   apiError,
   simulation,
   isSimulating,
@@ -71,15 +58,6 @@ export function CreditPurchaseFields({
 
   return (
     <>
-      <DateInputField
-        label={t('purchaseDate')}
-        required
-        value={purchaseDate}
-        onChange={onPurchaseDateChange}
-        minDate={minDate}
-        error={purchaseDateError}
-      />
-
       <TextInputField
         label={t('descriptionLabel')}
         placeholder={t('descriptionPlaceholder')}

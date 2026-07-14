@@ -860,7 +860,7 @@
     "firstInstallment": "1ª Parcela",
     "lastInstallment": "Última Parcela",
     "purchaseTotal": "Total da Compra",
-    "purchaseDate": "Data da Compra",
+    "purchaseDate": "Data do Lançamento",
     "installments": "Parcelas",
     "installment": "Parcela {n}/{total}",
     "invoiceMonth": "Fatura {month}/{year}",

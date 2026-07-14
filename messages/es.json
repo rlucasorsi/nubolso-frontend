@@ -860,7 +860,7 @@
     "firstInstallment": "1ª Cuota",
     "lastInstallment": "Última Cuota",
     "purchaseTotal": "Total de la Compra",
-    "purchaseDate": "Fecha de la Compra",
+    "purchaseDate": "Fecha del Movimiento",
     "installments": "Cuotas",
     "installment": "Cuota {n}/{total}",
     "invoiceMonth": "Factura {month}/{year}",

@@ -9,6 +9,7 @@ import {
   SheetTitle,
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
+import { DateInputField } from '@/components/ui/form-field';
 import { usePurchaseForm } from '@/modules/credit-cards/hooks/use-purchase-form';
 import { CreditPurchaseFields } from './CreditPurchaseFields';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -79,6 +80,14 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             </button>
           </div>
 
+          <DateInputField
+            label={t('purchaseDate')}
+            required
+            value={form.purchaseDate}
+            onChange={form.setPurchaseDate}
+            error={form.errors.purchaseDate}
+          />
+
           <CreditPurchaseFields
             description={form.description}
             onDescriptionChange={form.setDescription}
@@ -94,9 +103,6 @@ export function AddPurchaseDrawer({ open, onClose, cardId }: AddPurchaseDrawerPr
             strategy={form.strategy}
             onStrategyChange={form.setStrategy}
             computedTotal={form.computedTotal}
-            purchaseDate={form.purchaseDate}
-            onPurchaseDateChange={form.setPurchaseDate}
-            purchaseDateError={form.errors.purchaseDate}
             apiError={form.apiError}
             simulation={isCredit ? undefined : form.adjustedSimulation}
             isSimulating={isCredit ? false : form.isSimulating}

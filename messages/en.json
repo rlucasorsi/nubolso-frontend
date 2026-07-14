@@ -860,7 +860,7 @@
     "firstInstallment": "1st Installment",
     "lastInstallment": "Last Installment",
     "purchaseTotal": "Purchase Total",
-    "purchaseDate": "Purchase Date",
+    "purchaseDate": "Entry Date",
     "installments": "Installments",
     "installment": "Installment {n}/{total}",
     "invoiceMonth": "Invoice {month}/{year}",

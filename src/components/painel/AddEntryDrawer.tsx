@@ -14,6 +14,7 @@ import {
   DrawerFooter,
   SheetTitle,
 } from '@/components/ui/app-drawer';
+import { DateInputField } from '@/components/ui/form-field';
 import { CreditCardSelect } from '@/components/credit-cards/CreditCardSelect';
 import { CreditPurchaseFields } from '@/components/credit-cards/CreditPurchaseFields';
 import { CreditCardDrawer } from '@/components/credit-cards/CreditCardDrawer';
@@ -215,6 +216,15 @@ export function AddEntryDrawer({
               </div>
             ) : (
               <div className="space-y-4">
+                <DateInputField
+                  label={tc('purchaseDate')}
+                  required
+                  value={purchaseForm.purchaseDate}
+                  onChange={purchaseForm.setPurchaseDate}
+                  minDate={minDate}
+                  error={purchaseForm.errors.purchaseDate}
+                />
+
                 <CreditCardSelect
                   cards={activeCards}
                   value={purchaseCardId}
@@ -269,10 +279,6 @@ export function AddEntryDrawer({
                   strategy={purchaseForm.strategy}
                   onStrategyChange={purchaseForm.setStrategy}
                   computedTotal={purchaseForm.computedTotal}
-                  purchaseDate={purchaseForm.purchaseDate}
-                  onPurchaseDateChange={purchaseForm.setPurchaseDate}
-                  purchaseDateError={purchaseForm.errors.purchaseDate}
-                  minDate={minDate}
                   apiError={purchaseForm.apiError}
                   simulation={isCredit ? undefined : purchaseForm.adjustedSimulation}
                   isSimulating={isCredit ? false : purchaseForm.isSimulating}
