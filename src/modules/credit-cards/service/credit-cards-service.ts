@@ -130,6 +130,9 @@ function mapInstallment(
     paymentDate: invoice?.paymentDate ? invoice.paymentDate.split('T')[0] : '',
     purchaseId: installment.purchaseId,
     purchaseDescription: installment.purchase?.description,
+    purchaseDate: installment.purchase?.purchaseDate
+      ? installment.purchase.purchaseDate.split('T')[0]
+      : '',
     isAnticipated: installment.isAnticipated ?? false,
     isCredit: installment.purchase?.isCredit ?? false,
   };

@@ -412,6 +412,22 @@ export function getCyclePaymentDate(card: CreditCardLike, year: number, month: n
   return getCycleDateForDay(card, year, month, card.paymentDay);
 }
 
+// The invoice for referenceYear/referenceMonth opens on the closing day of the PREVIOUS
+// month (getInvoiceCycleForDate treats day === closingDay as belonging to the next cycle).
+export function getInvoiceOpeningDate(
+  card: CreditCardLike,
+  referenceYear: number,
+  referenceMonth: number,
+): string {
+  let y = referenceYear;
+  let m = referenceMonth - 1;
+  if (m < 1) {
+    m = 12;
+    y -= 1;
+  }
+  return getTemplateOccurrenceDate(y, m, card.closingDay);
+}
+
 // For templates linked to a credit card, one monthly occurrence yields two views:
 // - pendingEntries: dated on the occurrence day, for the pending-confirmation list
 //   (isCardBilled: true — they never enter generatePeriods directly);

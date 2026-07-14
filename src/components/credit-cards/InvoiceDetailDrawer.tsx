@@ -13,15 +13,19 @@ import { Loader2, Plus, RotateCcw, Trash2, FastForward, Undo2, Check, Ban } from
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DateInputField, AmountInputField } from '@/components/ui/form-field';
+import { format } from 'date-fns';
 import {
   formatCurrency,
   formatDateLong,
+  getInvoiceOpeningDate,
   getProjectedCardTemplatesForInvoiceCycle,
   type ProjectedCardTemplate,
   type RecurringTemplateLike,
   type FlowType,
 } from '@/lib/cashflow';
 import { isVirtualInvoiceId } from '@/lib/cashflow';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { MONTH_KEYS } from '@/components/painel/config';
 import { useGetInvoice } from '@/modules/credit-cards/hooks/use-get-invoice';
@@ -58,6 +62,8 @@ export function InvoiceDetailDrawer({
 }: InvoiceDetailDrawerProps) {
   const t = useTranslations('invoiceDetail');
   const td = useTranslations('dateNames');
+  const { locale } = useLanguage();
+  const dateFnsLocale = getDateFnsLocale(locale);
   const { data: fetchedInvoice, isLoading } = useGetInvoice(invoiceId ?? undefined, open);
   const invoice = virtualInvoice ?? fetchedInvoice;
   const isVirtual = isVirtualInvoiceId(invoice?.id);
@@ -137,7 +143,21 @@ export function InvoiceDetailDrawer({
     installments: NonNullable<typeof invoice>['installments'];
     total: number;
     isCredit: boolean;
+    displayDate: string;
   };
+
+  const card = useMemo(
+    () => (cardsData ?? []).find((c) => c.id === invoice?.cardId),
+    [cardsData, invoice],
+  );
+
+  const invoiceOpeningDate = useMemo(
+    () =>
+      card && invoice
+        ? getInvoiceOpeningDate(card, invoice.referenceYear, invoice.referenceMonth)
+        : undefined,
+    [card, invoice],
+  );
 
   const { activeGroups, anticipatedGroups } = useMemo(() => {
     const activeMap = new Map<string, InstallmentGroup>();
@@ -145,6 +165,8 @@ export function InvoiceDetailDrawer({
 
     for (const inst of invoice?.installments ?? []) {
       const targetMap = inst.isAnticipated ? anticipatedMap : activeMap;
+      const displayDate =
+        inst.number === 1 ? inst.purchaseDate : (invoiceOpeningDate ?? inst.purchaseDate);
       if (!targetMap.has(inst.purchaseId)) {
         targetMap.set(inst.purchaseId, {
           purchaseId: inst.purchaseId,
@@ -152,6 +174,7 @@ export function InvoiceDetailDrawer({
           installments: [],
           total: 0,
           isCredit: inst.isCredit,
+          displayDate,
         });
       }
       const g = targetMap.get(inst.purchaseId)!;
@@ -159,11 +182,14 @@ export function InvoiceDetailDrawer({
       g.total += inst.amount;
     }
 
+    const byDateDesc = (a: InstallmentGroup, b: InstallmentGroup) =>
+      b.displayDate.localeCompare(a.displayDate);
+
     return {
-      activeGroups: [...activeMap.values()],
-      anticipatedGroups: [...anticipatedMap.values()],
+      activeGroups: [...activeMap.values()].sort(byDateDesc),
+      anticipatedGroups: [...anticipatedMap.values()].sort(byDateDesc),
     };
-  }, [invoice, t]);
+  }, [invoice, t, invoiceOpeningDate]);
 
   // Conta parcelas antecipadas e restantes por purchaseId varrendo TODAS as faturas do cartão.
   // Necessário porque o advance fica na fatura onde foi feita a antecipação, não nas subsequentes.
@@ -187,6 +213,12 @@ export function InvoiceDetailDrawer({
     }
     return map;
   }, [cardInvoices, invoice]);
+
+  const formatItemDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr + 'T12:00:00');
+    return format(date, 'dd MMM', { locale: dateFnsLocale }).toUpperCase();
+  };
 
   const hasFutureInstallments = (group: InstallmentGroup) => {
     const anticipatedGroup = anticipatedGroups.find((g) => g.purchaseId === group.purchaseId);
@@ -215,9 +247,7 @@ export function InvoiceDetailDrawer({
   // Recorrentes de cartão que ainda vão cair nesta fatura (não lançados).
   // Só faz sentido para faturas em aberto — pagas não recebem mais cobranças.
   const projectedRecurrences = useMemo(() => {
-    if (!invoice || invoice.isPaid) return [];
-    const card = (cardsData ?? []).find((c) => c.id === invoice.cardId);
-    if (!card) return [];
+    if (!invoice || invoice.isPaid || !card) return [];
 
     const templates: RecurringTemplateLike[] = (templatesData ?? []).map((tpl) => ({
       id: tpl.id,
@@ -250,7 +280,7 @@ export function InvoiceDetailDrawer({
       existingEntries,
       invoice.purchaseTemplateIds ?? [],
     );
-  }, [invoice, cardsData, templatesData, entriesData]);
+  }, [invoice, card, templatesData, entriesData]);
 
   const projectedTotal =
     (invoice?.totalAmount ?? 0) +
@@ -384,6 +414,11 @@ export function InvoiceDetailDrawer({
                           key={group.purchaseId}
                           className="glass-card rounded-2xl p-4 space-y-2"
                         >
+                          {formatItemDate(group.displayDate) && (
+                            <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                              {formatItemDate(group.displayDate)}
+                            </span>
+                          )}
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2 min-w-0">
                               <p className="text-sm font-bold truncate">{group.description}</p>
@@ -473,6 +508,11 @@ export function InvoiceDetailDrawer({
                           key={group.purchaseId}
                           className="glass-card rounded-2xl p-4 space-y-2 opacity-60"
                         >
+                          {formatItemDate(group.displayDate) && (
+                            <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                              {formatItemDate(group.displayDate)}
+                            </span>
+                          )}
                           <p className="text-sm font-bold truncate line-through text-muted-foreground">
                             {group.description}
                           </p>

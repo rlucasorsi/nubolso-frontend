@@ -9,6 +9,7 @@ export interface CreditCardInstallmentLite {
   referenceYear: number;
   paymentDate: string;
   purchaseDescription?: string;
+  purchaseDate: string;
   isAnticipated: boolean;
   isCredit: boolean;
 }
