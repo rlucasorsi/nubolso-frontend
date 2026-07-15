@@ -159,7 +159,7 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
               key={card.id}
               type="button"
               onClick={() => onSelectCard(card.id)}
-              className="group flex-1 snap-start min-w-[156px] rounded-2xl p-4 text-left bg-gradient-to-br from-violet-500/15 via-violet-500/5 to-transparent border border-violet-500/15 hover:border-violet-400/40 hover:from-violet-500/20 transition-all flex flex-col"
+              className="group w-full shrink-0 snap-center sm:w-auto sm:shrink sm:flex-1 sm:min-w-[156px] sm:snap-start rounded-2xl p-4 text-left bg-gradient-to-br from-violet-500/15 via-violet-500/5 to-transparent border border-violet-500/15 hover:border-violet-400/40 hover:from-violet-500/20 transition-all flex flex-col"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="p-1.5 rounded-lg bg-violet-500/15 text-violet-300 shrink-0">
@@ -172,7 +172,7 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
                 )}
               </div>
 
-              <p className="text-[10px] font-bold text-white/60 uppercase tracking-wider truncate mb-1">
+              <p className="text-[10px] font-bold text-white uppercase tracking-wider truncate mb-1">
                 {card.name}
               </p>
               <div className="flex items-baseline justify-between gap-2">
