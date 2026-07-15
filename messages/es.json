@@ -650,7 +650,8 @@
     "dueOn": "Vence el {date}",
     "noOpenInvoices": "Sin factura pendiente",
     "next": "Próxima {amount}",
-    "overdue": "Atrasada"
+    "overdue": "Atrasada",
+    "projected": "Previsto {amount}"
   },
   "creditCardDetail": {
     "delete": "Eliminar",

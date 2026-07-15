@@ -4,9 +4,18 @@ import { useMemo } from 'react';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatCurrency, formatDateLong, formatDateShort } from '@/lib/cashflow';
+import {
+  formatCurrency,
+  formatDateLong,
+  formatDateShort,
+  getProjectedCardTemplatesForInvoiceCycle,
+  type RecurringTemplateLike,
+  type FlowType,
+} from '@/lib/cashflow';
 import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
+import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
+import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { localDateStr } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -19,8 +28,41 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
   const t = useTranslations('creditCardSummaryCard');
   const { data: cardsData, isLoading: isLoadingCards } = useGetCreditCards();
   const { data: invoicesData, isLoading: isLoadingInvoices } = useGetAllInvoices();
+  const { data: templatesData } = useGetRecurringTemplates();
+  const { data: entriesData } = useGetEntries();
 
   const isLoading = isLoadingCards || isLoadingInvoices;
+
+  const templates: RecurringTemplateLike[] = useMemo(
+    () =>
+      (templatesData ?? []).map((tpl) => ({
+        id: tpl.id,
+        description: tpl.description,
+        estimatedAmount: tpl.estimatedAmount,
+        type: tpl.type.toLowerCase() as FlowType,
+        dayOfMonth: tpl.dayOfMonth,
+        isActive: tpl.isActive,
+        categoryId: tpl.categoryId,
+        category: tpl.category,
+        endDate: tpl.endDate,
+        totalOccurrences: tpl.totalOccurrences,
+        occurrenceCount: tpl.occurrenceCount,
+        creditCardId: tpl.creditCardId,
+      })),
+    [templatesData],
+  );
+
+  const existingEntries = useMemo(
+    () =>
+      (entriesData?.data ?? []).map((item) => ({
+        id: item.id,
+        date: item.date.split('T')[0],
+        type: item.type as FlowType,
+        amount: item.amount,
+        templateId: item.templateId,
+      })),
+    [entriesData],
+  );
 
   const rows = useMemo(() => {
     const cards = (cardsData ?? []).filter((c) => c.isActive);
@@ -44,7 +86,21 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
           ? unpaid.find((inv) => inv.id !== currentInvoice.id)
           : undefined;
 
-        return { card, currentInvoice, nextInvoice };
+        const projectedRecurrences = currentInvoice
+          ? getProjectedCardTemplatesForInvoiceCycle(
+              templates,
+              card,
+              currentInvoice.referenceYear,
+              currentInvoice.referenceMonth,
+              existingEntries,
+              currentInvoice.purchaseTemplateIds ?? [],
+            )
+          : [];
+        const projectedTotal =
+          (currentInvoice?.totalAmount ?? 0) +
+          projectedRecurrences.reduce((sum, r) => sum + r.estimatedAmount, 0);
+
+        return { card, currentInvoice, nextInvoice, projectedTotal, hasProjected: projectedRecurrences.length > 0 };
       })
       .sort((a, b) => {
         if (!a.currentInvoice && !b.currentInvoice) return 0;
@@ -52,7 +108,7 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
         if (!b.currentInvoice) return -1;
         return a.currentInvoice.paymentDate.localeCompare(b.currentInvoice.paymentDate);
       });
-  }, [cardsData, invoicesData]);
+  }, [cardsData, invoicesData, templates, existingEntries]);
 
   const totalCurrent = rows.reduce((sum, r) => sum + (r.currentInvoice?.totalAmount ?? 0), 0);
   const nextDueDate = rows.find((r) => r.currentInvoice)?.currentInvoice?.paymentDate;
@@ -96,7 +152,7 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
         className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-1 px-1 pb-1"
         style={{ scrollbarWidth: 'none' }}
       >
-        {rows.map(({ card, currentInvoice, nextInvoice }) => {
+        {rows.map(({ card, currentInvoice, nextInvoice, projectedTotal, hasProjected }) => {
           const isOverdue = !!currentInvoice && currentInvoice.paymentDate < today;
           return (
             <button
@@ -132,6 +188,11 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
               {!currentInvoice && (
                 <p className="text-[9px] text-muted-foreground/50 font-medium mt-1 truncate">
                   {t('noOpenInvoices')}
+                </p>
+              )}
+              {hasProjected && (
+                <p className="text-[9px] font-semibold text-primary mt-1 truncate">
+                  {t('projected', { amount: formatCurrency(projectedTotal) })}
                 </p>
               )}
 

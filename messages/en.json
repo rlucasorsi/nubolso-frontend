@@ -650,7 +650,8 @@
     "dueOn": "Due {date}",
     "noOpenInvoices": "No open invoice",
     "next": "Next {amount}",
-    "overdue": "Overdue"
+    "overdue": "Overdue",
+    "projected": "Projected {amount}"
   },
   "creditCardDetail": {
     "delete": "Delete",
