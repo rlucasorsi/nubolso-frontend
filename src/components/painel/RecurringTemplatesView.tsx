@@ -279,21 +279,12 @@ export function RecurringTemplatesView() {
 
                             <div className="flex items-center gap-3 min-w-0 pl-2">
                               <div className="min-w-0">
-                                <p className="text-sm font-semibold truncate">
-                                  {template.description}
-                                </p>
-                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                  {template.category && (
-                                    <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1">
-                                      <span
-                                        className="h-1.5 w-1.5 rounded-full"
-                                        style={{ backgroundColor: template.category.color }}
-                                      />
-                                      {template.category.name}
-                                    </p>
-                                  )}
+                                <p className="text-sm font-semibold truncate">{template.description}</p>
+                                <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                  <p className="text-xs text-muted-foreground">
+                                    {t('day', { day: template.dayOfMonth })}
+                                  </p>
                                   <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
-                                    {t('day', { day: template.dayOfMonth })} ·{' '}
                                     {formatCurrency(template.estimatedAmount)}
                                     {template.endDate && (
                                       <>
@@ -309,15 +300,23 @@ export function RecurringTemplatesView() {
                                         {template.occurrenceCount ?? 0}/{template.totalOccurrences}x
                                       </>
                                     )}
-                                    {template.creditCard && (
-                                      <>
-                                        {' · '}
-                                        <CreditCard className="h-3 w-3 inline" />{' '}
-                                        {template.creditCard.name}
-                                      </>
-                                    )}
                                     {!template.isActive && ` · ${t('archived')}`}
                                   </p>
+                                  {template.category && (
+                                    <p className="text-[10px] font-semibold text-muted-foreground/60 flex items-center gap-1 min-w-0 max-w-[70vw]">
+                                      <span
+                                        className="h-1.5 w-1.5 rounded-full shrink-0"
+                                        style={{ backgroundColor: template.category.color }}
+                                      />
+                                      <span className="truncate min-w-0">{template.category.name}</span>
+                                    </p>
+                                  )}
+                                  {template.creditCard && (
+                                    <span className="inline-flex items-center gap-1 min-w-0 max-w-[70vw] px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/15 text-violet-300 border border-violet-500/20">
+                                      <CreditCard className="h-3 w-3 shrink-0" />
+                                      <span className="truncate min-w-0">{template.creditCard.name}</span>
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
