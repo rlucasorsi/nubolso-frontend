@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { CreditCard as CreditCardIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -114,6 +114,21 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
   const nextDueDate = rows.find((r) => r.currentInvoice)?.currentInvoice?.paymentDate;
   const today = localDateStr();
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el || el.clientWidth === 0) return;
+    setActiveIndex(Math.round(el.scrollLeft / el.clientWidth));
+  };
+
+  const scrollToIndex = (index: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: index * el.clientWidth, behavior: 'smooth' });
+  };
+
   if (isLoading) {
     return (
       <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-8">
@@ -149,6 +164,8 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
       </div>
 
       <div
+        ref={scrollRef}
+        onScroll={handleScroll}
         className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-1 px-1 pb-1"
         style={{ scrollbarWidth: 'none' }}
       >
@@ -212,6 +229,23 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
           );
         })}
       </div>
+
+      {rows.length > 1 && (
+        <div className="flex justify-center gap-1.5 mt-3 sm:hidden">
+          {rows.map((row, index) => (
+            <button
+              key={row.card.id}
+              type="button"
+              onClick={() => scrollToIndex(index)}
+              aria-label={row.card.name}
+              className={cn(
+                'h-1.5 rounded-full transition-all',
+                index === activeIndex ? 'w-4 bg-primary' : 'w-1.5 bg-white/20',
+              )}
+            />
+          ))}
+        </div>
+      )}
     </Card>
   );
 }
