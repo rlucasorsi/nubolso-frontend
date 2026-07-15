@@ -213,7 +213,12 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
               <span className="text-lg font-bold text-foreground">
                 {formatCurrency(currentAmount)}
               </span>
-              <span className="text-[11px] font-semibold text-primary">
+              <span
+                className={cn(
+                  'text-[11px] font-semibold text-primary',
+                  projectedRecurrences.length === 0 && 'invisible',
+                )}
+              >
                 {td('projected')} {formatCurrency(projectedTotal)}
               </span>
             </div>

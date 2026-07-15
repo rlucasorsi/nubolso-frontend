@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 import { InvoiceMonthlyChart } from '@/components/credit-cards/InvoiceMonthlyChart';
 import { DashboardAlerts } from './DashboardAlerts';
+import { CreditCardSummaryCard } from './CreditCardSummaryCard';
 
 interface DashboardSummaryProps {
   period: Period;
@@ -18,6 +19,7 @@ interface DashboardSummaryProps {
   today: string;
   balanceSettings: BalanceSettings;
   onSelectInvoice: (invoiceId: string) => void;
+  onSelectCard: (cardId: string) => void;
 }
 
 const ZONE_COLORS = {
@@ -37,6 +39,7 @@ export function DashboardSummary({
   today,
   balanceSettings,
   onSelectInvoice,
+  onSelectCard,
 }: DashboardSummaryProps) {
   const t = useTranslations('dashboard');
   const [chartView, setChartView] = useState<ChartView>('period');
@@ -210,6 +213,8 @@ export function DashboardSummary({
           </p>
         </Card>
       </div>
+
+      <CreditCardSummaryCard onSelectCard={onSelectCard} />
 
       {/* Projection Chart */}
       <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-2 sm:p-8">

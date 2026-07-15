@@ -642,6 +642,16 @@
     "card": "tarjeta",
     "cards": "tarjetas"
   },
+  "creditCardSummaryCard": {
+    "title": "Tarjeta de Crédito",
+    "card": "tarjeta activa",
+    "cards": "tarjetas activas",
+    "currentTotal": "Tarjeta de Crédito - Factura",
+    "dueOn": "Vence el {date}",
+    "noOpenInvoices": "Sin factura pendiente",
+    "next": "Próxima {amount}",
+    "overdue": "Atrasada"
+  },
   "creditCardDetail": {
     "delete": "Eliminar",
     "inactive": "Tarjeta Inactiva",

@@ -642,6 +642,16 @@
     "card": "cartão",
     "cards": "cartões"
   },
+  "creditCardSummaryCard": {
+    "title": "Cartão de Crédito",
+    "card": "cartão ativo",
+    "cards": "cartões ativos",
+    "currentTotal": "Cartão de Crédito - Fatura",
+    "dueOn": "Vence em {date}",
+    "noOpenInvoices": "Sem fatura em aberto",
+    "next": "Próxima {amount}",
+    "overdue": "Atrasada"
+  },
   "creditCardDetail": {
     "delete": "Excluir",
     "inactive": "Cartão Inativo",

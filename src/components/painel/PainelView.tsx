@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react';
-import { CashFlowEntry, FlowType } from '@/lib/cashflow';
+import { CashFlowEntry, FlowType, isVirtualInvoiceId } from '@/lib/cashflow';
 import { cn, localDateStr } from '@/lib/utils';
 import { PeriodNav } from './PeriodNav';
 import { DayList } from './DayList';
@@ -13,6 +13,12 @@ import { useCashFlow } from '@/hooks/useCashFlow';
 import { EntryFormValues, resolveTipoDespesa } from './EntryForm';
 import { ChevronDown, Filter, Loader2, Plus } from 'lucide-react';
 import { InvoiceDetailDrawer } from '@/components/credit-cards/InvoiceDetailDrawer';
+import { CreditCardDetailDrawer } from '@/components/credit-cards/CreditCardDetailDrawer';
+import { CreditCardDrawer } from '@/components/credit-cards/CreditCardDrawer';
+import { AddPurchaseDrawer } from '@/components/credit-cards/AddPurchaseDrawer';
+import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
+import type { CreditCard } from '@/modules/credit-cards/model/api/credit-card';
+import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { ServerErrorState } from '@/components/ui/server-error-state';
 import { ActionsSection } from './ActionsSection';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
@@ -51,6 +57,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   } = useCashFlow();
   const { alertDays } = usePendingAlertDays();
   const { data: categories } = useGetCategories();
+  const { data: creditCardsData } = useGetCreditCards();
   const tb = useTranslations('budget');
 
   const [periodIdx, setPeriodIdx] = useState(0);
@@ -59,6 +66,11 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
   const [mounted, setMounted] = useState(false);
   const [sheet, setSheet] = useState<DailyEntriesState | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [virtualInvoice, setVirtualInvoice] = useState<CreditCardInvoice | null>(null);
+  const [detailCardId, setDetailCardId] = useState<string | null>(null);
+  const [editingCard, setEditingCard] = useState<CreditCard | undefined>(undefined);
+  const [cardDrawerOpen, setCardDrawerOpen] = useState(false);
+  const [addPurchaseCardId, setAddPurchaseCardId] = useState<string | null>(null);
   const [isAddingInHeader, setIsAddingInHeader] = useState(false);
   const [showFab, setShowFab] = useState(false);
   const [showPendingOnly, setShowPendingOnly] = useState(false);
@@ -193,6 +205,22 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
     setPeriodIdx(idx);
   };
 
+  const detailCard = (creditCardsData ?? []).find((c) => c.id === detailCardId) ?? null;
+
+  const handleEditCardFromDetail = (card: CreditCard) => {
+    setDetailCardId(null);
+    setEditingCard(card);
+    setCardDrawerOpen(true);
+  };
+
+  const handleSelectInvoiceFromCardDetail = (invoice: CreditCardInvoice) => {
+    if (isVirtualInvoiceId(invoice.id)) {
+      setVirtualInvoice(invoice);
+    } else {
+      setSelectedInvoiceId(invoice.id);
+    }
+  };
+
   return (
     <div ref={rootRef} className="flex flex-col w-full max-w-6xl mx-auto pb-24 overflow-x-hidden">
       {/* Header */}
@@ -262,6 +290,7 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
             today={today}
             balanceSettings={balanceSettings}
             onSelectInvoice={setSelectedInvoiceId}
+            onSelectCard={setDetailCardId}
           />
           <BudgetSummaryCard period={period} entries={entries} virtualEntries={virtualEntries} />
           <CategoryCharts
@@ -371,8 +400,33 @@ export function PainelView({ onAddEntry, onUpdateEntry, onDeleteEntry }: PainelV
 
       <InvoiceDetailDrawer
         invoiceId={selectedInvoiceId}
-        open={!!selectedInvoiceId}
-        onClose={() => setSelectedInvoiceId(null)}
+        virtualInvoice={virtualInvoice}
+        open={!!selectedInvoiceId || !!virtualInvoice}
+        onClose={() => {
+          setSelectedInvoiceId(null);
+          setVirtualInvoice(null);
+        }}
+      />
+
+      <CreditCardDetailDrawer
+        open={!!detailCard}
+        card={detailCard}
+        onClose={() => setDetailCardId(null)}
+        onEdit={handleEditCardFromDetail}
+        onAddPurchase={(cardId) => setAddPurchaseCardId(cardId)}
+        onSelectInvoice={handleSelectInvoiceFromCardDetail}
+      />
+
+      <CreditCardDrawer
+        open={cardDrawerOpen}
+        onOpenChange={setCardDrawerOpen}
+        card={editingCard}
+      />
+
+      <AddPurchaseDrawer
+        open={!!addPurchaseCardId}
+        cardId={addPurchaseCardId}
+        onClose={() => setAddPurchaseCardId(null)}
       />
 
       {/* Floating quick-add button (desktop only), appears once the user scrolls down */}

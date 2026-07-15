@@ -642,6 +642,16 @@
     "noInvoicesPending": "No pending invoices",
     "thisMonthNote": "Total of the next open invoice"
   },
+  "creditCardSummaryCard": {
+    "title": "Credit Card",
+    "card": "active card",
+    "cards": "active cards",
+    "currentTotal": "Credit Card - Invoice",
+    "dueOn": "Due {date}",
+    "noOpenInvoices": "No open invoice",
+    "next": "Next {amount}",
+    "overdue": "Overdue"
+  },
   "creditCardDetail": {
     "delete": "Delete",
     "inactive": "Inactive Card",
