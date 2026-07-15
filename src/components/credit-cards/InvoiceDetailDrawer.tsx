@@ -144,6 +144,7 @@ export function InvoiceDetailDrawer({
     total: number;
     isCredit: boolean;
     displayDate: string;
+    createdAt: string;
   };
 
   const card = useMemo(
@@ -175,6 +176,7 @@ export function InvoiceDetailDrawer({
           total: 0,
           isCredit: inst.isCredit,
           displayDate,
+          createdAt: inst.purchaseCreatedAt,
         });
       }
       const g = targetMap.get(inst.purchaseId)!;
@@ -183,7 +185,7 @@ export function InvoiceDetailDrawer({
     }
 
     const byDateDesc = (a: InstallmentGroup, b: InstallmentGroup) =>
-      b.displayDate.localeCompare(a.displayDate);
+      b.displayDate.localeCompare(a.displayDate) || b.createdAt.localeCompare(a.createdAt);
 
     return {
       activeGroups: [...activeMap.values()].sort(byDateDesc),

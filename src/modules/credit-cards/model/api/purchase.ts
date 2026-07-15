@@ -12,6 +12,7 @@ export interface CreditCardInstallmentLite {
   purchaseDate: string;
   isAnticipated: boolean;
   isCredit: boolean;
+  purchaseCreatedAt: string;
 }
 
 export interface CreditCardPurchase {

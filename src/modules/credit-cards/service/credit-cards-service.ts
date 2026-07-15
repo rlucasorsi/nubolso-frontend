@@ -56,6 +56,7 @@ interface CreditCardPurchaseApi {
   templateId?: string | null;
   installments?: CreditCardInstallmentApi[];
   isCredit?: boolean;
+  createdAt: string;
 }
 
 interface CreditCardInstallmentApi {
@@ -135,6 +136,7 @@ function mapInstallment(
       : '',
     isAnticipated: installment.isAnticipated ?? false,
     isCredit: installment.purchase?.isCredit ?? false,
+    purchaseCreatedAt: installment.purchase?.createdAt ?? '',
   };
 }
 
