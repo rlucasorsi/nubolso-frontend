@@ -17,7 +17,7 @@ import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invo
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
 import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
-import { localDateStr } from '@/lib/utils';
+import { cn, localDateStr } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
 
 interface CreditCardSummaryCardProps {
@@ -190,9 +190,16 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
                   {t('noOpenInvoices')}
                 </p>
               )}
-              {hasProjected && (
-                <p className="text-[9px] font-semibold text-primary mt-1 truncate">
-                  {t('projected', { amount: formatCurrency(projectedTotal) })}
+              {currentInvoice && (
+                <p
+                  className={cn(
+                    'text-[9px] font-semibold mt-1 truncate',
+                    hasProjected ? 'text-primary' : 'text-muted-foreground/50 font-medium',
+                  )}
+                >
+                  {hasProjected
+                    ? t('projected', { amount: formatCurrency(projectedTotal) })
+                    : t('noProjected')}
                 </p>
               )}
 

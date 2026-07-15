@@ -651,7 +651,8 @@
     "noOpenInvoices": "Sem fatura em aberto",
     "next": "Próxima {amount}",
     "overdue": "Atrasada",
-    "projected": "Previsto {amount}"
+    "projected": "Previsto {amount}",
+    "noProjected": "Sem recorrências pendentes"
   },
   "creditCardDetail": {
     "delete": "Excluir",

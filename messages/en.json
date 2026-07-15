@@ -651,7 +651,8 @@
     "noOpenInvoices": "No open invoice",
     "next": "Next {amount}",
     "overdue": "Overdue",
-    "projected": "Projected {amount}"
+    "projected": "Projected {amount}",
+    "noProjected": "No pending recurring charges"
   },
   "creditCardDetail": {
     "delete": "Delete",
