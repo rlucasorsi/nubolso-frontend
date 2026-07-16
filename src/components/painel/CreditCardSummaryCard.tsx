@@ -181,15 +181,7 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
         style={{ scrollbarWidth: 'none' }}
       >
         {rows.map(
-          ({
-            card,
-            currentInvoice,
-            nextInvoice,
-            remainingAmount,
-            advancedAmount,
-            projectedTotal,
-            hasProjected,
-          }) => {
+          ({ card, currentInvoice, nextInvoice, remainingAmount, projectedTotal, hasProjected }) => {
             const isOverdue = !!currentInvoice && currentInvoice.paymentDate < today;
             return (
               <button
@@ -236,9 +228,7 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
                   >
                     {hasProjected
                       ? t('projected', { amount: formatCurrency(projectedTotal) })
-                      : advancedAmount > 0
-                        ? t('advanced', { amount: formatCurrency(advancedAmount) })
-                        : t('noProjected')}
+                      : t('noProjected')}
                   </p>
                 )}
 

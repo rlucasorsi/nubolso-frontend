@@ -331,7 +331,7 @@ export function InvoiceDetailDrawer({
           ) : (
             <>
               <div className="flex-1 px-6 pb-6 space-y-6 mt-4">
-                {hasProjection && hasAdvance ? (
+                {hasAdvance ? (
                   <>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5">
@@ -377,31 +377,6 @@ export function InvoiceDetailDrawer({
                       </span>
                     </div>
                   </div>
-                ) : hasAdvance ? (
-                  <>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
-                          {t('currentValue')}
-                        </span>
-                        <span className="text-2xl font-bold font-display">
-                          {formatCurrency(remainingAmount)}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5 border border-dashed border-primary/30">
-                        <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-1">
-                          {t('advancedAmountLabel')}
-                        </span>
-                        <span className="text-2xl font-bold font-display text-primary">
-                          {formatCurrency(advancedAmount)}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground text-center -mt-3">
-                      {t('invoiceTotal')}:{' '}
-                      <span className="font-semibold">{formatCurrency(invoice.totalAmount)}</span>
-                    </p>
-                  </>
                 ) : (
                   <div className="flex flex-col items-center text-center glass-card rounded-2xl p-6">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">

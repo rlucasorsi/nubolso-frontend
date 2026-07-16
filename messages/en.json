@@ -652,8 +652,7 @@
     "next": "Next {amount}",
     "overdue": "Overdue",
     "projected": "Projected {amount}",
-    "noProjected": "No pending recurring charges",
-    "advanced": "Advanced {amount}"
+    "noProjected": "No pending recurring charges"
   },
   "creditCardDetail": {
     "delete": "Delete",

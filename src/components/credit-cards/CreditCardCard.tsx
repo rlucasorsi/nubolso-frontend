@@ -219,19 +219,14 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
               <span className="text-lg font-bold text-foreground">
                 {formatCurrency(currentAmount)}
               </span>
-              {projectedRecurrences.length > 0 ? (
-                <span className="text-[11px] font-semibold text-primary">
-                  {td('projected')} {formatCurrency(projectedTotal)}
-                </span>
-              ) : currentAdvancedAmount > 0 ? (
-                <span className="text-[11px] font-semibold text-muted-foreground">
-                  {td('advanced')} {formatCurrency(currentAdvancedAmount)}
-                </span>
-              ) : (
-                <span className="text-[11px] font-semibold text-primary invisible">
-                  {td('projected')} {formatCurrency(projectedTotal)}
-                </span>
-              )}
+              <span
+                className={cn(
+                  'text-[11px] font-semibold text-primary',
+                  projectedRecurrences.length === 0 && 'invisible',
+                )}
+              >
+                {td('projected')} {formatCurrency(projectedTotal)}
+              </span>
             </div>
           )}
         </div>

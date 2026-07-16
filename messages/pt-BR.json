@@ -652,8 +652,7 @@
     "next": "Próxima {amount}",
     "overdue": "Atrasada",
     "projected": "Previsto {amount}",
-    "noProjected": "Sem recorrências pendentes",
-    "advanced": "Adiantado {amount}"
+    "noProjected": "Sem recorrências pendentes"
   },
   "creditCardDetail": {
     "delete": "Excluir",
