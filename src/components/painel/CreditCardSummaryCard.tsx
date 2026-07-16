@@ -96,11 +96,22 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
               currentInvoice.purchaseTemplateIds ?? [],
             )
           : [];
+        const advancedAmount = currentInvoice?.advancedAmount ?? 0;
+        const remainingAmount = Math.max((currentInvoice?.totalAmount ?? 0) - advancedAmount, 0);
         const projectedTotal =
           (currentInvoice?.totalAmount ?? 0) +
           projectedRecurrences.reduce((sum, r) => sum + r.estimatedAmount, 0);
+        const projectedRemaining = Math.max(projectedTotal - advancedAmount, 0);
 
-        return { card, currentInvoice, nextInvoice, projectedTotal, hasProjected: projectedRecurrences.length > 0 };
+        return {
+          card,
+          currentInvoice,
+          nextInvoice,
+          remainingAmount,
+          advancedAmount,
+          projectedTotal: projectedRemaining,
+          hasProjected: projectedRecurrences.length > 0,
+        };
       })
       .sort((a, b) => {
         if (!a.currentInvoice && !b.currentInvoice) return 0;
@@ -110,7 +121,7 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
       });
   }, [cardsData, invoicesData, templates, existingEntries]);
 
-  const totalCurrent = rows.reduce((sum, r) => sum + (r.currentInvoice?.totalAmount ?? 0), 0);
+  const totalCurrent = rows.reduce((sum, r) => sum + r.remainingAmount, 0);
   const nextDueDate = rows.find((r) => r.currentInvoice)?.currentInvoice?.paymentDate;
   const today = localDateStr();
 
@@ -169,65 +180,77 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
         className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-1 px-1 pb-1"
         style={{ scrollbarWidth: 'none' }}
       >
-        {rows.map(({ card, currentInvoice, nextInvoice, projectedTotal, hasProjected }) => {
-          const isOverdue = !!currentInvoice && currentInvoice.paymentDate < today;
-          return (
-            <button
-              key={card.id}
-              type="button"
-              onClick={() => onSelectCard(card.id)}
-              className="group w-full shrink-0 snap-center sm:w-auto sm:shrink sm:flex-1 sm:min-w-[156px] sm:snap-start rounded-2xl p-4 text-left bg-gradient-to-br from-violet-500/15 via-violet-500/5 to-transparent border border-violet-500/15 hover:border-violet-400/40 hover:from-violet-500/20 transition-all flex flex-col"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-1.5 rounded-lg bg-violet-500/15 text-violet-300 shrink-0">
-                  <CreditCardIcon className="h-3.5 w-3.5" />
+        {rows.map(
+          ({
+            card,
+            currentInvoice,
+            nextInvoice,
+            remainingAmount,
+            advancedAmount,
+            projectedTotal,
+            hasProjected,
+          }) => {
+            const isOverdue = !!currentInvoice && currentInvoice.paymentDate < today;
+            return (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => onSelectCard(card.id)}
+                className="group w-full shrink-0 snap-center sm:w-auto sm:shrink sm:flex-1 sm:min-w-[156px] sm:snap-start rounded-2xl p-4 text-left bg-gradient-to-br from-violet-500/15 via-violet-500/5 to-transparent border border-violet-500/15 hover:border-violet-400/40 hover:from-violet-500/20 transition-all flex flex-col"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-1.5 rounded-lg bg-violet-500/15 text-violet-300 shrink-0">
+                    <CreditCardIcon className="h-3.5 w-3.5" />
+                  </div>
+                  {isOverdue && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-red-500/15 text-red-400 border border-red-500/20">
+                      {t('overdue')}
+                    </span>
+                  )}
                 </div>
-                {isOverdue && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-red-500/15 text-red-400 border border-red-500/20">
-                    {t('overdue')}
-                  </span>
-                )}
-              </div>
 
-              <p className="text-[10px] font-bold text-white uppercase tracking-wider truncate mb-1">
-                {card.name}
-              </p>
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="text-base font-bold text-white font-display truncate">
-                  {formatCurrency(currentInvoice?.totalAmount ?? 0)}
+                <p className="text-[10px] font-bold text-white uppercase tracking-wider truncate mb-1">
+                  {card.name}
                 </p>
-                {currentInvoice && (
-                  <p className="text-[9px] text-muted-foreground/50 font-medium shrink-0 whitespace-nowrap">
-                    {formatDateShort(currentInvoice.paymentDate)}
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="text-base font-bold text-white font-display truncate">
+                    {formatCurrency(currentInvoice ? remainingAmount : 0)}
+                  </p>
+                  {currentInvoice && (
+                    <p className="text-[9px] text-muted-foreground/50 font-medium shrink-0 whitespace-nowrap">
+                      {formatDateShort(currentInvoice.paymentDate)}
+                    </p>
+                  )}
+                </div>
+                {!currentInvoice && (
+                  <p className="text-[9px] text-muted-foreground/50 font-medium mt-1 truncate">
+                    {t('noOpenInvoices')}
                   </p>
                 )}
-              </div>
-              {!currentInvoice && (
-                <p className="text-[9px] text-muted-foreground/50 font-medium mt-1 truncate">
-                  {t('noOpenInvoices')}
-                </p>
-              )}
-              {currentInvoice && (
-                <p
-                  className={cn(
-                    'text-[9px] font-semibold mt-1 truncate',
-                    hasProjected ? 'text-primary' : 'text-muted-foreground/50 font-medium',
-                  )}
-                >
-                  {hasProjected
-                    ? t('projected', { amount: formatCurrency(projectedTotal) })
-                    : t('noProjected')}
-                </p>
-              )}
+                {currentInvoice && (
+                  <p
+                    className={cn(
+                      'text-[9px] font-semibold mt-1 truncate',
+                      hasProjected ? 'text-primary' : 'text-muted-foreground/50 font-medium',
+                    )}
+                  >
+                    {hasProjected
+                      ? t('projected', { amount: formatCurrency(projectedTotal) })
+                      : advancedAmount > 0
+                        ? t('advanced', { amount: formatCurrency(advancedAmount) })
+                        : t('noProjected')}
+                  </p>
+                )}
 
-              {nextInvoice && (
-                <p className="text-[9px] font-semibold text-violet-300/70 mt-2.5 pt-2.5 border-t border-white/10 truncate">
-                  {t('next', { amount: formatCurrency(nextInvoice.totalAmount) })}
-                </p>
-              )}
-            </button>
-          );
-        })}
+                {nextInvoice && (
+                  <p className="text-[9px] font-semibold text-violet-300/70 mt-2.5 pt-2.5 border-t border-white/10 truncate">
+                    {t('next', { amount: formatCurrency(nextInvoice.totalAmount) })}
+                  </p>
+                )}
+              </button>
+            );
+          },
+        )}
       </div>
 
       {rows.length > 1 && (

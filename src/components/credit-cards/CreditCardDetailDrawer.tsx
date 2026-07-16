@@ -171,6 +171,9 @@ export function CreditCardDetailDrawer({
     const projectedTotal =
       invoice.totalAmount + projected.reduce((sum, r) => sum + r.estimatedAmount, 0);
     const hasProjection = projected.length > 0;
+    const advancedAmount = invoice.advancedAmount ?? 0;
+    const remainingAmount = Math.max(invoice.totalAmount - advancedAmount, 0);
+    const projectedRemaining = Math.max(projectedTotal - advancedAmount, 0);
     return (
       <button
         key={invoice.id}
@@ -193,7 +196,7 @@ export function CreditCardDetailDrawer({
         </div>
         <div className="text-right shrink-0">
           <p className="text-sm font-bold">
-            {formatCurrency(isVirtual ? projectedTotal : invoice.totalAmount)}
+            {formatCurrency(isVirtual ? projectedTotal : remainingAmount)}
           </p>
           {isVirtual ? (
             <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
@@ -201,7 +204,11 @@ export function CreditCardDetailDrawer({
             </span>
           ) : hasProjection ? (
             <p className="text-[11px] font-semibold text-primary">
-              {t('projected')} {formatCurrency(projectedTotal)}
+              {t('projected')} {formatCurrency(projectedRemaining)}
+            </p>
+          ) : advancedAmount > 0 ? (
+            <p className="text-[11px] font-semibold text-muted-foreground">
+              {t('advanced')} {formatCurrency(advancedAmount)}
             </p>
           ) : null}
           {invoice.isPaid ? (

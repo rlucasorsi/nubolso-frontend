@@ -39,6 +39,7 @@ interface Cycle {
   referenceMonth: number;
   paymentDate: string;
   totalAmount: number;
+  advancedAmount: number;
   purchaseTemplateIds: string[];
   isVirtual: boolean;
 }
@@ -89,6 +90,7 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
         referenceMonth: invoice.referenceMonth,
         paymentDate: invoice.paymentDate,
         totalAmount: invoice.totalAmount,
+        advancedAmount: invoice.advancedAmount ?? 0,
         purchaseTemplateIds: invoice.purchaseTemplateIds ?? [],
         isVirtual: false,
       }));
@@ -103,6 +105,7 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
       referenceMonth: cycle.referenceMonth,
       paymentDate: cycle.paymentDate,
       totalAmount: 0,
+      advancedAmount: 0,
       purchaseTemplateIds: [],
       isVirtual: true,
     }));
@@ -129,9 +132,12 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
     );
   }, [currentCycle, card, templates, existingEntries]);
 
-  const currentAmount = currentCycle?.totalAmount ?? 0;
-  const projectedTotal =
-    currentAmount + projectedRecurrences.reduce((sum, r) => sum + r.estimatedAmount, 0);
+  const currentAdvancedAmount = currentCycle?.advancedAmount ?? 0;
+  const currentAmount = Math.max((currentCycle?.totalAmount ?? 0) - currentAdvancedAmount, 0);
+  const projectedTotal = Math.max(
+    currentAmount + projectedRecurrences.reduce((sum, r) => sum + r.estimatedAmount, 0),
+    0,
+  );
 
   return (
     <div
@@ -213,14 +219,19 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
               <span className="text-lg font-bold text-foreground">
                 {formatCurrency(currentAmount)}
               </span>
-              <span
-                className={cn(
-                  'text-[11px] font-semibold text-primary',
-                  projectedRecurrences.length === 0 && 'invisible',
-                )}
-              >
-                {td('projected')} {formatCurrency(projectedTotal)}
-              </span>
+              {projectedRecurrences.length > 0 ? (
+                <span className="text-[11px] font-semibold text-primary">
+                  {td('projected')} {formatCurrency(projectedTotal)}
+                </span>
+              ) : currentAdvancedAmount > 0 ? (
+                <span className="text-[11px] font-semibold text-muted-foreground">
+                  {td('advanced')} {formatCurrency(currentAdvancedAmount)}
+                </span>
+              ) : (
+                <span className="text-[11px] font-semibold text-primary invisible">
+                  {td('projected')} {formatCurrency(projectedTotal)}
+                </span>
+              )}
             </div>
           )}
         </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { formatCurrency, formatDateLong } from '@/lib/cashflow';
+import { formatDateLong } from '@/lib/cashflow';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { AdvancePaymentDrawer } from './AdvancePaymentDrawer';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -24,13 +24,6 @@ export function OpenInvoiceAdvancePanel({ invoice }: OpenInvoiceAdvancePanelProp
         <p className="text-xs text-muted-foreground text-center">
           {t('openInvoiceNote', { date: formatDateLong(invoice.closingDate) })}
         </p>
-
-        {advancedAmount > 0 && (
-          <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5 text-xs">
-            <span className="text-muted-foreground">{t('advancedSoFar')}</span>
-            <span className="font-bold text-foreground">{formatCurrency(advancedAmount)}</span>
-          </div>
-        )}
 
         <Button
           onClick={() => setAdvanceOpen(true)}

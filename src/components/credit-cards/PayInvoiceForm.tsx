@@ -51,13 +51,6 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
       <div className="w-full space-y-3">
         <DateInputField label={t('paymentDate')} value={paymentDate} onChange={setPaymentDate} />
 
-        {advancedAmount > 0 && (
-          <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5 text-xs">
-            <span className="text-muted-foreground">{t('advancedSoFar')}</span>
-            <span className="font-bold text-foreground">{formatCurrency(advancedAmount)}</span>
-          </div>
-        )}
-
         <div className="flex gap-3">
           <Button
             onClick={() => setPartialOpen(true)}

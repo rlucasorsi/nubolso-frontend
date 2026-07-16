@@ -652,7 +652,8 @@
     "next": "Próxima {amount}",
     "overdue": "Atrasada",
     "projected": "Previsto {amount}",
-    "noProjected": "Sin recurrencias pendientes"
+    "noProjected": "Sin recurrencias pendientes",
+    "advanced": "Adelantado {amount}"
   },
   "creditCardDetail": {
     "delete": "Eliminar",
@@ -667,6 +668,7 @@
     "dueOn": "Vence el",
     "paid": "Pagada",
     "overdue": "Atrasada",
+    "advanced": "Adelantado",
     "closingDay": "Cierra el día {day}",
     "dueDay": "Vence el día {day}",
     "paymentDay": "Paga el día {day}",
@@ -695,7 +697,6 @@
     "payError": "No fue posible registrar el pago",
     "paymentDate": "Fecha de pago",
     "advancePayment": "Adelantar pago",
-    "advancedSoFar": "Ya adelantado",
     "closeInvoiceNote": "Esto liquida y cierra la factura.",
     "openInvoiceNote": "Esta factura sigue abierta y cierra el {date}. Puedes adelantar montos ahora; el pago total o parcial estará disponible después del cierre."
   },
@@ -789,7 +790,6 @@
     "reverting": "Revirtiendo...",
     "revertError": "No fue posible revertir la anticipación",
     "advancedAmountLabel": "Adelantado",
-    "remainingAmountLabel": "Restante",
     "invoiceAdvancePaymentsSection": "Adelantos de esta factura",
     "invoiceAdvancePaymentOn": "Adelanto el {date}",
     "projectedNote": "Este mes aún no tiene factura — el monto mostrado es el compromiso previsto de las recurrencias vinculadas. Agrega un gasto para abrir una factura real."

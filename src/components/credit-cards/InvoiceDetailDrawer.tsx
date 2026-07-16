@@ -293,10 +293,16 @@ export function InvoiceDetailDrawer({
     );
   }, [invoice, card, templatesData, entriesData]);
 
+  const advancedAmount = invoice?.advancedAmount ?? 0;
   const projectedTotal =
     (invoice?.totalAmount ?? 0) +
     projectedRecurrences.reduce((sum, r) => sum + r.estimatedAmount, 0);
+  // "Projetado" já soma recorrências ainda não lançadas; se parte da fatura já
+  // foi adiantada, esse valor também precisa refletir o que falta de fato.
+  const projectedRemaining = Math.max(projectedTotal - advancedAmount, 0);
   const hasProjection = !!invoice && !invoice.isPaid && projectedRecurrences.length > 0;
+  const hasAdvance = !!invoice && !invoice.isPaid && !isVirtual && advancedAmount > 0;
+  const remainingAmount = invoice ? Math.max(invoice.totalAmount - advancedAmount, 0) : 0;
   // Fatura fechada (fora do período de compras) só pode ser paga (total/parcial).
   // Enquanto ainda está aberta, só faz sentido adiantar valores contra ela.
   const isInvoiceClosed = !!invoice && getTodayDateString() >= invoice.closingDate;
@@ -325,7 +331,34 @@ export function InvoiceDetailDrawer({
           ) : (
             <>
               <div className="flex-1 px-6 pb-6 space-y-6 mt-4">
-                {hasProjection ? (
+                {hasProjection && hasAdvance ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                          {t('currentValue')}
+                        </span>
+                        <span className="text-2xl font-bold font-display">
+                          {formatCurrency(remainingAmount)}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5 border border-dashed border-primary/30">
+                        <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-1">
+                          {t('projectedValue')}
+                        </span>
+                        <span className="text-2xl font-bold font-display text-primary">
+                          {formatCurrency(projectedRemaining)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4 flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {t('advancedAmountLabel')}
+                      </span>
+                      <span className="text-sm font-bold">{formatCurrency(advancedAmount)}</span>
+                    </div>
+                  </>
+                ) : hasProjection ? (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5">
                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
@@ -344,6 +377,31 @@ export function InvoiceDetailDrawer({
                       </span>
                     </div>
                   </div>
+                ) : hasAdvance ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                          {t('currentValue')}
+                        </span>
+                        <span className="text-2xl font-bold font-display">
+                          {formatCurrency(remainingAmount)}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center text-center glass-card rounded-2xl p-5 border border-dashed border-primary/30">
+                        <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-1">
+                          {t('advancedAmountLabel')}
+                        </span>
+                        <span className="text-2xl font-bold font-display text-primary">
+                          {formatCurrency(advancedAmount)}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground text-center -mt-3">
+                      {t('invoiceTotal')}:{' '}
+                      <span className="font-semibold">{formatCurrency(invoice.totalAmount)}</span>
+                    </p>
+                  </>
                 ) : (
                   <div className="flex flex-col items-center text-center glass-card rounded-2xl p-6">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
@@ -356,27 +414,6 @@ export function InvoiceDetailDrawer({
                           : invoice.totalAmount,
                       )}
                     </span>
-                  </div>
-                )}
-
-                {!invoice.isPaid && !isVirtual && invoice.advancedAmount > 0 && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {t('advancedAmountLabel')}
-                      </span>
-                      <p className="text-sm font-bold">
-                        {formatCurrency(invoice.advancedAmount)}
-                      </p>
-                    </div>
-                    <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {t('remainingAmountLabel')}
-                      </span>
-                      <p className="text-sm font-bold">
-                        {formatCurrency(Math.max(invoice.totalAmount - invoice.advancedAmount, 0))}
-                      </p>
-                    </div>
                   </div>
                 )}
 
