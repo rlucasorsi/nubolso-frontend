@@ -122,6 +122,8 @@ export function CreditCardDetailDrawer({
     totalAmount: 0,
     installments: [],
     advances: [],
+    advancedAmount: 0,
+    advancePayments: [],
     purchaseTemplateIds: [],
   }));
 

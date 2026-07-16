@@ -10,7 +10,7 @@ import {
   SheetDescription,
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
-import { AmountInputField, NumberInputField } from '@/components/ui/form-field';
+import { AmountInputField, NumberInputField, DateInputField } from '@/components/ui/form-field';
 import { usePayInvoice } from '@/modules/credit-cards/hooks/use-pay-invoice';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
@@ -42,16 +42,31 @@ function addMonths(year: number, month: number, offset: number): { year: number;
   return { year: Math.floor(total / 12), month: (total % 12) + 1 };
 }
 
+function getTodayDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 interface PartialPaymentDrawerProps {
   invoice: CreditCardInvoice;
+  remainingAmount: number;
   open: boolean;
   onClose: () => void;
 }
 
-export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentDrawerProps) {
+export function PartialPaymentDrawer({
+  invoice,
+  remainingAmount,
+  open,
+  onClose,
+}: PartialPaymentDrawerProps) {
   const t = useTranslations('partialPayment');
   const td = useTranslations('dateNames');
   const [partialAmount, setPartialAmount] = useState('');
+  const [paymentDate, setPaymentDate] = useState(getTodayDateString());
   const [remainderInstallments, setRemainderInstallments] = useState(1);
   const [interestMode, setInterestMode] = useState<InterestMode>('none');
   const [interestRate, setInterestRate] = useState(0);
@@ -63,10 +78,10 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
 
   const numericPartial = parseFloat(partialAmount.replace(',', '.'));
   const amountExceedsTotal =
-    !Number.isNaN(numericPartial) && numericPartial >= invoice.totalAmount - 0.005;
+    !Number.isNaN(numericPartial) && numericPartial >= remainingAmount - 0.005;
   const isPartialAmountValid =
     !Number.isNaN(numericPartial) && numericPartial > 0 && !amountExceedsTotal;
-  const remainderAmount = isPartialAmountValid ? invoice.totalAmount - numericPartial : 0;
+  const remainderAmount = isPartialAmountValid ? remainingAmount - numericPartial : 0;
   const numericInstallmentAmount = parseFloat(installmentAmount.replace(',', '.'));
 
   // Compute total with interest and per-installment amounts
@@ -123,6 +138,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
 
   function handleClose() {
     setPartialAmount('');
+    setPaymentDate(getTodayDateString());
     setRemainderInstallments(1);
     setInterestMode('none');
     setInterestRate(0);
@@ -137,6 +153,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
       await payMutation.mutateAsync({
         id: invoice.id,
         amount: numericPartial,
+        paymentDate,
         remainderInstallments,
         ...(interestMode === 'rate' && interestRate > 0 && { interestRate }),
         ...(interestMode === 'amount' &&
@@ -161,13 +178,15 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
               year: invoice.referenceYear,
             })}{' '}
             <span className="font-semibold text-foreground">
-              {formatCurrency(invoice.totalAmount)}
+              {formatCurrency(remainingAmount)}
             </span>
           </p>
           <SheetDescription className="sr-only">{t('srDescription')}</SheetDescription>
         </DrawerHeader>
 
         <div className="flex-1 px-6 py-4 space-y-4">
+          <DateInputField label={t('paymentDate')} value={paymentDate} onChange={setPaymentDate} />
+
           <AmountInputField
             label={t('amountNow')}
             required
@@ -175,7 +194,7 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
             onChange={setPartialAmount}
             error={
               amountExceedsTotal
-                ? t('amountExceeds', { amount: formatCurrency(invoice.totalAmount) })
+                ? t('amountExceeds', { amount: formatCurrency(remainingAmount) })
                 : undefined
             }
           />
@@ -296,6 +315,8 @@ export function PartialPaymentDrawer({ invoice, open, onClose }: PartialPaymentD
               </div>
             </div>
           )}
+
+          <p className="text-[11px] text-muted-foreground text-center">{t('closeInvoiceNote')}</p>
 
           {error && <p className="text-xs text-destructive text-center">{error}</p>}
         </div>

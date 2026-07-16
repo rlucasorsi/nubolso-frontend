@@ -27,6 +27,9 @@ import type {
   PayInvoiceRequest,
   PayInvoiceResponse,
   ReopenInvoiceResponse,
+  InvoiceAdvancePayment,
+  AdvanceInvoicePaymentRequest,
+  AdvanceInvoicePaymentResponse,
 } from '../model/api/invoice';
 import type {
   InstallmentAdvance,
@@ -83,6 +86,14 @@ interface CreditCardAdvanceApi {
   purchase?: { description: string };
 }
 
+interface InvoiceAdvancePaymentApi {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  paymentDate: string;
+  createdAt: string;
+}
+
 interface CreditCardInvoiceApi {
   id: string;
   referenceMonth: number;
@@ -100,6 +111,8 @@ interface CreditCardInvoiceApi {
   card?: CreditCardApi;
   remainderPurchases?: CreditCardPurchaseApi[];
   advances?: CreditCardAdvanceApi[];
+  advancedAmount?: number;
+  advancePayments?: InvoiceAdvancePaymentApi[];
 }
 
 function mapCreditCard(card: CreditCardApi): CreditCard {
@@ -154,6 +167,16 @@ function mapPurchase(purchase: CreditCardPurchaseApi): CreditCardPurchase {
   };
 }
 
+function mapAdvancePayment(payment: InvoiceAdvancePaymentApi): InvoiceAdvancePayment {
+  return {
+    id: payment.id,
+    invoiceId: payment.invoiceId,
+    amount: payment.amount,
+    paymentDate: payment.paymentDate.split('T')[0],
+    createdAt: payment.createdAt,
+  };
+}
+
 function mapAdvance(advance: CreditCardAdvanceApi): InstallmentAdvance {
   return {
     id: advance.id,
@@ -194,6 +217,8 @@ function mapInvoice(invoice: CreditCardInvoiceApi): CreditCardInvoice {
       mapInstallment(installment, invoiceContext),
     ),
     advances: (invoice.advances ?? []).map(mapAdvance),
+    advancedAmount: invoice.advancedAmount ?? 0,
+    advancePayments: (invoice.advancePayments ?? []).map(mapAdvancePayment),
     purchaseTemplateIds: [
       ...new Set(
         (invoice.installments ?? [])
@@ -294,6 +319,15 @@ export const creditCardsService = {
       undefined,
     );
     return mapInvoice(data) as ReopenInvoiceResponse;
+  },
+
+  advanceInvoicePayment: async (params: AdvanceInvoicePaymentRequest) => {
+    const { id, ...rest } = params;
+    const data = await HttpClient.post<
+      CreditCardInvoiceApi,
+      Omit<AdvanceInvoicePaymentRequest, 'id'>
+    >(`/credit-cards/invoices/${id}/advance-payment`, rest);
+    return mapInvoice(data) as AdvanceInvoicePaymentResponse;
   },
 
   createCredit: async (params: CreatePurchaseRequest) => {

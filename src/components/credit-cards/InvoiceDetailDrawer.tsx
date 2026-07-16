@@ -41,9 +41,18 @@ import { useRealizeRecurringTemplate } from '@/modules/recurring-templates/hooks
 import { useSkipRecurringTemplate } from '@/modules/recurring-templates/hooks/use-skip-recurring-template';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { PayInvoiceForm } from './PayInvoiceForm';
+import { OpenInvoiceAdvancePanel } from './OpenInvoiceAdvancePanel';
 import { AddPurchaseDrawer } from './AddPurchaseDrawer';
 import { AnticipateInstallmentsDrawer } from './AnticipateInstallmentsDrawer';
 import { useTranslations } from '@/i18n/useTranslations';
+
+function getTodayDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 interface InvoiceDetailDrawerProps {
   invoiceId: string | null;
@@ -288,6 +297,9 @@ export function InvoiceDetailDrawer({
     (invoice?.totalAmount ?? 0) +
     projectedRecurrences.reduce((sum, r) => sum + r.estimatedAmount, 0);
   const hasProjection = !!invoice && !invoice.isPaid && projectedRecurrences.length > 0;
+  // Fatura fechada (fora do período de compras) só pode ser paga (total/parcial).
+  // Enquanto ainda está aberta, só faz sentido adiantar valores contra ela.
+  const isInvoiceClosed = !!invoice && getTodayDateString() >= invoice.closingDate;
 
   return (
     <>
@@ -344,6 +356,27 @@ export function InvoiceDetailDrawer({
                           : invoice.totalAmount,
                       )}
                     </span>
+                  </div>
+                )}
+
+                {!invoice.isPaid && !isVirtual && invoice.advancedAmount > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {t('advancedAmountLabel')}
+                      </span>
+                      <p className="text-sm font-bold">
+                        {formatCurrency(invoice.advancedAmount)}
+                      </p>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4 flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {t('remainingAmountLabel')}
+                      </span>
+                      <p className="text-sm font-bold">
+                        {formatCurrency(Math.max(invoice.totalAmount - invoice.advancedAmount, 0))}
+                      </p>
+                    </div>
                   </div>
                 )}
 
@@ -536,6 +569,29 @@ export function InvoiceDetailDrawer({
                     </div>
                   )}
 
+                  {invoice.advancePayments && invoice.advancePayments.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                        {t('invoiceAdvancePaymentsSection')}
+                      </h4>
+                      {invoice.advancePayments.map((payment) => (
+                        <div
+                          key={payment.id}
+                          className="glass-card rounded-2xl p-4 flex items-center justify-between"
+                        >
+                          <p className="text-sm font-medium text-muted-foreground">
+                            {t('invoiceAdvancePaymentOn', {
+                              date: formatDateLong(payment.paymentDate),
+                            })}
+                          </p>
+                          <span className="text-sm font-bold">
+                            {formatCurrency(payment.amount)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {invoice.advances && invoice.advances.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -628,8 +684,10 @@ export function InvoiceDetailDrawer({
                       <p className="text-xs text-destructive text-center">{reopenError}</p>
                     )}
                   </>
-                ) : (
+                ) : isInvoiceClosed ? (
                   <PayInvoiceForm invoice={invoice} />
+                ) : (
+                  <OpenInvoiceAdvancePanel invoice={invoice} />
                 )}
               </DrawerFooter>
             </>

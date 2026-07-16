@@ -692,10 +692,16 @@
     "payAll": "Pay all",
     "partialPayment": "Partial payment",
     "processing": "Processing...",
-    "payError": "Couldn't register the payment"
+    "payError": "Couldn't register the payment",
+    "paymentDate": "Payment date",
+    "advancePayment": "Advance payment",
+    "advancedSoFar": "Advanced so far",
+    "closeInvoiceNote": "This settles and closes the invoice.",
+    "openInvoiceNote": "This invoice is still open and closes on {date}. You can advance amounts now; full or partial payment becomes available after it closes."
   },
   "partialPayment": {
     "title": "Partial Payment",
+    "paymentDate": "Payment date",
     "amountNow": "Amount to pay now",
     "reinstall": "Reinstall remainder in",
     "bankInterest": "Bank interest",
@@ -713,7 +719,21 @@
     "payError": "Couldn't register the payment",
     "amountExceeds": "Must be less than {amount}",
     "invoiceHeader": "Invoice {month}/{year} —",
-    "srDescription": "Partial payment of the invoice"
+    "srDescription": "Partial payment of the invoice",
+    "closeInvoiceNote": "This closes the invoice; the remainder becomes future installments."
+  },
+  "advancePaymentDrawer": {
+    "title": "Advance Payment",
+    "invoiceHeader": "Invoice {month}/{year} — remaining",
+    "amount": "Amount to advance now",
+    "paymentDate": "Debit date",
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "confirm": "Confirm",
+    "confirmError": "Couldn't register the advance payment",
+    "amountExceeds": "Must be less than or equal to {amount}",
+    "srDescription": "Advance payment on the invoice without closing it",
+    "hint": "The invoice stays open for new purchases. When it closes, this amount will be deducted from the total due."
   },
   "invoiceDetail": {
     "title": "Invoice",
@@ -768,6 +788,10 @@
     "revertAdvance": "Revert",
     "reverting": "Reverting...",
     "revertError": "Couldn't revert the anticipation",
+    "advancedAmountLabel": "Advanced",
+    "remainingAmountLabel": "Remaining",
+    "invoiceAdvancePaymentsSection": "Advance payments on this invoice",
+    "invoiceAdvancePaymentOn": "Advance payment on {date}",
     "projectedNote": "This month has no invoice yet — the amount shown is the projected commitment from linked recurrences. Add a purchase to open a real invoice."
   },
   "recurringDrawer": {

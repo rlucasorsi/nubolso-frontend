@@ -692,10 +692,16 @@
     "payAll": "Pagar todo",
     "partialPayment": "Pago parcial",
     "processing": "Procesando...",
-    "payError": "No fue posible registrar el pago"
+    "payError": "No fue posible registrar el pago",
+    "paymentDate": "Fecha de pago",
+    "advancePayment": "Adelantar pago",
+    "advancedSoFar": "Ya adelantado",
+    "closeInvoiceNote": "Esto liquida y cierra la factura.",
+    "openInvoiceNote": "Esta factura sigue abierta y cierra el {date}. Puedes adelantar montos ahora; el pago total o parcial estará disponible después del cierre."
   },
   "partialPayment": {
     "title": "Pago Parcial",
+    "paymentDate": "Fecha de pago",
     "amountNow": "Monto a pagar ahora",
     "reinstall": "Refraccionar el resto en",
     "bankInterest": "Intereses del banco",
@@ -713,7 +719,21 @@
     "payError": "No fue posible registrar el pago",
     "amountExceeds": "Debe ser menor que {amount}",
     "invoiceHeader": "Factura {month}/{year} —",
-    "srDescription": "Pago parcial de la factura"
+    "srDescription": "Pago parcial de la factura",
+    "closeInvoiceNote": "Esto cierra la factura; el resto se convierte en cuotas futuras."
+  },
+  "advancePaymentDrawer": {
+    "title": "Adelantar Pago",
+    "invoiceHeader": "Factura {month}/{year} — restante",
+    "amount": "Monto a adelantar ahora",
+    "paymentDate": "Fecha de débito",
+    "cancel": "Cancelar",
+    "processing": "Procesando...",
+    "confirm": "Confirmar",
+    "confirmError": "No fue posible registrar el adelanto",
+    "amountExceeds": "Debe ser menor o igual a {amount}",
+    "srDescription": "Adelanto de pago de la factura sin cerrarla",
+    "hint": "La factura sigue abierta para nuevas compras. Cuando cierre, este monto se descontará del total a pagar."
   },
   "invoiceDetail": {
     "title": "Factura",
@@ -768,6 +788,10 @@
     "revertAdvance": "Revertir",
     "reverting": "Revirtiendo...",
     "revertError": "No fue posible revertir la anticipación",
+    "advancedAmountLabel": "Adelantado",
+    "remainingAmountLabel": "Restante",
+    "invoiceAdvancePaymentsSection": "Adelantos de esta factura",
+    "invoiceAdvancePaymentOn": "Adelanto el {date}",
     "projectedNote": "Este mes aún no tiene factura — el monto mostrado es el compromiso previsto de las recurrencias vinculadas. Agrega un gasto para abrir una factura real."
   },
   "recurringDrawer": {

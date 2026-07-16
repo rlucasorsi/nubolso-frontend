@@ -692,10 +692,16 @@
     "payAll": "Pagar tudo",
     "partialPayment": "Pagamento parcial",
     "processing": "Processando...",
-    "payError": "Não foi possível registrar o pagamento"
+    "payError": "Não foi possível registrar o pagamento",
+    "paymentDate": "Data do pagamento",
+    "advancePayment": "Adiantar pagamento",
+    "advancedSoFar": "Já adiantado",
+    "closeInvoiceNote": "Isso quita e fecha a fatura.",
+    "openInvoiceNote": "Esta fatura ainda está aberta e fecha em {date}. Você pode adiantar valores agora; o pagamento total ou parcial fica disponível após o fechamento."
   },
   "partialPayment": {
     "title": "Pagamento Parcial",
+    "paymentDate": "Data do pagamento",
     "amountNow": "Valor que vai pagar agora",
     "reinstall": "Reparcelar restante em",
     "bankInterest": "Juros do banco",
@@ -713,7 +719,21 @@
     "payError": "Não foi possível registrar o pagamento",
     "amountExceeds": "Deve ser menor que {amount}",
     "invoiceHeader": "Fatura {month}/{year} —",
-    "srDescription": "Pagamento parcial da fatura"
+    "srDescription": "Pagamento parcial da fatura",
+    "closeInvoiceNote": "Isso fecha a fatura; o restante vira parcelas futuras."
+  },
+  "advancePaymentDrawer": {
+    "title": "Adiantar Pagamento",
+    "invoiceHeader": "Fatura {month}/{year} — restante",
+    "amount": "Valor a adiantar agora",
+    "paymentDate": "Data do débito",
+    "cancel": "Cancelar",
+    "processing": "Processando...",
+    "confirm": "Confirmar",
+    "confirmError": "Não foi possível registrar o adiantamento",
+    "amountExceeds": "Deve ser menor ou igual a {amount}",
+    "srDescription": "Adiantamento de pagamento da fatura sem fechá-la",
+    "hint": "A fatura continua em aberto para novas compras. Quando ela fechar, esse valor será abatido do total a pagar."
   },
   "invoiceDetail": {
     "title": "Fatura",
@@ -768,6 +788,10 @@
     "revertAdvance": "Reverter",
     "reverting": "Revertendo...",
     "revertError": "Não foi possível reverter a antecipação",
+    "advancedAmountLabel": "Adiantado",
+    "remainingAmountLabel": "Restante",
+    "invoiceAdvancePaymentsSection": "Adiantamentos desta fatura",
+    "invoiceAdvancePaymentOn": "Adiantamento em {date}",
     "projectedNote": "Este mês ainda não tem fatura — o valor exibido é o comprometimento previsto das recorrências vinculadas. Faça um lançamento para abrir uma fatura real."
   },
   "recurringDrawer": {
