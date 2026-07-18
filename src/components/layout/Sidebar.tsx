@@ -9,6 +9,7 @@ import {
   CreditCard,
   RotateCw,
   Target,
+  LineChart,
   Wallet,
   Tag,
   Settings,
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   { key: 'cards', href: '/cards', icon: CreditCard },
   { key: 'recurring', href: '/recurring', icon: RotateCw },
   { key: 'goals', href: '/goals', icon: Target },
+  { key: 'investments', href: '/investments', icon: LineChart },
   { key: 'budget', href: '/orcamento', icon: Wallet },
   { key: 'categories', href: '/categories', icon: Tag },
 ] as const;

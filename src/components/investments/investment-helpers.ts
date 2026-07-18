@@ -1,0 +1,224 @@
+import type { Investment, InvestmentType } from '@/modules/investments/model/api/investment';
+import {
+  getInitialSharePosition,
+  getMovementSharePosition,
+} from '@/lib/investmentShareLedger';
+
+// FII/Ação têm cotação, comportam-se como renda variável (posição, preço
+// médio, valor de mercado). CDB/Outro são renda fixa (saldo controlado
+// manualmente ou por movimentações em dinheiro).
+export function isVariableIncome(investment: Investment): boolean {
+  return investment.type === 'FII' || investment.type === 'STOCK';
+}
+
+// Total investido (principal): soma dos aportes/retiradas (CONTRIBUTION),
+// sem contar proventos nem ajustes de mercado.
+export function getTotalContributed(investment: Investment): number {
+  return investment.movements
+    .filter((m) => m.type === 'CONTRIBUTION')
+    .reduce((sum, m) => sum + m.amount, 0);
+}
+
+// Rendimento total: proventos recebidos + ajustes de valorização/desvalorização.
+// YIELD nunca altera currentBalance, mas conta como "quanto rendeu".
+export function getTotalYield(investment: Investment): number {
+  return investment.movements
+    .filter((m) => m.type === 'YIELD' || m.type === 'ADJUSTMENT')
+    .reduce((sum, m) => sum + m.amount, 0);
+}
+
+// Rentabilidade %: rendimento sobre o total investido. Sem base de custo
+// (nada investido ainda, ou tudo retirado), a % não faz sentido — retorna null.
+export function getYieldPercentage(investment: Investment): number | null {
+  const totalContributed = getTotalContributed(investment);
+  if (totalContributed <= 0) return null;
+  return (getTotalYield(investment) / totalContributed) * 100;
+}
+
+export interface SharePosition {
+  // Quantidade de cotas/ações atualmente em carteira, pelo que este
+  // navegador conseguiu rastrear. null = não sabemos (nenhum dado local),
+  // não confundir com "0 cotas" (posição zerada, mas conhecida).
+  quantity: number | null;
+  // Preço médio pago nas compras rastreadas. Ajustes (reafirmação do valor
+  // de mercado) não entram na conta — só refletem preço de hoje, não custo
+  // de aquisição.
+  avgPrice: number | null;
+  // true quando existe movimentação/saldo que este navegador não consegue
+  // explicar (histórico de antes desse recurso, ou de outro dispositivo) —
+  // os números acima ficam incompletos ou ausentes nesse caso.
+  hasPartialData: boolean;
+}
+
+export function getSharePosition(investment: Investment): SharePosition {
+  let heldQuantity = 0;
+  let buyQuantity = 0;
+  let buyCost = 0;
+  let hasPartialData = false;
+  let hasAnyTrackedData = false;
+
+  const initial = getInitialSharePosition(investment.id);
+  if (initial) {
+    hasAnyTrackedData = true;
+    heldQuantity += initial.quantity;
+    buyQuantity += initial.quantity;
+    buyCost += initial.quantity * initial.pricePerShare;
+  }
+
+  const chronological = [...investment.movements].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
+
+  for (const movement of chronological) {
+    if (movement.type === 'CONTRIBUTION') {
+      const entry = getMovementSharePosition(investment.id, movement.id);
+      if (!entry) {
+        hasPartialData = true;
+        continue;
+      }
+      hasAnyTrackedData = true;
+      if (movement.amount >= 0) {
+        heldQuantity += entry.quantity;
+        buyQuantity += entry.quantity;
+        buyCost += entry.quantity * entry.pricePerShare;
+      } else {
+        heldQuantity -= entry.quantity;
+      }
+    } else if (movement.type === 'ADJUSTMENT') {
+      const entry = getMovementSharePosition(investment.id, movement.id);
+      // Ajuste sem quantidade rastreada (ex: ajuste feito em valor, não em
+      // cotas) não invalida o que já sabemos — só ignora.
+      if (entry) {
+        hasAnyTrackedData = true;
+        heldQuantity = entry.quantity;
+      }
+    }
+  }
+
+  // Sem nenhum dado rastreado neste navegador mas com sinais de que existe
+  // uma posição real (saldo ou histórico de movimentações) — não dá pra
+  // assumir "0 cotas", é "não sabemos".
+  if (!hasAnyTrackedData) {
+    const hasRealPosition = investment.currentBalance > 0 || investment.movements.length > 0;
+    return {
+      quantity: hasRealPosition ? null : 0,
+      avgPrice: null,
+      hasPartialData: hasRealPosition,
+    };
+  }
+
+  return {
+    quantity: Math.max(0, heldQuantity),
+    avgPrice: buyQuantity > 0 ? buyCost / buyQuantity : null,
+    hasPartialData,
+  };
+}
+
+// Proventos recebidos (dividendos/JCP/rendimentos de FII) — só o tipo YIELD,
+// separado de ADJUSTMENT, pra poder exibir como linha informativa à parte.
+export function getDividendsTotal(investment: Investment): number {
+  return investment.movements
+    .filter((m) => m.type === 'YIELD')
+    .reduce((sum, m) => sum + m.amount, 0);
+}
+
+export interface VariableResult {
+  // Preço atual x quantidade quando temos posição completa; senão o saldo
+  // que o backend já rastreia (fallback confiável pra investimentos sem
+  // histórico de cotas neste navegador).
+  totalValue: number;
+  profit: number;
+  profitPercent: number | null;
+  // true = calculado a partir de quantidade/preço médio/cotação ao vivo
+  // (mais preciso). false = caiu no fallback baseado no saldo do backend.
+  isMarketBased: boolean;
+}
+
+// Resultado de renda variável: quando sabemos quantidade + preço médio (sem
+// dados parciais) e temos cotação ao vivo, calculamos valor de mercado real
+// (quantidade x cotação) contra o custo de aquisição. Sem isso, caímos no
+// saldo/rendimento que o backend já rastreia via movimentações.
+export function getVariableResult(
+  investment: Investment,
+  currentPrice: number | null,
+): VariableResult {
+  const position = getSharePosition(investment);
+  const hasFullPosition =
+    position.quantity !== null &&
+    position.quantity > 0 &&
+    position.avgPrice !== null &&
+    !position.hasPartialData;
+
+  if (hasFullPosition && currentPrice !== null) {
+    const quantity = position.quantity as number;
+    const avgPrice = position.avgPrice as number;
+    const totalInvested = quantity * avgPrice;
+    const totalValue = quantity * currentPrice;
+    const profit = totalValue - totalInvested;
+    return {
+      totalValue,
+      profit,
+      profitPercent: totalInvested > 0 ? (profit / totalInvested) * 100 : null,
+      isMarketBased: true,
+    };
+  }
+
+  return {
+    totalValue: investment.currentBalance,
+    profit: getTotalYield(investment),
+    profitPercent: getYieldPercentage(investment),
+    isMarketBased: false,
+  };
+}
+
+export function formatCurrency(value: number) {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+}
+
+export type InvestmentGroupMode = 'none' | 'institution';
+
+export interface InvestmentGroup {
+  key: string;
+  label: string;
+  items: Investment[];
+}
+
+const NO_INSTITUTION_KEY = '__none__';
+
+function groupByInstitution(items: Investment[], noInstitutionLabel: string): InvestmentGroup[] {
+  const map = new Map<string, Investment[]>();
+  for (const inv of items) {
+    const key = inv.institution?.trim() || NO_INSTITUTION_KEY;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(inv);
+  }
+
+  const keys = Array.from(map.keys()).sort((a, b) => {
+    if (a === NO_INSTITUTION_KEY) return 1;
+    if (b === NO_INSTITUTION_KEY) return -1;
+    return a.localeCompare(b);
+  });
+
+  return keys.map((key) => ({
+    key,
+    label: key === NO_INSTITUTION_KEY ? noInstitutionLabel : key,
+    items: map.get(key)!,
+  }));
+}
+
+// Agrupa investimentos por instituição pra exibição na listagem (dentro de
+// cada categoria renda fixa/variável, que já é a separação de mais alto nível).
+export function groupInvestments(
+  items: Investment[],
+  mode: InvestmentGroupMode,
+  noInstitutionLabel: string,
+): InvestmentGroup[] {
+  if (mode === 'none') {
+    return [{ key: 'all', label: '', items }];
+  }
+
+  return groupByInstitution(items, noInstitutionLabel);
+}

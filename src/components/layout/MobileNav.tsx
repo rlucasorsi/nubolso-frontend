@@ -10,6 +10,7 @@ import {
   MoreHorizontal,
   RotateCw,
   Target,
+  LineChart,
   Wallet,
   Tag,
   Settings,
@@ -41,6 +42,7 @@ export function MobileNav({ onOpenNotifications, unreadCount = 0 }: MobileNavPro
 
   const MORE_ITEMS = [
     { label: t('goals'), href: '/goals', icon: Target },
+    { label: t('investments'), href: '/investments', icon: LineChart },
     { label: t('recurring'), href: '/recurring', icon: RotateCw },
     { label: t('budget'), href: '/orcamento', icon: Wallet },
     { label: t('categories'), href: '/categories', icon: Tag },

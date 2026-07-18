@@ -34,7 +34,9 @@ hooks/       — React Query useQuery/useMutation wrappers that call actions
 model/api/   — TypeScript request/response interfaces
 ```
 
-Modules: `entries`, `categories`, `users`, `recurring-templates`, `credit-cards`, `goals`, `imports`.
+Modules: `entries`, `categories`, `users`, `recurring-templates`, `credit-cards`, `goals`, `investments`, `imports`.
+
+The `investments` module (CDB, FII, stocks) is intentionally standalone — it does not create cash flow `Transaction`s or affect the dashboard balance, same as `goals`. Investment quotes for FII/STOCK tickers come from an unofficial, free Yahoo Finance endpoint (`GET /investments/quote?ticker=X` on the backend) and are purely informational.
 
 The `src/services/auth.ts` file is the one exception — it lives outside `modules/` because it's used by the logout hook and doesn't follow the standard module pattern.
 
@@ -60,7 +62,7 @@ Custom `fetch` wrapper. Key behaviours:
 
 The core financial projection logic, fully decoupled from React. It:
 
-- Defines `FlowType` (`'income' | 'expense' | 'spending'`) — **always lowercase** in the frontend; backend uses uppercase and conversion happens in the service layer
+- Defines `FlowType` (`'income' | 'expense' | 'investment'`) — **always lowercase** in the frontend; backend uses uppercase and conversion happens in the service layer
 - Synthesizes **virtual entries** for unrealized recurring template occurrences and unpaid credit card invoices, so future cashflow is visible even without real transactions
 - Computes `Period[]` with day-by-day running balance from a user-configurable `startDay` (stored in `localStorage` as `cashflow_start_day`)
 
@@ -80,7 +82,7 @@ To add a new translated string: add the key to all three JSON files, then use `u
 
 ### Type convention
 
-The backend sends transaction/template types as `INCOME` / `EXPENSE` / `SPENDING` (uppercase). The service layer normalises them to lowercase (`FlowType`) on read and converts back to uppercase on write. Do not pass uppercase values into components or the cashflow engine.
+The backend sends transaction/template types as `INCOME` / `EXPENSE` / `INVESTMENT` (uppercase). The service layer normalises them to lowercase (`FlowType`) on read and converts back to uppercase on write. Do not pass uppercase values into components or the cashflow engine.
 
 ### Environment variables
 
