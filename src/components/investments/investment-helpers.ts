@@ -175,6 +175,49 @@ export function getVariableResult(
   };
 }
 
+export interface CategorySummary {
+  yieldTotal: number;
+  investedTotal: number;
+  yieldPercent: number | null;
+}
+
+// Resumo de renda fixa: só tem os movimentos do backend (sem cotação de
+// mercado), então rendimento = YIELD + ADJUSTMENT sobre o total aportado.
+export function getFixedCategorySummary(investments: Investment[]): CategorySummary {
+  const yieldTotal = investments.reduce((s, inv) => s + getTotalYield(inv), 0);
+  const investedTotal = investments.reduce((s, inv) => s + getTotalContributed(inv), 0);
+  return {
+    yieldTotal,
+    investedTotal,
+    yieldPercent: investedTotal > 0 ? (yieldTotal / investedTotal) * 100 : null,
+  };
+}
+
+// Resumo de renda variável: usa o mesmo cálculo de cada card
+// (getVariableResult) pra que o total bata com o que é exibido individualmente
+// — inclui ganho/perda de mercado (quantidade x cotação viva), não só os
+// movimentos de YIELD/ADJUSTMENT registrados manualmente.
+export function getVariableCategorySummary(
+  investments: Investment[],
+  pricesByTicker: Record<string, number | null>,
+): CategorySummary {
+  let yieldTotal = 0;
+  let investedTotal = 0;
+  for (const inv of investments) {
+    const currentPrice = inv.ticker ? (pricesByTicker[inv.ticker] ?? null) : null;
+    const result = getVariableResult(inv, currentPrice);
+    yieldTotal += result.profit;
+    investedTotal += result.isMarketBased
+      ? result.totalValue - result.profit
+      : getTotalContributed(inv);
+  }
+  return {
+    yieldTotal,
+    investedTotal,
+    yieldPercent: investedTotal > 0 ? (yieldTotal / investedTotal) * 100 : null,
+  };
+}
+
 export function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',

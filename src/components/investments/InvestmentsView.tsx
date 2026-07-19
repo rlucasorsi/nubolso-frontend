@@ -7,6 +7,7 @@ import { useCreateInvestment } from '@/modules/investments/hooks/use-create-inve
 import { useUpdateInvestment } from '@/modules/investments/hooks/use-update-investment';
 import { useDeleteInvestment } from '@/modules/investments/hooks/use-delete-investment';
 import { useAddInvestmentMovement } from '@/modules/investments/hooks/use-add-investment-movement';
+import { useInvestmentQuotesMap } from '@/modules/investments/hooks/use-investment-quotes-map';
 import type {
   Investment,
   InvestmentMovementType,
@@ -19,8 +20,8 @@ import { AddMovementDrawer } from '@/components/investments/AddMovementDrawer';
 import { InvestmentsSummary } from '@/components/investments/InvestmentsSummary';
 import {
   formatCurrency,
-  getTotalContributed,
-  getTotalYield,
+  getFixedCategorySummary,
+  getVariableCategorySummary,
   groupInvestments,
   isVariableIncome,
   type InvestmentGroup,
@@ -154,8 +155,6 @@ export function InvestmentsView() {
   };
 
   const totalBalance = investments.reduce((s, inv) => s + inv.currentBalance, 0);
-  const totalYield = investments.reduce((s, inv) => s + getTotalYield(inv), 0);
-  const totalContributed = investments.reduce((s, inv) => s + getTotalContributed(inv), 0);
   const institutionOptions = Array.from(
     new Set(
       investments
@@ -172,6 +171,16 @@ export function InvestmentsView() {
   const variableInvestments = investments.filter((inv) => isVariableIncome(inv.type));
   const fixedBalance = fixedInvestments.reduce((s, inv) => s + inv.currentBalance, 0);
   const variableBalance = variableInvestments.reduce((s, inv) => s + inv.currentBalance, 0);
+
+  // Preços ao vivo pra que o rendimento de renda variável (ganho/perda de
+  // mercado, não só YIELD/ADJUSTMENT manual) entre no total — mesmo cálculo
+  // usado em cada card (VariableInvestmentSummary).
+  const pricesByTicker = useInvestmentQuotesMap(variableInvestments.map((inv) => inv.ticker));
+  const fixedSummary = getFixedCategorySummary(fixedInvestments);
+  const variableSummary = getVariableCategorySummary(variableInvestments, pricesByTicker);
+  const totalYield = fixedSummary.yieldTotal + variableSummary.yieldTotal;
+  const totalContributed = fixedSummary.investedTotal + variableSummary.investedTotal;
+
   const groupModeArg = groupByInstitutionOn ? 'institution' : 'none';
   const fixedGroups = groupInvestments(fixedInvestments, groupModeArg, t('noInstitution'));
   const variableGroups = groupInvestments(variableInvestments, groupModeArg, t('noInstitution'));
@@ -196,6 +205,7 @@ export function InvestmentsView() {
     items: Investment[],
     groups: InvestmentGroup[],
     totalValue: number,
+    yieldPercent: number | null,
     collapsed: boolean,
     onToggle: () => void,
   ) => {
@@ -217,7 +227,20 @@ export function InvestmentsView() {
             <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">{title}</h2>
             <span className="text-xs text-muted-foreground">({items.length})</span>
           </div>
-          <span className="text-sm font-bold text-foreground">{formatCurrency(totalValue)}</span>
+          <span className="text-sm font-bold text-foreground">
+            {formatCurrency(totalValue)}
+            {yieldPercent !== null && (
+              <span
+                className={cn(
+                  'ml-1.5 text-xs font-bold',
+                  yieldPercent >= 0 ? 'text-success' : 'text-destructive',
+                )}
+              >
+                ({yieldPercent >= 0 ? '+' : ''}
+                {yieldPercent.toFixed(2)}%)
+              </span>
+            )}
+          </span>
         </button>
 
         {!collapsed &&
@@ -320,6 +343,7 @@ export function InvestmentsView() {
               fixedInvestments,
               fixedGroups,
               fixedBalance,
+              fixedSummary.yieldPercent,
               fixedCollapsed,
               () => setFixedCollapsed((c) => !c),
             )}
@@ -328,6 +352,7 @@ export function InvestmentsView() {
               variableInvestments,
               variableGroups,
               variableBalance,
+              variableSummary.yieldPercent,
               variableCollapsed,
               () => setVariableCollapsed((c) => !c),
             )}
