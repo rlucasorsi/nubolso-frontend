@@ -7,6 +7,8 @@ export interface InvestmentMovement {
   amount: number;
   date: string;
   description: string;
+  shareQuantity: number | null;
+  pricePerShare: number | null;
 }
 
 export interface Investment {
@@ -54,6 +56,8 @@ export interface AddInvestmentMovementRequest {
   amount: number;
   date?: string;
   description?: string;
+  shareQuantity?: number;
+  pricePerShare?: number;
 }
 export type AddInvestmentMovementResponse = Investment;
 
