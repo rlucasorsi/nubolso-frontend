@@ -107,8 +107,18 @@ export function InvestmentsView() {
     shareInfo?: { quantity: number; pricePerShare: number },
   ) => {
     const previousIds = new Set((movementInvestment?.movements ?? []).map((m) => m.id));
-    const updated = await addMovementMutation.mutateAsync({ investmentId, type, amount, date });
+    const updated = await addMovementMutation.mutateAsync({
+      investmentId,
+      type,
+      amount,
+      date,
+      ...(shareInfo && shareInfo.quantity > 0 && shareInfo.pricePerShare > 0
+        ? { shareQuantity: shareInfo.quantity, pricePerShare: shareInfo.pricePerShare }
+        : {}),
+    });
 
+    // Mantém localStorage como cache local para acesso offline/imediato,
+    // mesmo com os dados já persistidos no backend.
     if (shareInfo && shareInfo.quantity > 0 && shareInfo.pricePerShare > 0) {
       const newMovement = updated.movements.find((m) => !previousIds.has(m.id));
       if (newMovement) {

@@ -62,26 +62,39 @@ export function getSharePosition(investment: Investment): SharePosition {
 
   for (const movement of chronological) {
     if (movement.type === 'CONTRIBUTION') {
-      const entry = getMovementSharePosition(investment.id, movement.id);
-      if (!entry) {
+      // Prefere dados vindos da API; cai no localStorage como fallback para
+      // movimentos criados antes deste campo existir no backend.
+      const apiQty = movement.shareQuantity;
+      const apiPrice = movement.pricePerShare;
+      const localEntry =
+        apiQty == null || apiPrice == null
+          ? getMovementSharePosition(investment.id, movement.id)
+          : undefined;
+
+      const quantity = apiQty ?? localEntry?.quantity;
+      const price = apiPrice ?? localEntry?.pricePerShare;
+
+      if (quantity == null || price == null) {
         hasPartialData = true;
         continue;
       }
       hasAnyTrackedData = true;
       if (movement.amount >= 0) {
-        heldQuantity += entry.quantity;
-        buyQuantity += entry.quantity;
-        buyCost += entry.quantity * entry.pricePerShare;
+        heldQuantity += quantity;
+        buyQuantity += quantity;
+        buyCost += quantity * price;
       } else {
-        heldQuantity -= entry.quantity;
+        heldQuantity -= quantity;
       }
     } else if (movement.type === 'ADJUSTMENT') {
-      const entry = getMovementSharePosition(investment.id, movement.id);
-      // Ajuste sem quantidade rastreada (ex: ajuste feito em valor, não em
-      // cotas) não invalida o que já sabemos — só ignora.
-      if (entry) {
+      const apiQty = movement.shareQuantity;
+      const localEntry =
+        apiQty == null ? getMovementSharePosition(investment.id, movement.id) : undefined;
+      const quantity = apiQty ?? localEntry?.quantity;
+      // Ajuste sem quantidade rastreada não invalida o que já sabemos.
+      if (quantity != null) {
         hasAnyTrackedData = true;
-        heldQuantity = entry.quantity;
+        heldQuantity = quantity;
       }
     }
   }

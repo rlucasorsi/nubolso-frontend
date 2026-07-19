@@ -24,6 +24,8 @@ interface InvestmentMovementApi {
   amount: number;
   date: string;
   description: string;
+  shareQuantity?: number | null;
+  pricePerShare?: number | null;
 }
 
 interface InvestmentApi {
@@ -45,6 +47,8 @@ function mapMovement(movement: InvestmentMovementApi): InvestmentMovement {
     amount: movement.amount,
     date: movement.date.split('T')[0],
     description: movement.description,
+    shareQuantity: movement.shareQuantity ?? null,
+    pricePerShare: movement.pricePerShare ?? null,
   };
 }
 
@@ -90,11 +94,16 @@ export const investmentsService = {
   },
 
   addMovement: async (params: AddInvestmentMovementRequest) => {
-    const { investmentId, ...rest } = params;
-    const data = await HttpClient.post<
-      InvestmentApi,
-      Omit<AddInvestmentMovementRequest, 'investmentId'>
-    >(`/investments/${investmentId}/movements`, rest);
+    const { investmentId, shareQuantity, pricePerShare, ...rest } = params;
+    const body = {
+      ...rest,
+      ...(shareQuantity != null && shareQuantity > 0 ? { shareQuantity } : {}),
+      ...(pricePerShare != null && pricePerShare > 0 ? { pricePerShare } : {}),
+    };
+    const data = await HttpClient.post<InvestmentApi, typeof body>(
+      `/investments/${investmentId}/movements`,
+      body,
+    );
     return mapInvestment(data) as AddInvestmentMovementResponse;
   },
 
