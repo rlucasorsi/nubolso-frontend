@@ -26,7 +26,6 @@ import {
 } from '@/components/investments/investment-helpers';
 import {
   clearInvestmentSharePositions,
-  setInitialSharePosition,
   setMovementSharePosition,
 } from '@/lib/investmentShareLedger';
 import { AddButton } from '@/components/ui/add-button';
@@ -72,15 +71,12 @@ export function InvestmentsView() {
     ticker?: string;
     cdiPercentage?: number;
     institution: string;
-    currentBalance?: number;
-    shareInfo?: { quantity: number; pricePerShare: number };
   }) => {
-    const { shareInfo, ...payload } = data;
-    const created = await createInvestmentMutation.mutateAsync(payload);
-    if (shareInfo && shareInfo.quantity > 0 && shareInfo.pricePerShare > 0) {
-      setInitialSharePosition(created.id, shareInfo.quantity, shareInfo.pricePerShare);
-    }
+    const created = await createInvestmentMutation.mutateAsync(data);
     setShowCreateDrawer(false);
+    // Sem valor inicial na criação — leva direto pro fluxo de aporte, já
+    // que o investimento nasce sem saldo.
+    setMovementInvestment(created);
   };
 
   const handleUpdateInvestment = async (data: {
@@ -159,8 +155,8 @@ export function InvestmentsView() {
   // primeira é enxuta, a segunda tem posição/mercado/resultado) — misturadas
   // no mesmo grid, as linhas ficam com alturas desiguais e desalinhadas.
   // Por isso a listagem sempre separa as duas categorias em grids próprios.
-  const fixedInvestments = investments.filter((inv) => !isVariableIncome(inv));
-  const variableInvestments = investments.filter((inv) => isVariableIncome(inv));
+  const fixedInvestments = investments.filter((inv) => !isVariableIncome(inv.type));
+  const variableInvestments = investments.filter((inv) => isVariableIncome(inv.type));
   const fixedBalance = fixedInvestments.reduce((s, inv) => s + inv.currentBalance, 0);
   const variableBalance = variableInvestments.reduce((s, inv) => s + inv.currentBalance, 0);
   const groupModeArg = groupByInstitutionOn ? 'institution' : 'none';

@@ -12,7 +12,18 @@ import {
 } from '@/components/ui/app-drawer';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { Plus, ArrowUpRight, Coins, Scale, Trash2, Landmark, Building2, TrendingUp, Wallet } from 'lucide-react';
+import {
+  Plus,
+  ArrowUpRight,
+  Coins,
+  Scale,
+  Trash2,
+  Landmark,
+  Building2,
+  TrendingUp,
+  PieChart,
+  Wallet,
+} from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { getDateFnsLocale } from '@/i18n/dateFnsLocale';
@@ -40,6 +51,7 @@ const TYPE_ICON: Record<Investment['type'], React.ComponentType<{ className?: st
   CDB: Landmark,
   FII: Building2,
   STOCK: TrendingUp,
+  ETF: PieChart,
   OTHER: Wallet,
 };
 
@@ -94,7 +106,7 @@ export function InvestmentDetailDrawer({
   const sortedMovements = [...investment.movements].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
-  const hasTicker = isVariableIncome(investment);
+  const hasTicker = isVariableIncome(investment.type);
 
   const handleOpenChange = (o: boolean) => {
     if (!o) onClose();

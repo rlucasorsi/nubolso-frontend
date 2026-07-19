@@ -1,7 +1,16 @@
 'use client';
 
 import type { Investment } from '@/modules/investments/model/api/investment';
-import { Landmark, Building2, TrendingUp, Wallet, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import {
+  Landmark,
+  Building2,
+  TrendingUp,
+  PieChart,
+  Wallet,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +33,7 @@ const TYPE_ICON: Record<Investment['type'], React.ComponentType<{ className?: st
   CDB: Landmark,
   FII: Building2,
   STOCK: TrendingUp,
+  ETF: PieChart,
   OTHER: Wallet,
 };
 
@@ -49,7 +59,7 @@ export function InvestmentCard({
   const totalYield = getTotalYield(investment);
   const yieldPercentage = getYieldPercentage(investment);
   const isPositiveYield = totalYield >= 0;
-  const hasTicker = isVariableIncome(investment);
+  const hasTicker = isVariableIncome(investment.type);
 
   return (
     <div

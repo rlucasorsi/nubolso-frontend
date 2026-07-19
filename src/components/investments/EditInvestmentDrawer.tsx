@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { TextInputField, NumberInputField } from '@/components/ui/form-field';
 import { InstitutionCombobox } from './InstitutionCombobox';
 import type { Investment } from '@/modules/investments/model/api/investment';
+import { isVariableIncome } from './investment-helpers';
 import { ArrowRight } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 
@@ -61,7 +62,7 @@ export function EditInvestmentDrawer({
   if (!investment) return null;
 
   const isCDB = investment.type === 'CDB';
-  const needsTicker = investment.type === 'FII' || investment.type === 'STOCK';
+  const needsTicker = isVariableIncome(investment.type);
 
   const handleSubmit = async () => {
     const result = updateInvestmentSchema.safeParse({

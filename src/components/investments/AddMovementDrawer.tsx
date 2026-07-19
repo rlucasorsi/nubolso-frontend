@@ -94,7 +94,7 @@ export function AddMovementDrawer({
   // Pra FII/Ação, aporte/retirada e ajuste usam quantidade de cotas x preço,
   // não um valor solto — reflete como a operação realmente aconteceu e evita
   // a pessoa ter que calcular o total de cabeça.
-  const isSharesBasedType = !!investment && isVariableIncome(investment);
+  const isSharesBasedType = !!investment && isVariableIncome(investment.type);
   const isSharesBased = tab === 'contribution' && isSharesBasedType;
   const isAdjustmentSharesBased = tab === 'adjustment' && isSharesBasedType;
 

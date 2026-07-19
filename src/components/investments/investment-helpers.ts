@@ -1,14 +1,13 @@
 import type { Investment, InvestmentType } from '@/modules/investments/model/api/investment';
-import {
-  getInitialSharePosition,
-  getMovementSharePosition,
-} from '@/lib/investmentShareLedger';
+import { getMovementSharePosition } from '@/lib/investmentShareLedger';
 
-// FII/Ação têm cotação, comportam-se como renda variável (posição, preço
-// médio, valor de mercado). CDB/Outro são renda fixa (saldo controlado
-// manualmente ou por movimentações em dinheiro).
-export function isVariableIncome(investment: Investment): boolean {
-  return investment.type === 'FII' || investment.type === 'STOCK';
+// FII/Ação/ETF têm cotação, comportam-se como renda variável (posição,
+// preço médio, valor de mercado). CDB/Outro são renda fixa (saldo
+// controlado manualmente ou por movimentações em dinheiro). Recebe o tipo
+// direto (não o Investment inteiro) pra também servir os formulários de
+// criação/edição, que só têm o tipo selecionado, ainda sem um Investment.
+export function isVariableIncome(type: InvestmentType): boolean {
+  return type === 'FII' || type === 'STOCK' || type === 'ETF';
 }
 
 // Total investido (principal): soma dos aportes/retiradas (CONTRIBUTION),
@@ -56,14 +55,6 @@ export function getSharePosition(investment: Investment): SharePosition {
   let buyCost = 0;
   let hasPartialData = false;
   let hasAnyTrackedData = false;
-
-  const initial = getInitialSharePosition(investment.id);
-  if (initial) {
-    hasAnyTrackedData = true;
-    heldQuantity += initial.quantity;
-    buyQuantity += initial.quantity;
-    buyCost += initial.quantity * initial.pricePerShare;
-  }
 
   const chronological = [...investment.movements].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),

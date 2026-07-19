@@ -668,6 +668,7 @@
     "CDB": "CDB",
     "FII": "REIT",
     "STOCK": "Stock",
+    "ETF": "ETF",
     "OTHER": "Other"
   },
   "investmentDetail": {
@@ -689,6 +690,7 @@
     "subtitle": "Register an investment to track its balance and yield.",
     "name": "Name",
     "namePlaceholder": "e.g. CDB Bank X",
+    "nameFollowsTickerHint": "Following the ticker — edit if you want a different name.",
     "institution": "Bank/Broker",
     "institutionPlaceholder": "e.g. Nubank, Clear, Inter",
     "noInstitutions": "No institutions registered yet",
@@ -701,13 +703,9 @@
     "tickerPlaceholder": "e.g. PETR4, MXRF11",
     "noSuggestions": "No results found",
     "quoteFound": "Quote found: {amount}",
-    "quoteNotFound": "Couldn't find a quote for this ticker",
     "useQuote": "Use this quote",
-    "quantity": "Quantity",
-    "pricePerShare": "Price Paid per Share",
-    "totalPreview": "Total: {amount}",
     "cdiPercentage": "% of CDI",
-    "initialBalance": "Initial Balance (optional)",
+    "noInitialValueHint": "No need to set a starting balance — add your first contribution right after creating it.",
     "creating": "Creating...",
     "createBtn": "Create Investment"
   },

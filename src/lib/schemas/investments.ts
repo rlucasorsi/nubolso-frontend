@@ -14,28 +14,16 @@ const positiveAmount = z
 export const createInvestmentSchema = z
   .object({
     name: z.string().min(1, 'Nome é obrigatório'),
-    type: z.enum(['CDB', 'FII', 'STOCK', 'OTHER']),
+    type: z.enum(['CDB', 'FII', 'STOCK', 'ETF', 'OTHER']),
     institution: z.string().min(1, 'Banco/Corretora é obrigatório'),
     ticker: z.string().optional(),
-    quantity: z.number().optional(),
-    pricePerShare: z.string().optional(),
-    currentBalance: z.string().optional(),
-  })
-  .refine((data) => (data.type === 'FII' || data.type === 'STOCK' ? !!data.ticker : true), {
-    message: 'Ticker é obrigatório para FIIs e ações',
-    path: ['ticker'],
-  })
-  .refine((data) => (data.type === 'FII' || data.type === 'STOCK' ? (data.quantity ?? 0) > 0 : true), {
-    message: 'Quantidade deve ser maior do que 0',
-    path: ['quantity'],
   })
   .refine(
-    (data) => {
-      if (data.type !== 'FII' && data.type !== 'STOCK') return true;
-      const n = parseFloat((data.pricePerShare ?? '').replace(',', '.'));
-      return !isNaN(n) && n > 0;
+    (data) => (data.type === 'FII' || data.type === 'STOCK' || data.type === 'ETF' ? !!data.ticker : true),
+    {
+      message: 'Ticker é obrigatório para FIIs, ações e ETFs',
+      path: ['ticker'],
     },
-    { message: 'Preço pago deve ser maior do que 0', path: ['pricePerShare'] },
   );
 
 export const addMovementSchema = z.object({

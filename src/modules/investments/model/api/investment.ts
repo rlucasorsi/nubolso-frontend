@@ -1,4 +1,4 @@
-export type InvestmentType = 'CDB' | 'FII' | 'STOCK' | 'OTHER';
+export type InvestmentType = 'CDB' | 'FII' | 'STOCK' | 'ETF' | 'OTHER';
 export type InvestmentMovementType = 'CONTRIBUTION' | 'YIELD' | 'ADJUSTMENT';
 
 export interface InvestmentMovement {
@@ -32,7 +32,6 @@ export interface CreateInvestmentRequest {
   ticker?: string;
   cdiPercentage?: number;
   institution: string;
-  currentBalance?: number;
 }
 export type CreateInvestmentResponse = Investment;
 

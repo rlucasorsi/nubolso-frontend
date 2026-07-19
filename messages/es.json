@@ -668,6 +668,7 @@
     "CDB": "CDB",
     "FII": "FII",
     "STOCK": "Acción",
+    "ETF": "ETF",
     "OTHER": "Otro"
   },
   "investmentDetail": {
@@ -689,6 +690,7 @@
     "subtitle": "Registra una inversión para seguir el saldo y el rendimiento.",
     "name": "Nombre",
     "namePlaceholder": "ej: CDB Banco X",
+    "nameFollowsTickerHint": "Siguiendo el ticker — edita si quieres un nombre diferente.",
     "institution": "Banco/Corredora",
     "institutionPlaceholder": "ej: Nubank, Clear, Inter",
     "noInstitutions": "Ninguna institución registrada todavía",
@@ -701,13 +703,9 @@
     "tickerPlaceholder": "ej: PETR4, MXRF11",
     "noSuggestions": "Ningún resultado encontrado",
     "quoteFound": "Cotización encontrada: {amount}",
-    "quoteNotFound": "No fue posible encontrar la cotización de este ticker",
     "useQuote": "Usar esta cotización",
-    "quantity": "Cantidad",
-    "pricePerShare": "Precio Pagado por Cuota/Acción",
-    "totalPreview": "Total: {amount}",
     "cdiPercentage": "% del CDI",
-    "initialBalance": "Saldo Inicial (opcional)",
+    "noInitialValueHint": "No hace falta indicar un saldo inicial — agrega tu primer aporte justo después de crearla.",
     "creating": "Creando...",
     "createBtn": "Crear Inversión"
   },
