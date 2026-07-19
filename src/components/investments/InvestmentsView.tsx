@@ -18,6 +18,7 @@ import { EditInvestmentDrawer } from '@/components/investments/EditInvestmentDra
 import { AddMovementDrawer } from '@/components/investments/AddMovementDrawer';
 import { InvestmentsSummary } from '@/components/investments/InvestmentsSummary';
 import {
+  formatCurrency,
   getTotalContributed,
   getTotalYield,
   groupInvestments,
@@ -40,7 +41,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
-import { Wallet } from 'lucide-react';
+import { ChevronDown, Wallet } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 
 export function InvestmentsView() {
@@ -60,6 +61,8 @@ export function InvestmentsView() {
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
   const [deletingInvestment, setDeletingInvestment] = useState<Investment | null>(null);
   const [groupByInstitutionOn, setGroupByInstitutionOn] = useState(false);
+  const [fixedCollapsed, setFixedCollapsed] = useState(false);
+  const [variableCollapsed, setVariableCollapsed] = useState(false);
 
   const investments = investmentsQuery.data ?? [];
   const isLoading = investmentsQuery.isLoading;
@@ -178,32 +181,53 @@ export function InvestmentsView() {
     </div>
   );
 
-  const renderCategorySection = (title: string, items: Investment[], groups: InvestmentGroup[]) => {
+  const renderCategorySection = (
+    title: string,
+    items: Investment[],
+    groups: InvestmentGroup[],
+    totalValue: number,
+    collapsed: boolean,
+    onToggle: () => void,
+  ) => {
     if (items.length === 0) return null;
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">{title}</h2>
-          <span className="text-xs text-muted-foreground">({items.length})</span>
-        </div>
-
-        {groupByInstitutionOn ? (
-          <div className="space-y-6 pl-1">
-            {groups.map((group) => (
-              <div key={group.key} className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    {group.label}
-                  </h3>
-                  <span className="text-[10px] text-muted-foreground">({group.items.length})</span>
-                </div>
-                {renderInvestmentGrid(group.items)}
-              </div>
-            ))}
+        <button
+          type="button"
+          onClick={onToggle}
+          className="w-full flex items-center justify-between gap-2 text-left"
+        >
+          <div className="flex items-center gap-2">
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-muted-foreground transition-transform',
+                collapsed && '-rotate-90',
+              )}
+            />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">{title}</h2>
+            <span className="text-xs text-muted-foreground">({items.length})</span>
           </div>
-        ) : (
-          renderInvestmentGrid(items)
-        )}
+          <span className="text-sm font-bold text-foreground">{formatCurrency(totalValue)}</span>
+        </button>
+
+        {!collapsed &&
+          (groupByInstitutionOn ? (
+            <div className="space-y-6 pl-1">
+              {groups.map((group) => (
+                <div key={group.key} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {group.label}
+                    </h3>
+                    <span className="text-[10px] text-muted-foreground">({group.items.length})</span>
+                  </div>
+                  {renderInvestmentGrid(group.items)}
+                </div>
+              ))}
+            </div>
+          ) : (
+            renderInvestmentGrid(items)
+          ))}
       </div>
     );
   };
@@ -281,8 +305,22 @@ export function InvestmentsView() {
           )}
 
           <div className="space-y-8">
-            {renderCategorySection(tc('fixedIncome'), fixedInvestments, fixedGroups)}
-            {renderCategorySection(tc('variableIncome'), variableInvestments, variableGroups)}
+            {renderCategorySection(
+              tc('fixedIncome'),
+              fixedInvestments,
+              fixedGroups,
+              fixedBalance,
+              fixedCollapsed,
+              () => setFixedCollapsed((c) => !c),
+            )}
+            {renderCategorySection(
+              tc('variableIncome'),
+              variableInvestments,
+              variableGroups,
+              variableBalance,
+              variableCollapsed,
+              () => setVariableCollapsed((c) => !c),
+            )}
 
             <button
               onClick={() => setShowCreateDrawer(true)}
