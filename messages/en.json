@@ -527,6 +527,8 @@
   },
   "entries": {
     "title": "Entries",
+    "tabMain": "Entries",
+    "tabIgnored": "Ignored",
     "searchPlaceholder": "Search by description or amount...",
     "filterPeriod": "Filter by period",
     "clearFilter": "Clear Filter",

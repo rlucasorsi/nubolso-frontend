@@ -26,6 +26,7 @@ export interface GetEntriesFilters {
   tipoDespesa?: 'fixa' | 'variavel' | null;
   categoryId?: string;
   isPaid?: boolean;
+  view?: 'main' | 'ignored' | 'all';
   page?: number;
   limit?: number;
 }
@@ -84,6 +85,10 @@ export const entriesService = {
 
   togglePaid: async (id: string) => {
     return HttpClient.patch<any, undefined>(`/transactions/${id}/toggle-paid`, undefined);
+  },
+
+  unskip: async (id: string) => {
+    return HttpClient.patch<any, undefined>(`/transactions/${id}/unskip`, undefined);
   },
 
   delete: async (params: { id: string }) => {

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
 import { useDeleteEntry } from '@/modules/entries/hooks/use-delete-entry';
+import { useUnskipEntry } from '@/modules/entries/hooks/use-unskip-entry';
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
 import { ServerErrorState } from '@/components/ui/server-error-state';
@@ -81,6 +82,7 @@ export function EntriesView() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showRecurring] = useState(false);
+  const [activeTab, setActiveTab] = useState<'main' | 'ignored'>('main');
   const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -89,6 +91,7 @@ export function EntriesView() {
   const [deletingEntry, setDeletingEntry] = useState<CashFlowEntry | null>(null);
   const [reopenInvoiceId, setReopenInvoiceId] = useState<string | null>(null);
   const { mutate: deleteEntry, isPending: isDeleting } = useDeleteEntry();
+  const { mutate: unskipEntry, isPending: isUnskipping } = useUnskipEntry();
   const { data: invoicesData } = useGetAllInvoices();
   const reopenInvoiceMutation = useReopenInvoice();
 
@@ -110,16 +113,18 @@ export function EntriesView() {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, dateRange, pageSize, expenseTypeFilter]);
+  }, [debouncedSearch, dateRange, pageSize, expenseTypeFilter, activeTab]);
 
   const filters = useMemo(() => {
     const params: {
       startDate?: string;
       endDate?: string;
       tipoDespesa?: 'fixa' | 'variavel';
+      view: 'main' | 'ignored';
       page: number;
       limit: number;
     } = {
+      view: activeTab,
       page,
       limit: pageSize,
     };
@@ -131,7 +136,7 @@ export function EntriesView() {
       params.tipoDespesa = expenseTypeFilter;
     }
     return params;
-  }, [dateRange, page, pageSize, expenseTypeFilter]);
+  }, [dateRange, page, pageSize, expenseTypeFilter, activeTab]);
 
   const { data, isLoading, isError, refetch } = useGetEntries(filters);
 
@@ -237,6 +242,29 @@ export function EntriesView() {
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
         <ImportOfxDrawer />
+      </div>
+
+      <div className="flex items-center gap-1.5">
+        {(
+          [
+            { value: 'main', label: t('tabMain') },
+            { value: 'ignored', label: t('tabIgnored') },
+          ] as { value: typeof activeTab; label: string }[]
+        ).map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setActiveTab(opt.value)}
+            className={cn(
+              'px-4 py-2 rounded-xl text-sm font-bold transition-all',
+              activeTab === opt.value
+                ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
@@ -578,6 +606,17 @@ export function EntriesView() {
                                 onClick={() => setReopenInvoiceId(entry.creditCardInvoiceId as string)}
                                 title={dailyT('reopenInvoice')}
                                 className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl text-muted-foreground/50 hover:text-primary hover:bg-primary/10 transition-all"
+                              >
+                                <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                              </button>
+                            </div>
+                          ) : entry.isSkipped ? (
+                            <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                              <button
+                                onClick={() => unskipEntry({ id: entry.id })}
+                                disabled={isUnskipping}
+                                title={dailyT('reactivate')}
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl text-muted-foreground/50 hover:text-primary hover:bg-primary/10 transition-all disabled:opacity-40"
                               >
                                 <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               </button>

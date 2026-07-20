@@ -527,6 +527,8 @@
   },
   "entries": {
     "title": "Movimientos",
+    "tabMain": "Movimientos",
+    "tabIgnored": "Ignorados",
     "searchPlaceholder": "Buscar por descripción o monto...",
     "filterPeriod": "Filtrar por período",
     "clearFilter": "Limpiar Filtro",

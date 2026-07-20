@@ -527,6 +527,8 @@
   },
   "entries": {
     "title": "Lançamentos",
+    "tabMain": "Lançamentos",
+    "tabIgnored": "Ignorados",
     "searchPlaceholder": "Buscar por descrição ou valor...",
     "filterPeriod": "Filtrar por período",
     "clearFilter": "Limpar Filtro",
