@@ -630,6 +630,8 @@
     "addInvestmentTitle": "Adicionar novo investimento",
     "createNew": "Adicionar investimento",
     "totalBalance": "Saldo Total",
+    "totalInvested": "Valor Investido",
+    "totalInvestedNote": "Total aportado (principal)",
     "totalYield": "Rendimento Total",
     "yieldNote": "Proventos e valorização",
     "totalDividends": "Proventos recebidos:",

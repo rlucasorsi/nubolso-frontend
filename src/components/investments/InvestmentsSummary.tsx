@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, Wallet } from 'lucide-react';
+import { PiggyBank, TrendingUp } from 'lucide-react';
 import { useTranslations } from '@/i18n/useTranslations';
 import { formatCurrency } from './investment-helpers';
 
@@ -29,7 +29,7 @@ export function InvestmentsSummary({
   const yieldPercentage = totalContributed > 0 ? (totalYield / totalContributed) * 100 : null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
       <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
           {t('totalBalance')}
@@ -37,12 +37,24 @@ export function InvestmentsSummary({
         <span className="text-2xl font-bold font-display text-primary">
           {formatCurrency(totalBalance)}
         </span>
-        <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] mt-2">
-          <Wallet className="h-3.5 w-3.5 shrink-0" />
-          <span className="font-semibold truncate">
-            {tc('fixedIncome')} {formatCurrency(fixedBalance)} · {tc('variableIncome')}{' '}
-            {formatCurrency(variableBalance)}
+        <div className="flex flex-col gap-0.5 text-muted-foreground text-[11px] mt-2">
+          <span className="font-semibold">
+            {tc('fixedIncome')}: {formatCurrency(fixedBalance)}
           </span>
+          <span className="font-semibold">
+            {tc('variableIncome')}: {formatCurrency(variableBalance)}
+          </span>
+        </div>
+      </div>
+
+      <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+          {t('totalInvested')}
+        </span>
+        <span className="text-2xl font-bold font-display">{formatCurrency(totalContributed)}</span>
+        <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] mt-2">
+          <PiggyBank className="h-3.5 w-3.5 shrink-0" />
+          <span className="font-semibold">{t('totalInvestedNote')}</span>
         </div>
       </div>
 
