@@ -626,6 +626,8 @@
   "investmentsView": {
     "title": "Inversiones",
     "subtitle": "Sigue tus inversiones en un solo lugar.",
+    "tabOverview": "Visión General",
+    "tabInvestments": "Inversiones",
     "addInvestment": "Nueva Inversión",
     "addInvestmentTitle": "Agregar nueva inversión",
     "createNew": "Agregar inversión",
@@ -643,6 +645,26 @@
     "groupByNone": "Ninguno",
     "groupByInstitution": "Institución",
     "noInstitution": "Sin institución"
+  },
+  "investmentsOverview": {
+    "allocationTitle": "Asignación por tipo",
+    "allocationSubtitle": "Renta fija vs. renta variable, por valor de mercado",
+    "allocationTotalLabel": "Total",
+    "portfolioAllocationTitle": "Distribución de la cartera",
+    "portfolioAllocationSubtitle": "Todos los tipos: CDB, FII, Acción, ETF y Otro",
+    "variableAllocationTitle": "Asignación en renta variable",
+    "variableAllocationSubtitle": "Distribución de la cartera solo entre FII, Acción y ETF",
+    "topHoldingsTitle": "Mayores posiciones",
+    "topHoldingsSubtitle": "Tus inversiones con mayor valor de mercado",
+    "dividendsTitle": "Dividendos por mes",
+    "dividendsSubtitle": "Dividendos y rendimientos recibidos en los últimos 6 meses",
+    "evolutionTitle": "Evolución de la cartera",
+    "evolutionSubtitle": "Capital invertido + dividendos acumulados, últimos 12 meses",
+    "evolutionTotalLabel": "Total",
+    "evolutionDisclaimer": "Basado en el historial de aportes y dividendos registrados — no refleja la variación del precio de mercado de FII/acciones en fechas pasadas, ya que el sistema no guarda cotizaciones históricas.",
+    "emptyState": "Ninguna inversión con valor todavía",
+    "emptyVariableState": "Ninguna inversión de renta variable con valor todavía",
+    "emptyDividends": "Ningún dividendo recibido en los últimos 6 meses"
   },
   "investmentCard": {
     "invested": "Invertido",

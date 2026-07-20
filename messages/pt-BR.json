@@ -626,6 +626,8 @@
   "investmentsView": {
     "title": "Investimentos",
     "subtitle": "Acompanhe seus investimentos em um só lugar.",
+    "tabOverview": "Visão Geral",
+    "tabInvestments": "Investimentos",
     "addInvestment": "Novo Investimento",
     "addInvestmentTitle": "Adicionar novo investimento",
     "createNew": "Adicionar investimento",
@@ -643,6 +645,26 @@
     "groupByNone": "Nenhum",
     "groupByInstitution": "Instituição",
     "noInstitution": "Sem instituição"
+  },
+  "investmentsOverview": {
+    "allocationTitle": "Alocação por tipo",
+    "allocationSubtitle": "Renda fixa x renda variável, por valor de mercado",
+    "allocationTotalLabel": "Total",
+    "portfolioAllocationTitle": "Distribuição da carteira",
+    "portfolioAllocationSubtitle": "Todos os tipos: CDB, FII, Ação, ETF e Outro",
+    "variableAllocationTitle": "Alocação em renda variável",
+    "variableAllocationSubtitle": "Distribuição da carteira só entre FII, Ação e ETF",
+    "topHoldingsTitle": "Maiores posições",
+    "topHoldingsSubtitle": "Seus investimentos com maior valor de mercado",
+    "dividendsTitle": "Proventos por mês",
+    "dividendsSubtitle": "Dividendos e rendimentos recebidos nos últimos 6 meses",
+    "evolutionTitle": "Evolução da carteira",
+    "evolutionSubtitle": "Capital investido + proventos acumulados, últimos 12 meses",
+    "evolutionTotalLabel": "Total",
+    "evolutionDisclaimer": "Baseado no histórico de aportes e proventos registrados — não reflete a variação de preço de mercado de FIIs/ações em datas passadas, já que o sistema não guarda cotação histórica.",
+    "emptyState": "Nenhum investimento com valor ainda",
+    "emptyVariableState": "Nenhum investimento de renda variável com valor ainda",
+    "emptyDividends": "Nenhum provento recebido nos últimos 6 meses"
   },
   "investmentCard": {
     "invested": "Investido",

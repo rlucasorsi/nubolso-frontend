@@ -626,6 +626,8 @@
   "investmentsView": {
     "title": "Investments",
     "subtitle": "Track your investments in one place.",
+    "tabOverview": "Overview",
+    "tabInvestments": "Investments",
     "addInvestment": "New Investment",
     "addInvestmentTitle": "Add new investment",
     "createNew": "Add investment",
@@ -643,6 +645,26 @@
     "groupByNone": "None",
     "groupByInstitution": "Institution",
     "noInstitution": "No institution"
+  },
+  "investmentsOverview": {
+    "allocationTitle": "Allocation by type",
+    "allocationSubtitle": "Fixed vs. variable income, by market value",
+    "allocationTotalLabel": "Total",
+    "portfolioAllocationTitle": "Portfolio breakdown",
+    "portfolioAllocationSubtitle": "All types: CDB, FII, Stock, ETF, and Other",
+    "variableAllocationTitle": "Variable income allocation",
+    "variableAllocationSubtitle": "Portfolio split among FII, Stock, and ETF only",
+    "topHoldingsTitle": "Top holdings",
+    "topHoldingsSubtitle": "Your investments with the highest market value",
+    "dividendsTitle": "Dividends by month",
+    "dividendsSubtitle": "Dividends and yield received over the last 6 months",
+    "evolutionTitle": "Portfolio evolution",
+    "evolutionSubtitle": "Invested capital + accumulated dividends, last 12 months",
+    "evolutionTotalLabel": "Total",
+    "evolutionDisclaimer": "Based on the recorded contribution and dividend history — does not reflect FII/stock market price changes on past dates, since the system doesn't store historical quotes.",
+    "emptyState": "No investments with value yet",
+    "emptyVariableState": "No variable income investments with value yet",
+    "emptyDividends": "No dividends received in the last 6 months"
   },
   "investmentCard": {
     "invested": "Invested",

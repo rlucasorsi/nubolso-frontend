@@ -18,6 +18,8 @@ import { CreateInvestmentDrawer } from '@/components/investments/CreateInvestmen
 import { EditInvestmentDrawer } from '@/components/investments/EditInvestmentDrawer';
 import { AddMovementDrawer } from '@/components/investments/AddMovementDrawer';
 import { InvestmentsSummary } from '@/components/investments/InvestmentsSummary';
+import { InvestmentsOverview } from '@/components/investments/InvestmentsOverview';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   formatCurrency,
   getDividendsTotal,
@@ -63,6 +65,7 @@ export function InvestmentsView() {
   const [movementInvestment, setMovementInvestment] = useState<Investment | null>(null);
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
   const [deletingInvestment, setDeletingInvestment] = useState<Investment | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'investments'>('investments');
   const [groupByInstitutionOn, setGroupByInstitutionOn] = useState(false);
   const [fixedCollapsed, setFixedCollapsed] = useState(false);
   const [variableCollapsed, setVariableCollapsed] = useState(false);
@@ -321,75 +324,96 @@ export function InvestmentsView() {
           </div>
         </>
       ) : (
-        <>
-          <InvestmentsSummary
-            totalBalance={totalBalance}
-            totalYield={totalYield}
-            totalContributed={totalContributed}
-            totalDividends={totalDividends}
-            fixedBalance={fixedBalance}
-            variableBalance={variableBalance}
-            count={investments.length}
-          />
-
-          {investments.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                {t('groupBy')}
-              </span>
-              <div className="flex gap-1 bg-surface-container border border-white/5 rounded-xl p-1">
-                {([false, true] as const).map((on) => (
-                  <button
-                    key={String(on)}
-                    type="button"
-                    onClick={() => setGroupByInstitutionOn(on)}
-                    className={cn(
-                      'px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
-                      groupByInstitutionOn === on
-                        ? 'bg-primary text-white'
-                        : 'text-muted-foreground hover:bg-white/5',
-                    )}
-                  >
-                    {on ? t('groupByInstitution') : t('groupByNone')}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-8">
-            {renderCategorySection(
-              tc('fixedIncome'),
-              fixedInvestments,
-              fixedGroups,
-              fixedBalance,
-              fixedSummary.yieldTotal,
-              fixedSummary.yieldPercent,
-              fixedCollapsed,
-              () => setFixedCollapsed((c) => !c),
-            )}
-            {renderCategorySection(
-              tc('variableIncome'),
-              variableInvestments,
-              variableGroups,
-              variableBalance,
-              variableSummary.yieldTotal,
-              variableSummary.yieldPercent,
-              variableCollapsed,
-              () => setVariableCollapsed((c) => !c),
-            )}
-
-            <button
-              onClick={() => setShowCreateDrawer(true)}
-              className="w-full border-2 border-dashed border-border/60 rounded-2xl flex flex-col items-center justify-center text-muted-foreground hover:border-primary/40 hover:text-primary/70 transition-all cursor-pointer min-h-[120px] group"
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'overview' | 'investments')}>
+          <TabsList className="w-full bg-transparent h-auto p-0 border-b border-white/10 rounded-none justify-start gap-0">
+            <TabsTrigger
+              value="overview"
+              className="relative flex-1 sm:flex-none h-11 px-2 sm:px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
             >
-              <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mb-2 group-hover:bg-primary/10 transition-colors">
-                <Wallet className="h-5 w-5" />
+              {t('tabOverview')}
+            </TabsTrigger>
+            <TabsTrigger
+              value="investments"
+              className="relative flex-1 sm:flex-none h-11 px-2 sm:px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
+            >
+              {t('tabInvestments')}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-6">
+            <InvestmentsOverview investments={investments} pricesByTicker={pricesByTicker} />
+          </TabsContent>
+
+          <TabsContent value="investments" className="mt-6 space-y-8">
+            <InvestmentsSummary
+              totalBalance={totalBalance}
+              totalYield={totalYield}
+              totalContributed={totalContributed}
+              totalDividends={totalDividends}
+              fixedBalance={fixedBalance}
+              variableBalance={variableBalance}
+              count={investments.length}
+            />
+
+            {investments.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  {t('groupBy')}
+                </span>
+                <div className="flex gap-1 bg-surface-container border border-white/5 rounded-xl p-1">
+                  {([false, true] as const).map((on) => (
+                    <button
+                      key={String(on)}
+                      type="button"
+                      onClick={() => setGroupByInstitutionOn(on)}
+                      className={cn(
+                        'px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+                        groupByInstitutionOn === on
+                          ? 'bg-primary text-white'
+                          : 'text-muted-foreground hover:bg-white/5',
+                      )}
+                    >
+                      {on ? t('groupByInstitution') : t('groupByNone')}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <span className="font-medium text-sm">{t('createNew')}</span>
-            </button>
-          </div>
-        </>
+            )}
+
+            <div className="space-y-8">
+              {renderCategorySection(
+                tc('fixedIncome'),
+                fixedInvestments,
+                fixedGroups,
+                fixedBalance,
+                fixedSummary.yieldTotal,
+                fixedSummary.yieldPercent,
+                fixedCollapsed,
+                () => setFixedCollapsed((c) => !c),
+              )}
+              {renderCategorySection(
+                tc('variableIncome'),
+                variableInvestments,
+                variableGroups,
+                variableBalance,
+                variableSummary.yieldTotal,
+                variableSummary.yieldPercent,
+                variableCollapsed,
+                () => setVariableCollapsed((c) => !c),
+              )}
+
+              <button
+                onClick={() => setShowCreateDrawer(true)}
+                className="w-full border-2 border-dashed border-border/60 rounded-2xl flex flex-col items-center justify-center text-muted-foreground hover:border-primary/40 hover:text-primary/70 transition-all cursor-pointer min-h-[120px] group"
+              >
+                <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mb-2 group-hover:bg-primary/10 transition-colors">
+                  <Wallet className="h-5 w-5" />
+                </div>
+                <span className="font-medium text-sm">{t('createNew')}</span>
+              </button>
+            </div>
+          </TabsContent>
+        </Tabs>
       )}
 
       <CreateInvestmentDrawer
