@@ -239,6 +239,94 @@ export function InvestmentsOverview({ investments, pricesByTicker }: Investments
     <div className="space-y-6">
       <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-7 space-y-5">
         <ChartHeader
+          icon={<LineIcon className="w-4 h-4" />}
+          title={t('evolutionTitle')}
+          subtitle={t('evolutionSubtitle')}
+        />
+        {!hasEvolutionData ? (
+          <EmptyState label={t('emptyState')} />
+        ) : (
+          <>
+            <div style={{ height: 220 }} className="w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={portfolioEvolution}
+                  margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.06)" />
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 10, fill: '#94a3b8' }}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    width={44}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 10, fill: '#94a3b8' }}
+                    tickFormatter={(v: number) => formatCurrencyCompact(v).replace('R$', '').trim()}
+                  />
+                  <Tooltip content={<EvolutionTooltip />} />
+                  <Line
+                    dataKey="total"
+                    name={t('evolutionTotalLabel')}
+                    stroke={EVOLUTION_TOTAL_COLOR}
+                    strokeWidth={2.5}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+                  <Line
+                    dataKey="fixed"
+                    name={tc('fixedIncome')}
+                    stroke={FIXED_COLOR}
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+                  <Line
+                    dataKey="variable"
+                    name={tc('variableIncome')}
+                    stroke={VARIABLE_COLOR}
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="flex justify-center">
+              <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1.5 w-full max-w-sm">
+                {[
+                  { key: 'total', label: t('evolutionTotalLabel'), color: EVOLUTION_TOTAL_COLOR },
+                  { key: 'fixed', label: tc('fixedIncome'), color: FIXED_COLOR },
+                  { key: 'variable', label: tc('variableIncome'), color: VARIABLE_COLOR },
+                ].map((item) => (
+                  <span
+                    key={item.key}
+                    className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80"
+                  >
+                    <span
+                      className="h-2.5 w-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    {item.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-[11px] leading-snug text-muted-foreground/50">
+              {t('evolutionDisclaimer')}
+            </p>
+          </>
+        )}
+      </Card>
+
+      <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-7 space-y-5">
+        <ChartHeader
           icon={<PieIcon className="w-4 h-4" />}
           title={t('allocationTitle')}
           subtitle={t('allocationSubtitle')}
@@ -331,94 +419,6 @@ export function InvestmentsOverview({ investments, pricesByTicker }: Investments
               </BarChart>
             </ResponsiveContainer>
           </div>
-        )}
-      </Card>
-
-      <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-7 space-y-5">
-        <ChartHeader
-          icon={<LineIcon className="w-4 h-4" />}
-          title={t('evolutionTitle')}
-          subtitle={t('evolutionSubtitle')}
-        />
-        {!hasEvolutionData ? (
-          <EmptyState label={t('emptyState')} />
-        ) : (
-          <>
-            <div style={{ height: 220 }} className="w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={portfolioEvolution}
-                  margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.06)" />
-                  <XAxis
-                    dataKey="label"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 10, fill: '#94a3b8' }}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis
-                    width={44}
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 10, fill: '#94a3b8' }}
-                    tickFormatter={(v: number) => formatCurrencyCompact(v).replace('R$', '').trim()}
-                  />
-                  <Tooltip content={<EvolutionTooltip />} />
-                  <Line
-                    dataKey="total"
-                    name={t('evolutionTotalLabel')}
-                    stroke={EVOLUTION_TOTAL_COLOR}
-                    strokeWidth={2.5}
-                    dot={false}
-                    activeDot={{ r: 4 }}
-                  />
-                  <Line
-                    dataKey="fixed"
-                    name={tc('fixedIncome')}
-                    stroke={FIXED_COLOR}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4 }}
-                  />
-                  <Line
-                    dataKey="variable"
-                    name={tc('variableIncome')}
-                    stroke={VARIABLE_COLOR}
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="flex justify-center">
-              <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1.5 w-full max-w-sm">
-                {[
-                  { key: 'total', label: t('evolutionTotalLabel'), color: EVOLUTION_TOTAL_COLOR },
-                  { key: 'fixed', label: tc('fixedIncome'), color: FIXED_COLOR },
-                  { key: 'variable', label: tc('variableIncome'), color: VARIABLE_COLOR },
-                ].map((item) => (
-                  <span
-                    key={item.key}
-                    className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80"
-                  >
-                    <span
-                      className="h-2.5 w-2.5 rounded-full shrink-0"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    {item.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-[11px] leading-snug text-muted-foreground/50">
-              {t('evolutionDisclaimer')}
-            </p>
-          </>
         )}
       </Card>
     </div>
