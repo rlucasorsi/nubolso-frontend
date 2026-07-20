@@ -8,6 +8,7 @@ interface InvestmentsSummaryProps {
   totalBalance: number;
   totalYield: number;
   totalContributed: number;
+  totalDividends: number;
   fixedBalance: number;
   variableBalance: number;
   count: number;
@@ -17,6 +18,7 @@ export function InvestmentsSummary({
   totalBalance,
   totalYield,
   totalContributed,
+  totalDividends,
   fixedBalance,
   variableBalance,
   count,
@@ -61,9 +63,16 @@ export function InvestmentsSummary({
           )}
         </span>
         <div className="flex items-center gap-2 text-success text-xs mt-2">
-          <TrendingUp className="h-4 w-4" />
+          <TrendingUp className="h-4 w-4 shrink-0" />
           <span className="font-bold">{t('yieldNote')}</span>
         </div>
+        {totalDividends > 0 && (
+          <div className="flex items-center gap-1.5 text-muted-foreground text-[11px]">
+            <span className="font-semibold">
+              {t('totalDividends')} {formatCurrency(totalDividends)}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="bg-surface-container border border-white/5 rounded-base shadow-lg p-7 flex flex-col gap-2">

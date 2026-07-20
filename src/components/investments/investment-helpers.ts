@@ -131,8 +131,17 @@ export interface VariableResult {
   // que o backend já rastreia (fallback confiável pra investimentos sem
   // histórico de cotas neste navegador).
   totalValue: number;
-  profit: number;
-  profitPercent: number | null;
+  // Variação de preço (mercado): só ganho/perda de cotação sobre o custo de
+  // aquisição, sem contar proventos. É "quanto o ativo valorizou", não
+  // "quanto o investidor ganhou" — proventos entram em `totalReturn`.
+  priceVariation: number;
+  priceVariationPercent: number | null;
+  // Proventos recebidos (dividendos/JCP/rendimentos de FII).
+  dividends: number;
+  // Rentabilidade total do ativo: variação de preço + proventos, sobre o
+  // capital investido. É o número que deveria ser mostrado como "resultado".
+  totalReturn: number;
+  totalReturnPercent: number | null;
   // true = calculado a partir de quantidade/preço médio/cotação ao vivo
   // (mais preciso). false = caiu no fallback baseado no saldo do backend.
   isMarketBased: boolean;
@@ -140,8 +149,9 @@ export interface VariableResult {
 
 // Resultado de renda variável: quando sabemos quantidade + preço médio (sem
 // dados parciais) e temos cotação ao vivo, calculamos valor de mercado real
-// (quantidade x cotação) contra o custo de aquisição. Sem isso, caímos no
-// saldo/rendimento que o backend já rastreia via movimentações.
+// (quantidade x cotação) contra o custo de aquisição, e somamos os proventos
+// recebidos para a rentabilidade total. Sem isso, caímos no saldo/rendimento
+// que o backend já rastreia via movimentações (que já inclui proventos).
 export function getVariableResult(
   investment: Investment,
   currentPrice: number | null,
@@ -152,25 +162,39 @@ export function getVariableResult(
     position.quantity > 0 &&
     position.avgPrice !== null &&
     !position.hasPartialData;
+  const dividends = getDividendsTotal(investment);
 
   if (hasFullPosition && currentPrice !== null) {
     const quantity = position.quantity as number;
     const avgPrice = position.avgPrice as number;
     const totalInvested = quantity * avgPrice;
     const totalValue = quantity * currentPrice;
-    const profit = totalValue - totalInvested;
+    const priceVariation = totalValue - totalInvested;
+    const totalReturn = priceVariation + dividends;
     return {
       totalValue,
-      profit,
-      profitPercent: totalInvested > 0 ? (profit / totalInvested) * 100 : null,
+      priceVariation,
+      priceVariationPercent: totalInvested > 0 ? (priceVariation / totalInvested) * 100 : null,
+      dividends,
+      totalReturn,
+      totalReturnPercent: totalInvested > 0 ? (totalReturn / totalInvested) * 100 : null,
       isMarketBased: true,
     };
   }
 
+  // Sem posição/cotação: o saldo do backend já reflete YIELD + ADJUSTMENT,
+  // então usamos isso como rentabilidade total e tratamos ADJUSTMENT (menos
+  // os proventos, já contados à parte) como proxy de variação de preço.
+  const totalYield = getTotalYield(investment);
+  const totalContributed = getTotalContributed(investment);
+  const priceVariation = totalYield - dividends;
   return {
     totalValue: investment.currentBalance,
-    profit: getTotalYield(investment),
-    profitPercent: getYieldPercentage(investment),
+    priceVariation,
+    priceVariationPercent: totalContributed > 0 ? (priceVariation / totalContributed) * 100 : null,
+    dividends,
+    totalReturn: totalYield,
+    totalReturnPercent: getYieldPercentage(investment),
     isMarketBased: false,
   };
 }
@@ -195,8 +219,8 @@ export function getFixedCategorySummary(investments: Investment[]): CategorySumm
 
 // Resumo de renda variável: usa o mesmo cálculo de cada card
 // (getVariableResult) pra que o total bata com o que é exibido individualmente
-// — inclui ganho/perda de mercado (quantidade x cotação viva), não só os
-// movimentos de YIELD/ADJUSTMENT registrados manualmente.
+// — rentabilidade total = ganho/perda de mercado (quantidade x cotação viva)
+// + proventos recebidos, não só a variação de preço.
 export function getVariableCategorySummary(
   investments: Investment[],
   pricesByTicker: Record<string, number | null>,
@@ -206,9 +230,9 @@ export function getVariableCategorySummary(
   for (const inv of investments) {
     const currentPrice = inv.ticker ? (pricesByTicker[inv.ticker] ?? null) : null;
     const result = getVariableResult(inv, currentPrice);
-    yieldTotal += result.profit;
+    yieldTotal += result.totalReturn;
     investedTotal += result.isMarketBased
-      ? result.totalValue - result.profit
+      ? result.totalValue - result.priceVariation
       : getTotalContributed(inv);
   }
   return {

@@ -20,8 +20,10 @@ import { AddMovementDrawer } from '@/components/investments/AddMovementDrawer';
 import { InvestmentsSummary } from '@/components/investments/InvestmentsSummary';
 import {
   formatCurrency,
+  getDividendsTotal,
   getFixedCategorySummary,
   getVariableCategorySummary,
+  getVariableResult,
   groupInvestments,
   isVariableIncome,
   type InvestmentGroup,
@@ -154,7 +156,6 @@ export function InvestmentsView() {
     setMovementInvestment(investment);
   };
 
-  const totalBalance = investments.reduce((s, inv) => s + inv.currentBalance, 0);
   const institutionOptions = Array.from(
     new Set(
       investments
@@ -170,16 +171,32 @@ export function InvestmentsView() {
   const fixedInvestments = investments.filter((inv) => !isVariableIncome(inv.type));
   const variableInvestments = investments.filter((inv) => isVariableIncome(inv.type));
   const fixedBalance = fixedInvestments.reduce((s, inv) => s + inv.currentBalance, 0);
-  const variableBalance = variableInvestments.reduce((s, inv) => s + inv.currentBalance, 0);
 
   // Preços ao vivo pra que o rendimento de renda variável (ganho/perda de
   // mercado, não só YIELD/ADJUSTMENT manual) entre no total — mesmo cálculo
   // usado em cada card (VariableInvestmentSummary).
-  const pricesByTicker = useInvestmentQuotesMap(variableInvestments.map((inv) => inv.ticker));
+  const { pricesByTicker, isLoading: isQuotesLoading } = useInvestmentQuotesMap(
+    variableInvestments.map((inv) => inv.ticker),
+  );
+  // Enquanto as cotações ainda não resolveram, rendimento/proventos/totais de
+  // renda variável ficariam mudando de valor à medida que cada uma chega —
+  // melhor mostrar o esqueleto até tudo estabilizar.
+  const showLoadingState = isLoading || isQuotesLoading;
+
+  // Valor de mercado (quantidade x cotação atual), não o saldo bruto do
+  // backend — senão o total da categoria não acompanha a cotação em tempo
+  // real, como cada card já faz via getVariableResult.
+  const variableBalance = variableInvestments.reduce((s, inv) => {
+    const currentPrice = inv.ticker ? (pricesByTicker[inv.ticker] ?? null) : null;
+    return s + getVariableResult(inv, currentPrice).totalValue;
+  }, 0);
+  const totalBalance = fixedBalance + variableBalance;
+
   const fixedSummary = getFixedCategorySummary(fixedInvestments);
   const variableSummary = getVariableCategorySummary(variableInvestments, pricesByTicker);
   const totalYield = fixedSummary.yieldTotal + variableSummary.yieldTotal;
   const totalContributed = fixedSummary.investedTotal + variableSummary.investedTotal;
+  const totalDividends = investments.reduce((s, inv) => s + getDividendsTotal(inv), 0);
 
   const groupModeArg = groupByInstitutionOn ? 'institution' : 'none';
   const fixedGroups = groupInvestments(fixedInvestments, groupModeArg, t('noInstitution'));
@@ -205,6 +222,7 @@ export function InvestmentsView() {
     items: Investment[],
     groups: InvestmentGroup[],
     totalValue: number,
+    yieldTotal: number,
     yieldPercent: number | null,
     collapsed: boolean,
     onToggle: () => void,
@@ -227,16 +245,17 @@ export function InvestmentsView() {
             <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">{title}</h2>
             <span className="text-xs text-muted-foreground">({items.length})</span>
           </div>
-          <span className="text-sm font-bold text-foreground">
-            {formatCurrency(totalValue)}
+          <span className="flex flex-col items-end">
+            <span className="text-sm font-bold text-foreground">{formatCurrency(totalValue)}</span>
             {yieldPercent !== null && (
               <span
                 className={cn(
-                  'ml-1.5 text-xs font-bold',
+                  'text-xs font-bold whitespace-nowrap',
                   yieldPercent >= 0 ? 'text-success' : 'text-destructive',
                 )}
               >
-                ({yieldPercent >= 0 ? '+' : ''}
+                {yieldTotal >= 0 ? '+' : ''}
+                {formatCurrency(yieldTotal)} ({yieldPercent >= 0 ? '+' : ''}
                 {yieldPercent.toFixed(2)}%)
               </span>
             )}
@@ -282,7 +301,7 @@ export function InvestmentsView() {
 
       {isError ? (
         <ServerErrorState onRetry={() => investmentsQuery.refetch()} />
-      ) : isLoading ? (
+      ) : showLoadingState ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -307,6 +326,7 @@ export function InvestmentsView() {
             totalBalance={totalBalance}
             totalYield={totalYield}
             totalContributed={totalContributed}
+            totalDividends={totalDividends}
             fixedBalance={fixedBalance}
             variableBalance={variableBalance}
             count={investments.length}
@@ -343,6 +363,7 @@ export function InvestmentsView() {
               fixedInvestments,
               fixedGroups,
               fixedBalance,
+              fixedSummary.yieldTotal,
               fixedSummary.yieldPercent,
               fixedCollapsed,
               () => setFixedCollapsed((c) => !c),
@@ -352,6 +373,7 @@ export function InvestmentsView() {
               variableInvestments,
               variableGroups,
               variableBalance,
+              variableSummary.yieldTotal,
               variableSummary.yieldPercent,
               variableCollapsed,
               () => setVariableCollapsed((c) => !c),

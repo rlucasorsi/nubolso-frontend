@@ -6,12 +6,7 @@ import { useInvestmentQuote } from '@/modules/investments/hooks/use-investment-q
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslations } from '@/i18n/useTranslations';
 import { cn } from '@/lib/utils';
-import {
-  formatCurrency,
-  getDividendsTotal,
-  getSharePosition,
-  getVariableResult,
-} from './investment-helpers';
+import { formatCurrency, getSharePosition, getVariableResult } from './investment-helpers';
 
 interface VariableInvestmentSummaryProps {
   investment: Investment;
@@ -67,8 +62,8 @@ export function VariableInvestmentSummary({
 
   const position = getSharePosition(investment);
   const result = getVariableResult(investment, currentPrice);
-  const dividends = getDividendsTotal(investment);
-  const isPositive = result.profit >= 0;
+  const isPriceVariationPositive = result.priceVariation >= 0;
+  const isTotalReturnPositive = result.totalReturn >= 0;
 
   const wrapperClass = variant === 'detail' ? 'space-y-4' : 'space-y-3';
   const sectionLabelClass =
@@ -93,32 +88,64 @@ export function VariableInvestmentSummary({
         <span className={sectionLabelClass}>{t('market')}</span>
         {quote.isLoading ? (
           <p className="text-[11px] text-muted-foreground">…</p>
-        ) : currentPrice === null ? (
-          <p className="text-[11px] text-muted-foreground">{t('quoteUnavailable')}</p>
         ) : (
-          <Row label={t('currentPrice')} value={formatCurrency(currentPrice)} hint={t('currentPriceTooltip')} />
+          <>
+            {currentPrice === null ? (
+              <p className="text-[11px] text-muted-foreground">{t('quoteUnavailable')}</p>
+            ) : (
+              <Row
+                label={t('currentPrice')}
+                value={formatCurrency(currentPrice)}
+                hint={t('currentPriceTooltip')}
+              />
+            )}
+            <Row label={t('marketValue')} value={formatCurrency(result.totalValue)} />
+          </>
         )}
-        <Row label={t('marketValue')} value={formatCurrency(result.totalValue)} />
       </div>
 
       <div className="space-y-1">
         <span className={sectionLabelClass}>{t('result')}</span>
-        <Row
-          label={t('yield')}
-          value={`${isPositive ? '+' : ''}${formatCurrency(result.profit)}${
-            result.profitPercent !== null
-              ? ` (${isPositive ? '+' : ''}${result.profitPercent.toFixed(2)}%)`
-              : ''
-          }`}
-          valueClassName={isPositive ? 'text-success' : 'text-destructive'}
-          hint={t('resultTooltip')}
-        />
-        {dividends > 0 && (
-          <Row
-            label={t('dividendsReceived')}
-            value={`+${formatCurrency(dividends)}`}
-            valueClassName="text-success font-semibold"
-          />
+        {quote.isLoading ? (
+          // Espera a cotação resolver antes de exibir o resultado — senão o
+          // número aparece com o fallback (sem cotação) e muda de valor
+          // assim que a cotação chega, dando a impressão de estar "errado".
+          <p className="text-[11px] text-muted-foreground">…</p>
+        ) : (
+          <>
+            <Row
+              label={t('priceVariation')}
+              value={`${isPriceVariationPositive ? '+' : ''}${formatCurrency(result.priceVariation)}${
+                result.priceVariationPercent !== null
+                  ? ` (${isPriceVariationPositive ? '+' : ''}${result.priceVariationPercent.toFixed(2)}%)`
+                  : ''
+              }`}
+              valueClassName={isPriceVariationPositive ? 'text-success' : 'text-destructive'}
+              hint={t('priceVariationTooltip')}
+            />
+            {result.dividends > 0 && (
+              <Row
+                label={t('dividendsReceived')}
+                value={`+${formatCurrency(result.dividends)}`}
+                valueClassName="text-success font-semibold"
+              />
+            )}
+            <div className="border-t border-white/10 pt-1 mt-1">
+              <Row
+                label={t('totalReturn')}
+                value={`${isTotalReturnPositive ? '+' : ''}${formatCurrency(result.totalReturn)}${
+                  result.totalReturnPercent !== null
+                    ? ` (${isTotalReturnPositive ? '+' : ''}${result.totalReturnPercent.toFixed(2)}%)`
+                    : ''
+                }`}
+                valueClassName={cn(
+                  'text-sm',
+                  isTotalReturnPositive ? 'text-success' : 'text-destructive',
+                )}
+                hint={t('totalReturnTooltip')}
+              />
+            </div>
+          </>
         )}
       </div>
     </div>
