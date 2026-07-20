@@ -38,6 +38,7 @@ import {
   Ban,
   CreditCard,
 } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -244,28 +245,22 @@ export function EntriesView() {
         <ImportOfxDrawer />
       </div>
 
-      <div className="flex items-center gap-1.5">
-        {(
-          [
-            { value: 'main', label: t('tabMain') },
-            { value: 'ignored', label: t('tabIgnored') },
-          ] as { value: typeof activeTab; label: string }[]
-        ).map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => setActiveTab(opt.value)}
-            className={cn(
-              'px-4 py-2 rounded-xl text-sm font-bold transition-all',
-              activeTab === opt.value
-                ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-white',
-            )}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'main' | 'ignored')}>
+        <TabsList className="w-full bg-transparent h-auto p-0 border-b border-white/10 rounded-none justify-start gap-0">
+          <TabsTrigger
+            value="main"
+            className="relative flex-1 sm:flex-none h-11 px-2 sm:px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
           >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+            {t('tabMain')}
+          </TabsTrigger>
+          <TabsTrigger
+            value="ignored"
+            className="relative flex-1 sm:flex-none h-11 px-2 sm:px-5 rounded-none bg-transparent border-0 shadow-none text-sm font-medium text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors duration-200 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform after:duration-200 data-[state=active]:after:scale-x-100"
+          >
+            {t('tabIgnored')}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
         <div className="p-4 space-y-2">
