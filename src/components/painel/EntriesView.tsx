@@ -676,6 +676,12 @@ export function EntriesView() {
                               >
                                 <RotateCcw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               </button>
+                              <button
+                                onClick={() => setDeletingEntry(entry)}
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all"
+                              >
+                                <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                              </button>
                             </div>
                           ) : (
                             !entry.isVirtual && (
