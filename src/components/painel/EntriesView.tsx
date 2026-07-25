@@ -15,6 +15,7 @@ import {
   FlowType,
   RecurringTemplateLike,
   formatCurrency,
+  generatePeriods,
   generateVirtualEntriesForRange,
 } from '@/lib/cashflow';
 import { TYPE_CONFIG } from './config';
@@ -55,7 +56,7 @@ import {
 import { format } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { cn } from '@/lib/utils';
+import { cn, localDateStr } from '@/lib/utils';
 import { ImportOfxDrawer } from '@/components/imports/ImportOfxDrawer';
 import { EditEntryDrawer } from './EditEntryDrawer';
 import { ExpenseTypeHelp } from './ExpenseTypeHelp';
@@ -114,7 +115,7 @@ export function EntriesView() {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, dateRange, pageSize, expenseTypeFilter, activeTab]);
+  }, [debouncedSearch, dateRange, pageSize, expenseTypeFilter, activeTab, minDate]);
 
   const filters = useMemo(() => {
     const params: {
@@ -129,7 +130,13 @@ export function EntriesView() {
       page,
       limit: pageSize,
     };
-    if (dateRange?.from) params.startDate = format(dateRange.from, 'yyyy-MM-dd');
+    // O piso de `minDate` precisa ir pro backend (não só pro filtro client-side
+    // abaixo) senão `total`/`hasMore` contam lançamentos anteriores ao início do
+    // saldo que depois são descartados na tela — isso deixava páginas seguintes
+    // vazias quando os registros restantes ficavam todos antes de `minDate`.
+    const rangeStart = dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined;
+    const effectiveStart = minDate && (!rangeStart || minDate > rangeStart) ? minDate : rangeStart;
+    if (effectiveStart) params.startDate = effectiveStart;
     if (dateRange?.to) params.endDate = format(dateRange.to, 'yyyy-MM-dd');
     // Envia ao backend quando aplicável (ignorado até o backend suportar). O filtro
     // client-side abaixo garante feedback imediato sobre a página carregada.
@@ -137,7 +144,7 @@ export function EntriesView() {
       params.tipoDespesa = expenseTypeFilter;
     }
     return params;
-  }, [dateRange, page, pageSize, expenseTypeFilter, activeTab]);
+  }, [dateRange, page, pageSize, expenseTypeFilter, activeTab, minDate]);
 
   const { data, isLoading, isError, refetch } = useGetEntries(filters);
 
@@ -218,6 +225,46 @@ export function EntriesView() {
     minDate,
     transactionToInvoiceId,
   ]);
+
+  // Saldo em conta: precisa do histórico completo de lançamentos reais (não só
+  // da página/filtro atual), senão o saldo acumulado por dia ficaria incorreto.
+  // Mesma query sem filtros usada pelo useCashFlow no dashboard, então o cache
+  // do React Query é reaproveitado quando o usuário já visitou aquela página.
+  const { data: allEntriesData } = useGetEntries();
+
+  const dailyBalanceByDate = useMemo(() => {
+    const map = new Map<string, number>();
+    if (!allEntriesData) return map;
+
+    const fullEntries: CashFlowEntry[] = allEntriesData.data
+      .filter((item) => !item.isSkipped)
+      .map((item) => ({
+        id: item.id,
+        date: item.date.split('T')[0],
+        type: item.type as FlowType,
+        amount: item.amount,
+        description: item.description,
+        categoryId: item.categoryId,
+        category: item.category,
+        isPaid: item.isPaid,
+        tipoDespesa: item.tipoDespesa,
+        templateId: item.templateId,
+      }));
+
+    const saldoInicial = {
+      value: me?.currentBalance ?? 0,
+      date: minDate ?? localDateStr(),
+    };
+    const startDay = me?.cashflowStartDay ?? 1;
+
+    const periods = generatePeriods(fullEntries, [], saldoInicial, 60, startDay);
+    for (const period of periods) {
+      for (const day of period.days) {
+        map.set(day.date, day.saldoAcumulado);
+      }
+    }
+    return map;
+  }, [allEntriesData, me, minDate]);
 
   const groupedByDay = useMemo(() => {
     const map = new Map<string, CashFlowEntry[]>();
@@ -384,6 +431,9 @@ export function EntriesView() {
           ) : (
             groupedByDay.map(([date, dayEntries]) => {
               const isOpen = !collapsedDays.has(date);
+              // Saldo em conta acumulado até este dia (mesma métrica de day.saldoAcumulado
+              // usada no dashboard), não apenas a movimentação do dia isolado.
+              const dayBalance = dailyBalanceByDate.get(date) ?? 0;
               return (
                 <Collapsible
                   key={date}
@@ -394,12 +444,23 @@ export function EntriesView() {
                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
                       {formatDayHeader(date, dateFnsLocale)}
                     </span>
-                    <ChevronDown
-                      className={cn(
-                        'h-4 w-4 text-muted-foreground transition-transform',
-                        isOpen && 'rotate-180',
-                      )}
-                    />
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          'text-xs font-bold whitespace-nowrap',
+                          dayBalance >= 0 ? 'text-emerald-400' : 'text-red-400',
+                        )}
+                        title={t('daySaldo')}
+                      >
+                        {formatCurrency(dayBalance)}
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          'h-4 w-4 text-muted-foreground transition-transform',
+                          isOpen && 'rotate-180',
+                        )}
+                      />
+                    </div>
                   </CollapsibleTrigger>
 
                   <CollapsibleContent className="space-y-3 pb-3">

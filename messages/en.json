@@ -538,6 +538,7 @@
     "filterVariable": "Variable",
     "filterNoType": "No type",
     "showEstimated": "Show estimated recurrences",
+    "daySaldo": "Account balance",
     "noResults": "No entries found",
     "noResultsHint": "Try adjusting your search filters",
     "perPage": "Per page",

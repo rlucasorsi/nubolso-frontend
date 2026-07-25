@@ -538,6 +538,7 @@
     "filterVariable": "Variables",
     "filterNoType": "Sin tipo",
     "showEstimated": "Mostrar recurrencias estimadas",
+    "daySaldo": "Saldo en cuenta",
     "noResults": "No se encontraron movimientos",
     "noResultsHint": "Intenta ajustar tus filtros de búsqueda",
     "perPage": "Por página",
