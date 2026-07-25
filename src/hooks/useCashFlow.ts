@@ -13,7 +13,7 @@ import {
   getPeriodForDate,
   getPeriodRanges,
 } from '@/lib/cashflow';
-import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
+import { useGetAllEntries } from '@/modules/entries/hooks/use-get-entries';
 import { useCreateEntry } from '@/modules/entries/hooks/use-create-entry';
 import { useUpdateEntry } from '@/modules/entries/hooks/use-update-entry';
 import { useDeleteEntry } from '@/modules/entries/hooks/use-delete-entry';
@@ -30,7 +30,7 @@ export interface BalanceSettings {
 }
 
 export function useCashFlow() {
-  const entriesQuery = useGetEntries();
+  const entriesQuery = useGetAllEntries();
   const addEntryMutation = useCreateEntry();
   const updateEntryMutation = useUpdateEntry();
   const deleteEntryMutation = useDeleteEntry();

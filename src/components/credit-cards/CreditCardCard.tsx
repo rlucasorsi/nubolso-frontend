@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import type { CreditCard as CreditCardType } from '@/modules/credit-cards/model/api/credit-card';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
-import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
+import { useGetAllEntries } from '@/modules/entries/hooks/use-get-entries';
 import {
   formatCurrency,
   formatDateLong,
@@ -49,7 +49,7 @@ export function CreditCardCard({ card, onClick, onDelete }: CreditCardCardProps)
   const td = useTranslations('creditCardDetail');
   const { data: invoices, isLoading } = useGetCardInvoices(card.id);
   const { data: templatesData } = useGetRecurringTemplates();
-  const { data: entriesData } = useGetEntries();
+  const { data: entriesData } = useGetAllEntries();
 
   const templates: RecurringTemplateLike[] = useMemo(
     () =>

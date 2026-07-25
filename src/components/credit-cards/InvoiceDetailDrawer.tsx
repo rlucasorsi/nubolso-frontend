@@ -32,7 +32,7 @@ import { useGetInvoice } from '@/modules/credit-cards/hooks/use-get-invoice';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
 import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
-import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
+import { useGetAllEntries } from '@/modules/entries/hooks/use-get-entries';
 import { useUpdateInvoicePaymentDate } from '@/modules/credit-cards/hooks/use-update-invoice-payment-date';
 import { useReopenInvoice } from '@/modules/credit-cards/hooks/use-reopen-invoice';
 import { useDeletePurchase } from '@/modules/credit-cards/hooks/use-delete-purchase';
@@ -79,7 +79,7 @@ export function InvoiceDetailDrawer({
   const { data: cardInvoices } = useGetCardInvoices(isVirtual ? undefined : invoice?.cardId, open);
   const { data: cardsData } = useGetCreditCards();
   const { data: templatesData } = useGetRecurringTemplates();
-  const { data: entriesData } = useGetEntries();
+  const { data: entriesData } = useGetAllEntries();
   const updatePaymentDateMutation = useUpdateInvoicePaymentDate();
   const reopenMutation = useReopenInvoice();
   const deletePurchaseMutation = useDeletePurchase();

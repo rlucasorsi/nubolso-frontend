@@ -12,3 +12,15 @@ export async function getAllEntriesAction(filters?: GetEntriesFilters) {
     throw new Error(message);
   }
 }
+
+export async function getAllEntriesUnpagedAction(
+  filters?: Omit<GetEntriesFilters, 'page' | 'limit'>,
+) {
+  try {
+    return await entriesService.getAllUnpaged(filters);
+  } catch (error) {
+    const message = extractErrorMessage(error);
+
+    throw new Error(message);
+  }
+}

@@ -15,7 +15,7 @@ import {
 import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
-import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
+import { useGetAllEntries } from '@/modules/entries/hooks/use-get-entries';
 import type { CreditCardInvoice } from '@/modules/credit-cards/model/api/invoice';
 import { cn, localDateStr } from '@/lib/utils';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -29,7 +29,7 @@ export function CreditCardSummaryCard({ onSelectCard }: CreditCardSummaryCardPro
   const { data: cardsData, isLoading: isLoadingCards } = useGetCreditCards();
   const { data: invoicesData, isLoading: isLoadingInvoices } = useGetAllInvoices();
   const { data: templatesData } = useGetRecurringTemplates();
-  const { data: entriesData } = useGetEntries();
+  const { data: entriesData } = useGetAllEntries();
 
   const isLoading = isLoadingCards || isLoadingInvoices;
 

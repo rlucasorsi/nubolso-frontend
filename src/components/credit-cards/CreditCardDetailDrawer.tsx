@@ -26,7 +26,7 @@ import {
 import { MONTH_KEYS, TYPE_CONFIG } from '@/components/painel/config';
 import { useGetCardInvoices } from '@/modules/credit-cards/hooks/use-get-card-invoices';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
-import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
+import { useGetAllEntries } from '@/modules/entries/hooks/use-get-entries';
 import { cn, localDateStr } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslations } from '@/i18n/useTranslations';
@@ -56,7 +56,7 @@ export function CreditCardDetailDrawer({
   const td = useTranslations('dateNames');
   const { data: invoices, isLoading } = useGetCardInvoices(card?.id, open);
   const { data: templatesData } = useGetRecurringTemplates();
-  const { data: entriesData } = useGetEntries();
+  const { data: entriesData } = useGetAllEntries();
 
   const templates = useMemo<RecurringTemplateLike[]>(
     () =>

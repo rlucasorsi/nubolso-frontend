@@ -65,6 +65,27 @@ export const entriesService = {
     };
   },
 
+  // O endpoint /transactions é paginado; várias telas (cashflow, saldo por dia,
+  // faturas de cartão) precisam do histórico completo pra calcular corretamente,
+  // então aqui percorremos todas as páginas em vez de confiar no limite padrão
+  // do backend quando `limit` não é informado.
+  getAllUnpaged: async (filters?: Omit<GetEntriesFilters, 'page' | 'limit'>) => {
+    const limit = 200;
+    let page = 1;
+    let all: Array<Omit<Transaction, 'type'> & { type: 'income' | 'expense' | 'investment' }> = [];
+    let total = 0;
+
+    while (true) {
+      const response = await entriesService.getAll({ ...filters, page, limit });
+      all = all.concat(response.data);
+      total = response.total;
+      if (!response.hasMore) break;
+      page += 1;
+    }
+
+    return { data: all, total, page: 1, limit: all.length, hasMore: false };
+  },
+
   create: async (params: any) => {
     // Envia para o backend transformando o tipo para uppercase
     const payload = {

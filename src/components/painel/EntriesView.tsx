@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useGetEntries } from '@/modules/entries/hooks/use-get-entries';
+import { useGetEntries, useGetAllEntries } from '@/modules/entries/hooks/use-get-entries';
 import { useGetRecurringTemplates } from '@/modules/recurring-templates/hooks/use-get-recurring-templates';
 import { useDeleteEntry } from '@/modules/entries/hooks/use-delete-entry';
 import { useUnskipEntry } from '@/modules/entries/hooks/use-unskip-entry';
@@ -230,7 +230,7 @@ export function EntriesView() {
   // da página/filtro atual), senão o saldo acumulado por dia ficaria incorreto.
   // Mesma query sem filtros usada pelo useCashFlow no dashboard, então o cache
   // do React Query é reaproveitado quando o usuário já visitou aquela página.
-  const { data: allEntriesData } = useGetEntries();
+  const { data: allEntriesData } = useGetAllEntries();
 
   const dailyBalanceByDate = useMemo(() => {
     const map = new Map<string, number>();
