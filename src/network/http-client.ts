@@ -163,12 +163,16 @@ export class HttpClient {
           if (status === 401 && !AUTH_ENDPOINTS.includes(url)) {
             await this.handleSessionExpired();
 
-            throw {
+            // Deliberately a bare Error (no `.data`) so extractErrorMessage's
+            // backend-message lookup can't shadow this text with whatever the
+            // API happened to return for the 401 — every action funnels its
+            // error through extractErrorMessage before it reaches the client,
+            // so this message is the only reliable "session expired" signal
+            // callers on the client can match against.
+            throw Object.assign(new Error(ERROR_KEYS.SESSION_EXPIRED), {
               status,
               sessionExpired: true,
-              message: ERROR_KEYS.SESSION_EXPIRED,
-              data: responseData,
-            };
+            });
           }
 
           // AUTH_ENDPOINTS return expected 4xx for invalid credentials/codes —
