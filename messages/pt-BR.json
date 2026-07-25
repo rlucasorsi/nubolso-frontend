@@ -1120,7 +1120,12 @@
     "cardsSelected": "{count} cartões selecionados",
     "chooseInvoice": "Escolha a fatura",
     "previousMonths": "Meses anteriores",
-    "nextMonths": "Próximos meses"
+    "nextMonths": "Próximos meses",
+    "viewGrossSpent": "Total gasto",
+    "viewRemaining": "Saldo restante",
+    "grossSpentTooltip": "Mostra o valor total gasto no cartão em cada mês, sem descontar os adiantamentos já pagos.",
+    "remainingTooltip": "Volta a mostrar o saldo que ainda falta pagar em cada fatura, descontando os adiantamentos já pagos.",
+    "grossSpentBanner": "Exibindo o total gasto no cartão — os adiantamentos já pagos não estão descontados aqui."
   },
   "billing": {
     "upgradeTitle": "Recurso PRO",

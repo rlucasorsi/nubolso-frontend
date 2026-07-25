@@ -1094,7 +1094,12 @@
     "cardsSelected": "{count} tarjetas seleccionadas",
     "chooseInvoice": "Elige la factura",
     "previousMonths": "Meses anteriores",
-    "nextMonths": "Meses siguientes"
+    "nextMonths": "Meses siguientes",
+    "viewGrossSpent": "Total gastado",
+    "viewRemaining": "Saldo restante",
+    "grossSpentTooltip": "Muestra el monto total gastado en la tarjeta cada mes, sin descontar los adelantos ya pagados.",
+    "remainingTooltip": "Vuelve a mostrar el saldo que aún falta pagar en cada factura, descontando los adelantos ya pagados.",
+    "grossSpentBanner": "Mostrando el total gastado en la tarjeta — los adelantos ya pagados no están descontados aquí."
   },
   "support": {
     "title": "Contáctanos",

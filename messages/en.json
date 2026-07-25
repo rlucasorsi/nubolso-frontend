@@ -1094,7 +1094,12 @@
     "cardsSelected": "{count} cards selected",
     "chooseInvoice": "Choose the invoice",
     "previousMonths": "Previous months",
-    "nextMonths": "Next months"
+    "nextMonths": "Next months",
+    "viewGrossSpent": "Total spent",
+    "viewRemaining": "Remaining balance",
+    "grossSpentTooltip": "Shows the total amount spent on the card each month, without subtracting advance payments already made.",
+    "remainingTooltip": "Switch back to the balance still owed on each invoice, net of advance payments already made.",
+    "grossSpentBanner": "Showing total card spend — advance payments already made are not subtracted here."
   },
   "support": {
     "title": "Contact us",

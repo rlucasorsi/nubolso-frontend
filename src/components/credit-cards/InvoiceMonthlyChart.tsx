@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, CreditCard as CreditCardIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CreditCard as CreditCardIcon, Receipt } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGetCreditCards } from '@/modules/credit-cards/hooks/use-get-credit-cards';
 import { useGetAllInvoices } from '@/modules/credit-cards/hooks/use-get-all-invoices';
 import { formatCurrencyCompact } from '@/lib/cashflow';
@@ -48,6 +49,11 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   const cards = cardsData ?? [];
 
   const [cardFilter, setCardFilter] = useState<CardFilter>('all');
+  // Default view nets out advance payments (adiantamentos) already made against
+  // an open invoice, so the chart reflects what's actually still owed. This
+  // toggle lets the user instead see the raw amount charged to the card,
+  // ignoring those advances.
+  const [showGrossSpent, setShowGrossSpent] = useState(false);
 
   const isCardSelected = (id: string) => cardFilter === 'all' || cardFilter.includes(id);
 
@@ -148,13 +154,21 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
       const monthInvoices = filteredInvoices.filter(
         (inv) => inv.referenceYear === year && inv.referenceMonth === month,
       );
-      const total = monthInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+      // "spent" is the gross amount charged to the card; "total" is what's
+      // actually still owed on the invoice, net of any advance payments made
+      // while it was still open (adiantamento) — the bar should reflect the
+      // latter since that's the real remaining cashflow impact.
+      const spent = monthInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+      const advanced = monthInvoices.reduce((sum, inv) => sum + (inv.advancedAmount ?? 0), 0);
+      const total = Math.max(spent - advanced, 0);
       const hasOpenInvoice = monthInvoices.some((inv) => !inv.isPaid);
       list.push({
         key,
         year,
         month,
         total,
+        spent,
+        advanced,
         invoices: monthInvoices,
         isCurrentMonth: key === todayKey,
         hasOpenInvoice,
@@ -163,7 +177,9 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
     return list;
   }, [invoicesData, cardFilter]);
 
-  const maxTotal = Math.max(1, ...buckets.map((b) => b.total));
+  const bucketValue = (bucket: (typeof buckets)[number]) =>
+    showGrossSpent ? bucket.spent : bucket.total;
+  const maxTotal = Math.max(1, ...buckets.map(bucketValue));
   const formatAxisValue = (v: number) => formatCurrencyCompact(v).replace('R$', '').trim();
 
   // useLayoutEffect fires synchronously after DOM commit, before the browser
@@ -211,38 +227,68 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-base font-bold text-white font-display">{t('title')}</h3>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 text-xs font-bold text-muted-foreground hover:text-white hover:bg-white/10 transition-colors max-w-[160px]"
-              >
-                <CreditCardIcon className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{filterLabel}</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-[#1c1a24] border-white/10 text-white">
-              <DropdownMenuCheckboxItem
-                checked={cardFilter === 'all'}
-                onCheckedChange={() => setCardFilter('all')}
-                className="focus:bg-white/10 focus:text-white"
-              >
-                {t('allCards')}
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator className="bg-white/10" />
-              {cards.map((card) => (
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setShowGrossSpent((v) => !v)}
+                  aria-pressed={showGrossSpent}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors',
+                    showGrossSpent
+                      ? 'bg-[#7b5cff]/20 text-[#7b5cff]'
+                      : 'bg-white/5 text-muted-foreground hover:text-white hover:bg-white/10',
+                  )}
+                >
+                  <Receipt className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">
+                    {showGrossSpent ? t('viewRemaining') : t('viewGrossSpent')}
+                  </span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[220px] text-center">
+                {showGrossSpent ? t('remainingTooltip') : t('grossSpentTooltip')}
+              </TooltipContent>
+            </Tooltip>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 text-xs font-bold text-muted-foreground hover:text-white hover:bg-white/10 transition-colors max-w-[160px]"
+                >
+                  <CreditCardIcon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{filterLabel}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-[#1c1a24] border-white/10 text-white">
                 <DropdownMenuCheckboxItem
-                  key={card.id}
-                  checked={isCardSelected(card.id)}
-                  onCheckedChange={() => toggleCard(card.id)}
+                  checked={cardFilter === 'all'}
+                  onCheckedChange={() => setCardFilter('all')}
                   className="focus:bg-white/10 focus:text-white"
                 >
-                  {card.name}
+                  {t('allCards')}
                 </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator className="bg-white/10" />
+                {cards.map((card) => (
+                  <DropdownMenuCheckboxItem
+                    key={card.id}
+                    checked={isCardSelected(card.id)}
+                    onCheckedChange={() => toggleCard(card.id)}
+                    className="focus:bg-white/10 focus:text-white"
+                  >
+                    {card.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
+
+        {showGrossSpent && (
+          <p className="text-[11px] font-medium text-[#7b5cff]/80 -mt-2">{t('grossSpentBanner')}</p>
+        )}
 
         <div className="flex gap-1">
           <div
@@ -296,8 +342,9 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
             >
               {buckets.map((bucket) => {
                 const hasInvoice = bucket.invoices.length > 0;
+                const value = bucketValue(bucket);
                 const barHeight = hasInvoice
-                  ? Math.max(MIN_BAR_HEIGHT, (bucket.total / maxTotal) * MAX_BAR_HEIGHT)
+                  ? Math.max(MIN_BAR_HEIGHT, (value / maxTotal) * MAX_BAR_HEIGHT)
                   : MIN_BAR_HEIGHT;
 
                 return (
@@ -326,7 +373,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                               className="absolute text-[8px] font-bold text-muted-foreground/60 leading-none whitespace-nowrap"
                               style={{ bottom: barHeight + LABEL_GAP }}
                             >
-                              {formatCurrencyCompact(bucket.total)}
+                              {formatCurrencyCompact(value)}
                             </span>
                           )}
                           <div
@@ -366,22 +413,35 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                           {t('chooseInvoice')}
                         </p>
                         <div className="space-y-1">
-                          {bucket.invoices.map((inv) => (
-                            <button
-                              key={inv.id}
-                              type="button"
-                              onClick={() => {
-                                onSelectInvoice(inv.id);
-                                setOpenMonthKey(null);
-                              }}
-                              className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-left"
-                            >
-                              <span className="text-xs font-semibold truncate">{inv.cardName}</span>
-                              <span className="text-xs font-bold text-muted-foreground shrink-0">
-                                {formatCurrencyCompact(inv.totalAmount)}
-                              </span>
-                            </button>
-                          ))}
+                          {bucket.invoices.map((inv) => {
+                            const invAdvanced = inv.advancedAmount ?? 0;
+                            const invRemaining = Math.max(inv.totalAmount - invAdvanced, 0);
+                            const invPrimary = showGrossSpent ? inv.totalAmount : invRemaining;
+                            const invSecondary = showGrossSpent ? invRemaining : inv.totalAmount;
+                            return (
+                              <button
+                                key={inv.id}
+                                type="button"
+                                onClick={() => {
+                                  onSelectInvoice(inv.id);
+                                  setOpenMonthKey(null);
+                                }}
+                                className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-left"
+                              >
+                                <span className="text-xs font-semibold truncate">{inv.cardName}</span>
+                                <span className="flex flex-col items-end shrink-0">
+                                  <span className="text-xs font-bold text-muted-foreground">
+                                    {formatCurrencyCompact(invPrimary)}
+                                  </span>
+                                  {invAdvanced > 0 && (
+                                    <span className="text-[10px] font-medium text-muted-foreground/40">
+                                      {formatCurrencyCompact(invSecondary)}
+                                    </span>
+                                  )}
+                                </span>
+                              </button>
+                            );
+                          })}
                         </div>
                       </PopoverContent>
                     )}
