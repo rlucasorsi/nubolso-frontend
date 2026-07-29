@@ -224,7 +224,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
   return (
     <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-5 sm:p-8">
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="text-base font-bold text-white font-display">{t('title')}</h3>
 
           <div className="flex items-center gap-2">
@@ -235,7 +235,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                   onClick={() => setShowGrossSpent((v) => !v)}
                   aria-pressed={showGrossSpent}
                   className={cn(
-                    'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors',
+                    'flex flex-1 sm:flex-none items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors min-w-0',
                     showGrossSpent
                       ? 'bg-[#7b5cff]/20 text-[#7b5cff]'
                       : 'bg-white/5 text-muted-foreground hover:text-white hover:bg-white/10',
@@ -256,7 +256,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 text-xs font-bold text-muted-foreground hover:text-white hover:bg-white/10 transition-colors max-w-[160px]"
+                  className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 text-xs font-bold text-muted-foreground hover:text-white hover:bg-white/10 transition-colors min-w-0 sm:max-w-[160px]"
                 >
                   <CreditCardIcon className="h-3.5 w-3.5 shrink-0" />
                   <span className="truncate">{filterLabel}</span>

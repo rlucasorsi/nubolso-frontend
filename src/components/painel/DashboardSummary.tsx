@@ -214,8 +214,6 @@ export function DashboardSummary({
         </Card>
       </div>
 
-      <CreditCardSummaryCard onSelectCard={onSelectCard} />
-
       {/* Projection Chart */}
       <Card className="bg-[#1c1a24] border-none rounded-[2rem] p-2 sm:p-8">
         <div className="space-y-3 sm:space-y-4">
@@ -401,6 +399,8 @@ export function DashboardSummary({
           </div>
         </div>
       </Card>
+
+      <CreditCardSummaryCard onSelectCard={onSelectCard} />
 
       <InvoiceMonthlyChart onSelectInvoice={onSelectInvoice} />
     </div>
