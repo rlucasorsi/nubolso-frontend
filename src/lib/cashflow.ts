@@ -346,11 +346,12 @@ export function generateVirtualEntriesForRange(
 // over) or its card has been deactivated.
 export function synthesizeInvoiceEntry(invoice: CreditCardInvoiceLike): CashFlowEntry | null {
   if (invoice.isPaid || invoice.transactionId || !invoice.cardIsActive) return null;
+  if (invoice.totalAmount <= 0) return null;
 
   // O valor adiantado já saiu do saldo na data do adiantamento; na data de
-  // pagamento da fatura resta apenas a diferença.
+  // pagamento da fatura resta apenas a diferença (pode ser 0 quando o
+  // adiantamento cobriu a fatura inteira).
   const remainingAmount = Math.max(invoice.totalAmount - (invoice.advancedAmount ?? 0), 0);
-  if (remainingAmount <= 0) return null;
 
   return {
     id: `invoice_${invoice.id}`,
