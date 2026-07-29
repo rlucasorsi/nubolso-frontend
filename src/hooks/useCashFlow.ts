@@ -205,6 +205,7 @@ export function useCashFlow() {
       totalAmount: invoice.totalAmount,
       isPaid: invoice.isPaid,
       transactionId: invoice.transactionId,
+      advancedAmount: invoice.advancedAmount,
       purchaseTemplateIds: invoice.purchaseTemplateIds,
     }));
   }, [creditCardInvoicesQuery.data]);

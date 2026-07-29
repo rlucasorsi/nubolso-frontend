@@ -87,6 +87,8 @@ export interface CreditCardInvoiceLike {
   totalAmount: number;
   isPaid: boolean;
   transactionId?: string;
+  // Soma dos adiantamentos já debitados contra esta fatura antes do fechamento/pagamento final
+  advancedAmount?: number;
   // templateIds dos recorrentes de cartão já materializados como compra nesta fatura
   purchaseTemplateIds?: string[];
 }
@@ -344,13 +346,17 @@ export function generateVirtualEntriesForRange(
 // over) or its card has been deactivated.
 export function synthesizeInvoiceEntry(invoice: CreditCardInvoiceLike): CashFlowEntry | null {
   if (invoice.isPaid || invoice.transactionId || !invoice.cardIsActive) return null;
-  if (invoice.totalAmount <= 0) return null;
+
+  // O valor adiantado já saiu do saldo na data do adiantamento; na data de
+  // pagamento da fatura resta apenas a diferença.
+  const remainingAmount = Math.max(invoice.totalAmount - (invoice.advancedAmount ?? 0), 0);
+  if (remainingAmount <= 0) return null;
 
   return {
     id: `invoice_${invoice.id}`,
     date: invoice.paymentDate,
     type: 'expense',
-    amount: invoice.totalAmount,
+    amount: remainingAmount,
     description: `Fatura ${invoice.cardName} - ${String(invoice.referenceMonth).padStart(2, '0')}/${invoice.referenceYear}`,
     isPaid: false,
     isVirtual: true,
