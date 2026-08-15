@@ -242,9 +242,7 @@ export function InvoiceMonthlyChart({ onSelectInvoice }: InvoiceMonthlyChartProp
                   )}
                 >
                   <Receipt className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">
-                    {showGrossSpent ? t('viewRemaining') : t('viewGrossSpent')}
-                  </span>
+                  <span className="truncate">{t('viewGrossSpent')}</span>
                 </button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[220px] text-center">

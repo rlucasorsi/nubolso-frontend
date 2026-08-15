@@ -11,6 +11,7 @@ import { authService } from '@/services/auth';
 import { extractErrorMessage } from '@/shared/utils/extract-error-message';
 import { useCooldown } from '@/hooks/useCooldown';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { AuthLanguageSwitcher } from '@/components/auth/AuthLanguageSwitcher';
 
 export default function VerifyEmailPage() {
   const t = useTranslations('auth');
@@ -62,6 +63,7 @@ export default function VerifyEmailPage() {
 
   return (
     <main className="relative flex h-dvh items-center justify-center px-4 overflow-hidden">
+      <AuthLanguageSwitcher />
       <div
         aria-hidden
         className="pointer-events-none absolute -top-40 -left-40 h-[28rem] w-[28rem] rounded-full opacity-40 blur-3xl"
@@ -82,10 +84,16 @@ export default function VerifyEmailPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t('verifyTitle')}</h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {email ? (
-                <>
-                  {t('verifyDescriptionWithEmail', { email: '' }).split('')[0]}
-                  <span className="font-medium text-foreground">{email}</span>.
-                </>
+                (() => {
+                  const parts = t('verifyDescriptionWithEmail', { email: '___EMAIL___' }).split('___EMAIL___');
+                  return (
+                    <>
+                      {parts[0]}
+                      <span className="font-medium text-foreground">{email}</span>
+                      {parts[1] ?? ''}
+                    </>
+                  );
+                })()
               ) : (
                 t('verifyDescriptionNoEmail')
               )}

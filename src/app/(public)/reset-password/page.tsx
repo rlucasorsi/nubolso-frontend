@@ -97,11 +97,16 @@ export default function ResetPasswordPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t('resetTitle')}</h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {email ? (
-                <>
-                  {t('resetDescriptionWithEmail', { email: '' }).split(email)[0]}
-                  <span className="font-medium text-foreground">{email}</span>
-                  {t('resetDescriptionWithEmail', { email: '' }).split(email)[1] ?? ''}
-                </>
+                (() => {
+                  const parts = t('resetDescriptionWithEmail', { email: '___EMAIL___' }).split('___EMAIL___');
+                  return (
+                    <>
+                      {parts[0]}
+                      <span className="font-medium text-foreground">{email}</span>
+                      {parts[1] ?? ''}
+                    </>
+                  );
+                })()
               ) : (
                 t('resetDescriptionNoEmail')
               )}
