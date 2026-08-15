@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -52,14 +52,16 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
         <DateInputField label={t('paymentDate')} value={paymentDate} onChange={setPaymentDate} />
 
         <div className="flex gap-3">
-          <Button
-            onClick={() => setPartialOpen(true)}
-            variant="outline"
-            disabled={payMutation.isPending}
-            className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5 font-bold"
-          >
-            {t('partialPayment')}
-          </Button>
+          {remainingAmount > 0 && (
+            <Button
+              onClick={() => setPartialOpen(true)}
+              variant="outline"
+              disabled={payMutation.isPending}
+              className="flex-1 h-11 rounded-xl border-white/10 hover:bg-white/5 font-bold"
+            >
+              {t('partialPayment')}
+            </Button>
+          )}
 
           <Button
             onClick={handleFullPayment}
@@ -68,7 +70,9 @@ export function PayInvoiceForm({ invoice }: PayInvoiceFormProps) {
           >
             {payMutation.isPending
               ? t('processing')
-              : `${t('payAll')} ${formatCurrency(remainingAmount)}`}
+              : remainingAmount === 0
+                ? `Fechar fatura (${formatCurrency(0)})`
+                : `${t('payAll')} ${formatCurrency(remainingAmount)}`}
           </Button>
         </div>
 
